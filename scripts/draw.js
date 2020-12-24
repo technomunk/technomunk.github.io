@@ -2,8 +2,9 @@
 // Get global variables
 let canvas = document.getElementById('canvas');
 let context = canvas.getContext('2d');
-let LIMIT = 32;
+let LIMIT = 30;
 let SCALE = 1.2;
+const SIXTH = 1 / 6;
 
 // Setup listening functions
 // Invoke resizeCanvas() when the window is resized
@@ -33,8 +34,30 @@ function mag2(c) {
 	return c[0]*c[0] + c[1]*c[1];
 }
 
+// Translates a hue value to a fully saturated RGB value using
+// https://www.rapidtables.com/convert/color/hsv-to-rgb.html
+// Expects normalized hue value.
+function hueToRgb(hue) {
+	if (hue < SIXTH) {
+		return [ 255, hue / SIXTH * 255, 0, ];
+	} else if (hue < 2*SIXTH) {
+		return [ (2 - hue/SIXTH) * 255, 255, 0, ];
+	} else if (hue < 3*SIXTH) {
+		return [ 0, 255, (hue - 2*SIXTH) / SIXTH * 255, ];
+	} else if (hue < 4*SIXTH) {
+		return [ 0, (2 - (hue - 2*SIXTH) / SIXTH) * 255, 255, ];
+	} else if (hue < 5*SIXTH) {
+		return [ (hue - 4*SIXTH) / SIXTH * 255, 0, 255, ];
+	} else {
+		return [ 255, 0, (2 - (hue - 4*SIXTH)/SIXTH) * 255, ];
+	}
+}
+
 function mapColor(iterationCount, limit) {
-	return [ (iterationCount / limit) * 255, 0, 0, ];
+	if (iterationCount == -1) {
+		return [ 0, 0, 0, ];
+	}
+	return hueToRgb(iterationCount / limit);
 }
 
 function mandelbrot(point, limit) {
@@ -45,7 +68,7 @@ function mandelbrot(point, limit) {
 		}
 		point = add(sqr(point), c);
 	}
-	return mapColor(0, limit);
+	return mapColor(-1, limit);
 }
 
 // Redraw the content on the canvas
