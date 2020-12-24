@@ -1,3 +1,3 @@
-# Explorer
+# Griffone's Github Pages
 
-An interactive webpage for exploring visual data sets.
+A place to showcase some of personal projects an abilities.
