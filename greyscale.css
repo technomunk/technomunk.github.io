@@ -1,0 +1,93 @@
+:root {
+	--background: #ff0000;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	border: 0px;
+	overflow: hidden; /* disable scrollbars */
+	display: block; /* no floating content */
+}
+
+.button {
+	display: inline-block;
+	color: black;
+	background: darkgray;
+	text-align: center;
+	font-size: 25pt;
+	font-weight: bold;
+	outline: none;
+	border: 2pt solid black;
+	width: 32pt;
+	height: 32pt;
+	opacity: .4;
+}
+
+.button:hover {
+	background: gray;
+	opacity: .8;
+}
+
+.button:active {
+	background: darkslategray;
+	opacity: 1;
+}
+
+#limitSliderLabel {
+	position: absolute;
+	font-size: 32pt;
+}
+
+#limitSliderContainer {
+	position: absolute;
+	bottom: 5%;
+	left: 5%;
+	width: 90%;
+	display: flex;
+	border: 0 none;
+}
+
+.column-fixed {
+	flex: 0 0 auto;
+}
+
+.column-mid {
+	margin: 0;
+	flex: 1 1 auto;
+}
+
+.slider {
+	-webkit-appearance: none;
+	-webkit-transition: .2s;
+	margin: 0;
+	transition: opacity .2s;
+	border-top: 2pt solid black;
+	border-bottom: 2pt solid black;
+	width: 100%;
+	height: 28pt;
+	background: lightgray;
+	outline: none;
+	opacity: .4;
+}
+
+.slider:hover {
+	opacity: .8;
+}
+
+.slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 12pt;
+	height: 24pt;
+	background: black;
+	cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+	width: 12pt;
+	height: 24pt;
+	background: black;
+	cursor: pointer;
+}

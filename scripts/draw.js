@@ -1,16 +1,14 @@
 'use strict';
-// Get global variables
-let canvas = document.getElementById('canvas');
-let context = canvas.getContext('2d');
-let LIMIT = 30;
-let SCALE = 1.2;
-const SIXTH = 1 / 6;
 
-// Setup listening functions
-// Invoke resizeCanvas() when the window is resized
-window.addEventListener('resize', resizeCanvas, false);
-// Perform the first invocation
-resizeCanvas();
+// Declare constants
+
+const SIXTH = 1 / 6;
+const SCALE = 1.2;
+
+// Get global variables
+
+let canvas = document.getElementById('mainCanvas');
+let context = canvas.getContext('2d');
 
 // Function to be invoked whenever the canvas needs to be resized
 function resizeCanvas() {
@@ -33,6 +31,8 @@ function sqr(c) {
 function mag2(c) {
 	return c[0]*c[0] + c[1]*c[1];
 }
+
+// Declare functions
 
 // Translates a hue value to a fully saturated RGB value using
 // https://www.rapidtables.com/convert/color/hsv-to-rgb.html
@@ -75,14 +75,16 @@ function mandelbrot(point, limit) {
 function redraw() {
 	let width = canvas.width;
 	let height = canvas.height;
+	let limit = limitSlider.value;
 	let imageData = context.createImageData(width, height);
 	let pixels = imageData.data;
 	let xOffset = (height - width)*1.4;
+
 	for (var y = 0; y < height; y++) {
 		for (var x = 0; x < width; x++) {
 			let offset = (y * width + x) * 4;
 			let point = [ (x*2 - height + xOffset) / height * SCALE, (y*2 - height) / height * SCALE, ];
-			let pixel = mandelbrot(point, LIMIT);
+			let pixel = mandelbrot(point, limit);
             pixels[offset + 0] = pixel[0]; // red
 			pixels[offset + 1] = pixel[1]; // green
 			pixels[offset + 2] = pixel[2]; // blue
@@ -91,3 +93,8 @@ function redraw() {
 	}
 	context.putImageData(imageData, 0, 0);
 }
+
+// Run setup
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
