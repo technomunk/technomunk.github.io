@@ -1,19 +1,31 @@
 'use strict';
 
-// Declare constants
+/**
+ * Redraw the contents of 'mainCanvas' of the document.
+ */
+let redraw = (function(){
+
+// Constants
 
 const WORKER_COUNT = 16;
-const CHUNK_X = 64;
-const CHUNK_Y = 64;
+const CHUNK_WIDTH = 64;
+const CHUNK_HEIGHT = 64;
 
-// Set global variables
+// Global variables
 
-let canvas = document.getElementById('mainCanvas');
-let context = canvas.getContext('2d');
-let limitSlider = document.getElementById('limitSlider');
-let workers = [];
+let canvas = document.getElementById('mainCanvas'),
+	context = canvas.getContext('2d'),
+	limit = document.getElementById('limitSlider'),
+	workers = [];
 
-// Function to be invoked whenever the canvas needs to be resized
+// Local variables
+
+let i = 0;
+
+// Free function declarations
+
+/** Update canvas size to fill the whole window.
+ */
 function resizeCanvas() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
@@ -22,19 +34,20 @@ function resizeCanvas() {
 	redraw();
 }
 
-function putImage(image, rect) {
-	context.putImageData(image, rect.x, rect.y);
-}
-
-// Redraw the content on the canvas
+/** Redraw the whole contents of the canvas.
+ */
 function redraw() {
-	let chunksX = Math.ceil(canvas.width / CHUNK_X);
-	let chunksY = Math.ceil(canvas.height / CHUNK_Y);
-	for (var y = 0; y < chunksY; ++y) {
-		for (var x = 0; x < chunksX; ++x) {
+	let chunksX = Math.ceil(canvas.width / CHUNK_WIDTH),
+		chunksY = Math.ceil(canvas.height / CHUNK_HEIGHT);
+
+	var y = 0,
+		x = 0;
+	
+	for (y = 0; y < chunksY; ++y) {
+		for (x = 0; x < chunksX; ++x) {
 			workers[(y*chunksX + x) % WORKER_COUNT].postMessage({
-				image: context.createImageData(CHUNK_X, CHUNK_Y),
-				rect: new DOMRect(x * CHUNK_X, y * CHUNK_Y, CHUNK_X, CHUNK_Y),
+				image: context.createImageData(CHUNK_WIDTH, CHUNK_HEIGHT),
+				rect: { x: x * CHUNK_WIDTH, y: y * CHUNK_HEIGHT, width: CHUNK_WIDTH, height: CHUNK_HEIGHT },
 				canvasWidth: canvas.width,
 				canvasHeight: canvas.height,
 				limit: Number(limitSlider.value),
@@ -45,12 +58,17 @@ function redraw() {
 
 // Run setup
 
-for (var i = 0; i < WORKER_COUNT; ++i) {
+for (i = 0; i < WORKER_COUNT; ++i) {
 	workers.push(new Worker('./scripts/draw.js'));
 	workers[i].onmessage = function (event) {
-		putImage(event.data[0], event.data[1]);
+		context.putImageData(event.data[0], event.data[1].x, event.data[1].y);
 	};
 }
 
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+// Export function
+return redraw;
+
+}());

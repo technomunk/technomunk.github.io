@@ -1,37 +1,84 @@
 'use strict';
 
-// Declare constants
+(function(){
+
+// Constants
 
 const SIXTH = 1 / 6;
 const SCALE = 1.2;
 
-// Function to be invoked whenever the canvas needs to be resized
-function resizeCanvas() {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	redraw();
+// Class declarations
+
+/**
+ * A complex number.
+ */
+class Complex {
+	re = 0;
+	im = 0;
+	
+	/** Create a new complex number.
+	 * @param {Number} real Real part.
+	 * @param {Number} imaginary Imaginary (multiplied by sqrt(-1)) part.
+	 */
+	constructor(real, imaginary) {
+		this.re = real;
+		this.im = imaginary;
+	}
+
+	/** Add another complex number.
+	 * @param {Complex} other The other complex number to add.
+	 * @returns {Complex} Self.
+	 */
+	add(other) {
+		this.re += other.re;
+		this.im += other.im;
+		return this;
+	}
+
+	/** Multiply with itself.
+	 * @returns {Complex} Self.
+	 */
+	sqr() {
+		let re = this.re;
+		let im = this.im;
+		this.re = re*re - im*im;
+		this.im = 2*re*im;
+		return this;
+	}
+
+	/** Get the magnitude of the complex number.
+	 * @returns {Number} The magnitude of the number.
+	 */
+	mag2() {
+		return this.re*this.re + this.im*this.im;
+	}
 }
 
-// Add 2 complex numbers together
-function add(a, b) {
-	return [ a[0] + b[0], a[1] + b[1], ];
+// Free function declarations
+
+/** Check whether the provided point is within the Mandelbrot set.
+ * See https://en.wikipedia.org/wiki/Mandelbrot_set for more details.
+ * @param {Complex} point The complex number to check.
+ * @param {Number} limit Maximum number of iterations to check whether the number is within the Mandelbrot set.
+ * @returns {[Number, Complex]} Number of iterations the number passed and the last checked value.
+ */
+function mandelbrot(point, limit) {
+	let c = {...point};
+	var i = 0;
+	for (i = 0; i < limit; ++i) {
+		if (point.mag2() > 4) {
+			return [ i, point, ];
+		}
+		point.sqr().add(c);
+	}
+	return [ i, point, ];
 }
 
-// Square (multiply by itself) a complex number
-function sqr(c) {
-	return [ c[0]*c[0] - c[1]*c[1], 2*c[0]*c[1], ];
-}
-
-// Get the square magnitude of a complex number
-function mag2(c) {
-	return c[0]*c[0] + c[1]*c[1];
-}
-
-// Declare functions
-
-// Translates a hue value to a fully saturated RGB value using
-// https://www.rapidtables.com/convert/color/hsv-to-rgb.html
-// Expects normalized hue value.
+/** Translate a hue value to a fully saturated RGB value using
+ * https://www.rapidtables.com/convert/color/hsv-to-rgb.html
+ * @param {Number} hue Normalized hue of HSV color.
+ * @returns {[Number]} [red, green, blue] color.
+ */
 function hueToRgb(hue) {
 	if (hue < SIXTH) {
 		return [ 255, hue / SIXTH * 255, 0, ];
@@ -48,46 +95,61 @@ function hueToRgb(hue) {
 	}
 }
 
+/** Map iteration count to an RGB value.
+ * @param {Number} iterationCount The number of performed iterations for the pixel.
+ * @param {Number} limit The maximum number of iterations to perform.
+ * @returns {[Number]} RGB values of the mapped color.
+ */
 function mapColor(iterationCount, limit) {
-	if (iterationCount == -1) {
+	if (iterationCount == limit) {
 		return [ 0, 0, 0, ];
 	}
 	return hueToRgb(iterationCount / limit);
 }
 
-function mandelbrot(point, limit) {
-	let c = [...point];
-	for (var i = 0; i < limit; ++i) {
-		if (mag2(point) > 4) {
-			return mapColor(i, limit);
-		}
-		point = add(sqr(point), c);
-	}
-	return mapColor(-1, limit);
-}
+/** Draw part of the mandelbrot set as provided by the thing.
+ * Posts a message with the image and the provided rectangle back when done.
+ * @param {DOMRect} rect The rectangle to draw.
+ * @param {Number} width The width of the full image.
+ * @param {Number} height The height of the full image.
+ * @param {Number} limit The maximum number of iterations to perform.
+ * @param {ImageData} image The image to draw to.
+ */
+function draw(rect, width, height, limit, image) {
+	let pixels = image.data,
+		xOffset = (height - width)*1.4;
+	
+	var offset = 0,
+		xCoord = 0,
+		yCoord = 0,
+		pixel = [],
+		x = 0,
+		y = 0,
+		result = [];
 
-// Redraw the content on the canvas
-function draw(data) {
-	let rect = data.rect;
-	let width = data.canvasWidth;
-	let height = data.canvasHeight;
-	let limit = data.limit;
-	let pixels = data.image.data;
-	let xOffset = (height - width)*1.4;
-
-	for (var y = 0; y < rect.height; ++y) {
-		for (var x = 0; x < rect.width; ++x) {
-			let offset = (y * rect.width + x) * 4;
-			let xCoord = ((rect.x + x)*2 - height + xOffset) / height * SCALE;
-			let yCoord = ((rect.y + y)*2 - height) / height * SCALE;
-			let pixel = mandelbrot([xCoord, yCoord], limit);
+	for (y = 0; y < rect.height; ++y) {
+		for (x = 0; x < rect.width; ++x) {
+			offset = (y * rect.width + x) * 4;
+			xCoord = ((rect.x + x)*2 - height + xOffset) / height * SCALE;
+			yCoord = ((rect.y + y)*2 - height) / height * SCALE;
+			result = mandelbrot(new Complex(xCoord, yCoord), limit);
+			pixel = mapColor(result[0], limit);
             pixels[offset + 0] = pixel[0]; // red
 			pixels[offset + 1] = pixel[1]; // green
 			pixels[offset + 2] = pixel[2]; // blue
 			pixels[offset + 3] = 255; // alpha
 		}
 	}
-	postMessage([ data.image, rect ]);
+	postMessage([ image, rect ]);
 }
 
-onmessage = function (event) { draw(event.data); };
+onmessage = function (event) {
+	draw(
+		event.data.rect,
+		event.data.canvasWidth,
+		event.data.canvasHeight,
+		event.data.limit,
+		event.data.image);
+};
+
+}());

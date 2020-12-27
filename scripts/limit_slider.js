@@ -1,24 +1,27 @@
 'strict mode';
 
-// Declare constants
+(function(){
+
+// Constants
 
 const REDRAW_DELAY = 200;
 const FADE_DELAY = 600;
 const FADE_TOTAL_ITERATIONS = 50;
 const FADE_ITERATION_PERIOD = 20;
 
-// Initialize global variables
+// Global variables
 
-let slider = document.getElementById('limitSlider');
-let label = document.getElementById('limitSliderLabel');
-
-var redrawTimer = 0;
-var prefadeTimer = 0;
-var fadeTimer = 0;
-var fadeIteration = 0;
+let slider = document.getElementById('limitSlider'),
+	label = document.getElementById('limitSliderLabel'),
+	redrawTimer = 0,
+	prefadeTimer = 0,
+	fadeTimer = 0,
+	fadeIteration = 0;
 
 // Define functions
 
+/** Fade (make transparent) the label text.
+ */
 function fadeoutDisplay() {
 	if (++fadeIteration == FADE_TOTAL_ITERATIONS) {
 		clearInterval(fadeTimer);
@@ -26,10 +29,14 @@ function fadeoutDisplay() {
 	label.style.opacity = (FADE_TOTAL_ITERATIONS - fadeIteration) / FADE_TOTAL_ITERATIONS;
 }
 
+/** Begin the fading process.
+ */
 function beginFade() {
 	fadeTimer = window.setInterval(fadeoutDisplay, FADE_ITERATION_PERIOD);
 }
 
+/** Update displayed label text, its position and queue its fade.
+ */
 function updateDisplayedValue() {
 	label.textContent = slider.value;
 
@@ -47,11 +54,16 @@ function updateDisplayedValue() {
 	prefadeTimer = window.setTimeout(beginFade, FADE_DELAY);
 }
 
-function redrawAfterDelay() {
+/** Redraw the picture on the 'mainCanvas' after a set delay. Cancels any pending redraws.
+ * @param {Number} delay number of milliseconds to wait before redrawing.
+ */
+function redrawAfterDelay(delay = REDRAW_DELAY) {
 	clearTimeout(redrawTimer);
 	redrawTimer = window.setTimeout(redraw, REDRAW_DELAY);
 }
 
+/** Redraw the picture immediately and cancel any pending redraws.
+ */
 function redrawImmediately() {
 	clearTimeout(redrawTimer);
 	redraw();
@@ -74,3 +86,5 @@ document.getElementById('limitSliderPlus').addEventListener('click', function ()
 	updateDisplayedValue();
 	redrawImmediately();
 });
+
+}());
