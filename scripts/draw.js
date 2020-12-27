@@ -5,11 +5,6 @@
 const SIXTH = 1 / 6;
 const SCALE = 1.2;
 
-// Get global variables
-
-let canvas = document.getElementById('mainCanvas');
-let context = canvas.getContext('2d');
-
 // Function to be invoked whenever the canvas needs to be resized
 function resizeCanvas() {
 	canvas.width = window.innerWidth;
@@ -62,7 +57,7 @@ function mapColor(iterationCount, limit) {
 
 function mandelbrot(point, limit) {
 	let c = [...point];
-	for (var i = 0; i < limit; i++) {
+	for (var i = 0; i < limit; ++i) {
 		if (mag2(point) > 4) {
 			return mapColor(i, limit);
 		}
@@ -72,29 +67,27 @@ function mandelbrot(point, limit) {
 }
 
 // Redraw the content on the canvas
-function redraw() {
-	let width = canvas.width;
-	let height = canvas.height;
-	let limit = limitSlider.value;
-	let imageData = context.createImageData(width, height);
-	let pixels = imageData.data;
+function draw(data) {
+	let rect = data.rect;
+	let width = data.canvasWidth;
+	let height = data.canvasHeight;
+	let limit = data.limit;
+	let pixels = data.image.data;
 	let xOffset = (height - width)*1.4;
 
-	for (var y = 0; y < height; y++) {
-		for (var x = 0; x < width; x++) {
-			let offset = (y * width + x) * 4;
-			let point = [ (x*2 - height + xOffset) / height * SCALE, (y*2 - height) / height * SCALE, ];
-			let pixel = mandelbrot(point, limit);
+	for (var y = 0; y < rect.height; ++y) {
+		for (var x = 0; x < rect.width; ++x) {
+			let offset = (y * rect.width + x) * 4;
+			let xCoord = ((rect.x + x)*2 - height + xOffset) / height * SCALE;
+			let yCoord = ((rect.y + y)*2 - height) / height * SCALE;
+			let pixel = mandelbrot([xCoord, yCoord], limit);
             pixels[offset + 0] = pixel[0]; // red
 			pixels[offset + 1] = pixel[1]; // green
 			pixels[offset + 2] = pixel[2]; // blue
 			pixels[offset + 3] = 255; // alpha
 		}
 	}
-	context.putImageData(imageData, 0, 0);
+	postMessage([ data.image, rect ]);
 }
 
-// Run setup
-
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+onmessage = function (event) { draw(event.data); };

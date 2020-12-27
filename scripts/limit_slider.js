@@ -2,7 +2,7 @@
 
 // Declare constants
 
-const REDRAW_DELAY = 600;
+const REDRAW_DELAY = 200;
 const FADE_DELAY = 600;
 const FADE_TOTAL_ITERATIONS = 50;
 const FADE_ITERATION_PERIOD = 20;
@@ -20,7 +20,7 @@ var fadeIteration = 0;
 // Define functions
 
 function fadeoutDisplay() {
-	if (fadeIteration++ == FADE_TOTAL_ITERATIONS) {
+	if (++fadeIteration == FADE_TOTAL_ITERATIONS) {
 		clearInterval(fadeTimer);
 	}
 	label.style.opacity = (FADE_TOTAL_ITERATIONS - fadeIteration) / FADE_TOTAL_ITERATIONS;
@@ -52,19 +52,25 @@ function redrawAfterDelay() {
 	redrawTimer = window.setTimeout(redraw, REDRAW_DELAY);
 }
 
+function redrawImmediately() {
+	clearTimeout(redrawTimer);
+	redraw();
+}
+
 // Register event listeners
 
 slider.addEventListener('input', updateDisplayedValue);
 slider.addEventListener('input', redrawAfterDelay);
+slider.addEventListener('change', redrawImmediately);
 
 document.getElementById('limitSliderMinus').addEventListener('click', function () {
 	slider.value = Number(slider.value) - 1;
 	updateDisplayedValue();
-	redrawAfterDelay();
+	redrawImmediately();
 });
 
 document.getElementById('limitSliderPlus').addEventListener('click', function () {
 	slider.value = Number(slider.value) + 1;
 	updateDisplayedValue();
-	redrawAfterDelay();
+	redrawImmediately();
 });
