@@ -6,20 +6,24 @@
 	</head>
 
 	<body>
-		<canvas id="mainCanvas"></canvas>
-		<div id="limitSliderLabel">30</div>
-		<div id="limitSliderContainer">
-			<div class="column-fixed">
-				<input type="button" class="button" id="limitSliderMinus" value="-" />
+		<canvas id="main-canvas"></canvas>
+		<div id="side-menu" class="flex">
+			<div class="column">
+				<div class="row">X:</div>
+				<div class="row">Y:</div>
+				<div class="row">Iterations:</div>
 			</div>
-			<div class="column-mid">
-				<input class="slider" id="limitSlider" type="range" min="1" max="1024" value="30" step="1" />
-			</div>
-			<div class="column-fixed">
-				<input type="button" class="button" id="limitSliderPlus" value="+" />
+			<div class="column">
+				<div class="row">0</div>
+				<div class="row">0</div>
+				<div class="row flex">
+					<input class="column" type="number" id="limit" min="1" value="30" max="2048"/>
+				</div>
 			</div>
 		</div>
+		<button id="toggle-menu"><i class="arrow-big left" id="toggle-menu-arrow"></i></button>
+		<script src="scripts/side_menu.js"></script>
+		<script src="scripts/numeric_input.js"></script>
 		<script src="scripts/main.js"></script>
-		<script src="scripts/limit_slider.js"></script>
 	</body>
 </html>

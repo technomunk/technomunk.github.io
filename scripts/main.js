@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Redraw the contents of 'mainCanvas' of the document.
- */
+/** Redraw the contents of 'main-canvas' of the document. */
 let redraw = (function(){
 
 // Constants
@@ -13,9 +11,9 @@ const CHUNK_HEIGHT = 64;
 
 // Global variables
 
-let canvas = document.getElementById('mainCanvas'),
+let canvas = document.getElementById('main-canvas'),
 	context = canvas.getContext('2d'),
-	limit = document.getElementById('limitSlider'),
+	limitInput = document.getElementById('limit'),
 	workers = [];
 
 // Local variables
@@ -24,19 +22,19 @@ let i = 0;
 
 // Free function declarations
 
-/** Update canvas size to fill the whole window.
- */
+/** Update canvas size to fill the whole window. */
 function resizeCanvas() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 	context.fillStyle = 'red';
 	context.fillRect(0, 0, canvas.width, canvas.height);
-	redraw();
+	redraw(Number(limitInput.value));
 }
 
 /** Redraw the whole contents of the canvas.
- */
-function redraw() {
+ * @param {Number} limit The maximum number of iterations to perform when calculating colors.
+*/
+function redraw(limit) {
 	let chunksX = Math.ceil(canvas.width / CHUNK_WIDTH),
 		chunksY = Math.ceil(canvas.height / CHUNK_HEIGHT);
 
@@ -50,10 +48,11 @@ function redraw() {
 				rect: { x: x * CHUNK_WIDTH, y: y * CHUNK_HEIGHT, width: CHUNK_WIDTH, height: CHUNK_HEIGHT },
 				canvasWidth: canvas.width,
 				canvasHeight: canvas.height,
-				limit: Number(limitSlider.value),
+				limit: limit,
 			});
 		}
 	}
+	console.log('Queued redraw');
 }
 
 // Run setup

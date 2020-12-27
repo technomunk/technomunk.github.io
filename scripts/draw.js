@@ -9,9 +9,7 @@ const SCALE = 1.2;
 
 // Class declarations
 
-/**
- * A complex number.
- */
+/** A complex number. */
 class Complex {
 	re = 0;
 	im = 0;
@@ -101,7 +99,7 @@ function hueToRgb(hue) {
  * @returns {[Number]} RGB values of the mapped color.
  */
 function mapColor(iterationCount, limit) {
-	if (iterationCount == limit) {
+	if (iterationCount === limit) {
 		return [ 0, 0, 0, ];
 	}
 	return hueToRgb(iterationCount / limit);
