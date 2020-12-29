@@ -11,6 +11,9 @@ const CHUNK_HEIGHT = 64;
 const WHEEL_SENSITIVITY = 1e-3;
 const WHEEL_REDRAW_DELAY = 100;
 const GESTURE_SCALE_DELAY = 600;
+const COOKIE_NAME_COORD = 'coords';
+const COOKIE_NAME_LIMIT = 'limit';
+const COOKIE_TIMEOUT = 24*60*60*1000;
 
 // Global variables
 
@@ -32,9 +35,43 @@ let canvas = document.getElementById('canvas'),
 
 // Local variables
 
-let i = 0;
+let i = 0,
+	coords = [ 0, 0, 2, 2, ];
 
 // Free function declarations
+
+/** Get the cookie associated with provided name.
+ * @param {String} name The name of the cookie to get.
+ * @param {*} value The default value returned if the cookie is not found.
+ * @returns {*} Value associated with the cookie or default value.
+ */
+function getCookie(name, value = undefined) {
+	let cookie = decodeURIComponent(document.cookie).split(';').filter(element => element.split('=')[0] === name);
+	if (cookie.length) {
+		console.log(cookie);
+		return JSON.parse(cookie[0]);
+	}
+	return value;
+}
+
+/** Associate provided value with a given name cookie.
+ * @param {String} name The name of the cookie.
+ * @param {*} value The new value of the cookie.
+ */
+function putCookie(name, value) {
+	document.cookie = `${name}=${JSON.stringify(value)}; expires=${Date.now() + COOKIE_TIMEOUT}`;
+}
+
+/** Update the coordinate cookie to reflect current viewport. */
+function refreshCoordCookie() {
+	coords = [
+		viewport.x + viewport.width * .5,
+		viewport.y + viewport.height * .5,
+		viewport.width,
+		viewport.height,
+	];
+	putCookie(COOKIE_NAME_COORD, coords);
+}
 
 /** Redraw the provided rectangle of the canvas.
  * @param {Number} limit The maximum number of iterations to perform when calculating colors.
@@ -50,7 +87,10 @@ function redraw(limit, rect = undefined) {
 
 	var x = 0, y = 0, width = 0, height = 0;
 	
-	lastLimit = limit;
+	if (lastLimit != limit) {
+		lastLimit = limit;
+		putCookie(COOKIE_NAME_LIMIT, lastLimit);
+	}
 
 	for (y = 0; y < chunksY; ++y) {
 		height = Math.min(rect.height - y * CHUNK_HEIGHT, CHUNK_HEIGHT);
@@ -89,6 +129,7 @@ function resizeCanvas() {
 	// TODO/Greg: reuse existent image
 	context.fillStyle = 'red';
 	context.fillRect(0, 0, canvas.width, canvas.height);
+	refreshCoordCookie();
 	redraw(lastLimit);
 }
 
@@ -106,6 +147,8 @@ function pan(x, y) {
 
 	viewport.x -= x / canvas.width * viewport.width;
 	viewport.y -= y / canvas.height * viewport.height;
+
+	refreshCoordCookie();
 
 	quadrants = [
 		{ x: 0, y: 0, width: midX, height: midY, },
@@ -177,6 +220,8 @@ function zoom(x, y, scale, delay = 0) {
 
 	window.clearTimeout(redrawTimer);
 	redrawTimer = setTimeout(() => redraw(lastLimit), delay);
+
+	refreshCoordCookie();
 }
 
 // Perform initialization
@@ -237,6 +282,33 @@ canvas.addEventListener('mouseleave', () => {
 });
 
 document.getElementById('redraw').onclick = () => redraw(lastLimit);
+document.getElementById('reset').onclick = () => {
+	offsetX = 0;
+	offsetY = 0;
+	coords = [0, 0, 2, 2];
+	lastLimit = 30;
+	document.getElementById('limit').value = lastLimit;
+	if (canvas.width < canvas.height) {
+		let ratio = canvas.height / canvas.width;
+		viewport = {
+			x: coords[0] - coords[2] * .5,
+			y: (coords[0] - coords[2] * .5) * ratio,
+			width: coords[2],
+			height: coords[2] * ratio,
+		};
+	} else {
+		let ratio = canvas.width / canvas.height;
+		viewport = {
+			x: (coords[1] - coords[3] * .5) * ratio,
+			y: coords[1] - coords[3] * .5,
+			width: coords[3] * ratio,
+			height: coords[3],
+		};
+	}
+	refreshCoordCookie();
+	putCookie(COOKIE_NAME_LIMIT, lastLimit);
+	redraw(lastLimit);
+};
 
 // Clear canvas to red
 canvas.width = window.innerWidth;
@@ -244,14 +316,28 @@ canvas.height = window.innerHeight;
 context.fillStyle = 'red';
 context.fillRect(0, 0, canvas.width, canvas.height);
 // Setup viewport
+coords = getCookie(COOKIE_NAME_COORD, [0, 0, 2, 2]);
+lastLimit = getCookie(COOKIE_NAME_LIMIT, Number(document.getElementById('limit').value));
 if (canvas.width < canvas.height) {
 	let ratio = canvas.height / canvas.width;
-	viewport = { x: -1, y: -1 * ratio, width: 2, height: 2 * ratio, };
+	viewport = {
+		x: coords[0] - coords[2] * .5,
+		y: (coords[0] - coords[2] * .5) * ratio,
+		width: coords[2],
+		height: coords[2] * ratio,
+	};
 } else {
 	let ratio = canvas.width / canvas.height;
-	viewport = { x: -1 * ratio, y: -1, width: 2 * ratio, height: 2, };
+	viewport = {
+		x: (coords[1] - coords[3] * .5) * ratio,
+		y: coords[1] - coords[3] * .5,
+		width: coords[3] * ratio,
+		height: coords[3],
+	};
 }
-redraw(Number(document.getElementById('limit').value));
+refreshCoordCookie();
+putCookie(COOKIE_NAME_LIMIT, lastLimit);
+redraw(lastLimit);
 
 labelX.textContent = `X: ${viewport.x + viewport.width*.5}`;
 labelY.textContent = `Y: ${viewport.y + viewport.height*.5}`;
