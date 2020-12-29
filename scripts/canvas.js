@@ -210,6 +210,8 @@ canvas.addEventListener('mouseleave', () => {
 	labelY.textContent = `Y: ${viewport.y + viewport.height*.5}`;
 });
 
+document.getElementById('redraw').onclick = () => redraw(lastLimit);
+
 // Clear canvas to red
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
