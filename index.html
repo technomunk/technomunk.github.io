@@ -6,24 +6,18 @@
 	</head>
 
 	<body>
-		<canvas id="main-canvas"></canvas>
-		<div id="side-menu" class="flex">
-			<div class="column">
-				<div class="row">X:</div>
-				<div class="row">Y:</div>
-				<div class="row">Iterations:</div>
+		<main>
+			<canvas id="canvas"></canvas>
+		</main>
+		<aside id="side-menu" class="flex">
+			<div class="row">
+				<label for="limit">Limit</label>
+				<input id="limit" type="number" min="1" value="30" max="2048">
+				<script src="scripts/numeric_input.js"></script>
 			</div>
-			<div class="column">
-				<div class="row">0</div>
-				<div class="row">0</div>
-				<div class="row flex">
-					<input class="column" type="number" id="limit" min="1" value="30" max="2048"/>
-				</div>
-			</div>
-		</div>
+		</aside>
 		<button id="toggle-menu"><i class="arrow-big left" id="toggle-menu-arrow"></i></button>
-		<script src="scripts/side_menu.js"></script>
-		<script src="scripts/numeric_input.js"></script>
 		<script src="scripts/main.js"></script>
+		<script src="scripts/side_menu.js"></script>
 	</body>
 </html>

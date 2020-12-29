@@ -22,10 +22,9 @@ input[type="number"] {
 
 	text-align: center;
 	outline: none;
-	font: 15pt 'Roboto';
+	font: 20pt 'Roboto';
 	line-height: 20pt;
-	width: 40pt;
-	height: 28pt;
+	width: 60pt;
 	border: 2pt solid black;
 }
 
@@ -71,38 +70,10 @@ input[type=number]::-webkit-outer-spin-button {
 	-webkit-transform: rotate(135deg);
 }
 
-.flex {
-	display: flex;
-	justify-content: center;
-}
-
-.column {
-	flex: 0 0 auto;
-}
-
 .row {
-	flex: 0 0 auto;
-	height: 40pt;
-	margin: 10pt 0;
-	justify-content: center;
-}
-
-.button {
-	display: inline-block;
-	background: darkgray;
-	outline: none;
-	border: 2pt solid black;
-	width: 30pt;
-	height: 30pt;
-	text-align: center;
-}
-
-.button:hover {
-	background-color: gray;
-}
-
-.button:active {
-	background-color: darkslategray;
+	display: flex;
+	justify-content: space-evenly;
+	flex-direction: row;
 }
 
 #side-menu > .column {
@@ -110,7 +81,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 #side-menu {
-	background-color: lightgray;
+	background-color: rgba(200, 200, 200, .6);
 	position: fixed;
 	padding-top: 5%;
 	height: 100%;
