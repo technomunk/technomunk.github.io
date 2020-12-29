@@ -107,15 +107,12 @@ function mapColor(iterationCount, limit) {
 
 /** Draw part of the mandelbrot set as provided by the thing.
  * Posts a message with the image and the provided rectangle back when done.
- * @param {DOMRect} rect The rectangle to draw.
- * @param {Number} width The width of the full image.
- * @param {Number} height The height of the full image.
- * @param {Number} limit The maximum number of iterations to perform.
  * @param {ImageData} image The image to draw to.
+ * @param {DOMRect} rect The rectangle to draw.
+ * @param {Number} limit The maximum number of iterations to perform.
  */
-function draw(rect, width, height, limit, image) {
-	let pixels = image.data,
-		xOffset = (height - width)*1.4;
+function draw(image, rect, limit) {
+	let pixels = image.data;
 	
 	var offset = 0,
 		xCoord = 0,
@@ -125,29 +122,23 @@ function draw(rect, width, height, limit, image) {
 		y = 0,
 		result = [];
 
-	for (y = 0; y < rect.height; ++y) {
-		for (x = 0; x < rect.width; ++x) {
-			offset = (y * rect.width + x) * 4;
-			xCoord = ((rect.x + x)*2 - height + xOffset) / height * SCALE;
-			yCoord = ((rect.y + y)*2 - height) / height * SCALE;
+	for (y = 0; y < image.height; ++y) {
+		yCoord = rect.y + rect.height * y / image.height;
+		for (x = 0; x < image.width; ++x) {
+			xCoord = rect.x + rect.width * x / image.width;
 			result = mandelbrot(new Complex(xCoord, yCoord), limit);
 			pixel = mapColor(result[0], limit);
-            pixels[offset + 0] = pixel[0]; // red
-			pixels[offset + 1] = pixel[1]; // green
-			pixels[offset + 2] = pixel[2]; // blue
-			pixels[offset + 3] = 255; // alpha
+			pixels[offset++] = pixel[0]; // red
+			pixels[offset++] = pixel[1]; // green
+			pixels[offset++] = pixel[2]; // blue
+			pixels[offset++] = 255; // alpha
 		}
 	}
-	postMessage([ image, rect ]);
 }
 
 onmessage = function (event) {
-	draw(
-		event.data.rect,
-		event.data.canvasWidth,
-		event.data.canvasHeight,
-		event.data.limit,
-		event.data.image);
+	draw(event.data.image, event.data.rect, event.data.limit);
+	postMessage(event.data);
 };
 
 }());
