@@ -8,12 +8,17 @@ let redraw = (function(){
 const WORKER_COUNT = 16;
 const CHUNK_WIDTH = 64;
 const CHUNK_HEIGHT = 64;
+const WHEEL_SENSITIVITY = 1e-3;
+const WHEEL_REDRAW_DELAY = 100;
+const GESTURE_SCALE_DELAY = 600;
 
 // Global variables
 
 let canvas = document.getElementById('canvas'),
 	context = canvas.getContext('2d'),
-	limitInput = document.getElementById('limit'),
+	labelX = document.getElementById('coord-x'),
+	labelY = document.getElementById('coord-y'),
+	lastLimit = 0,
 	mouseX = 0,
 	mouseY = 0,
 	enablePan = false,
@@ -22,7 +27,8 @@ let canvas = document.getElementById('canvas'),
 	offsetX = 0,
 	offsetY = 0,
 	// The space that is represented by the canvas
-	viewport = { x: -1, y: -1, width: 2, height: 2, };
+	viewport = { x: -1, y: -1, width: 2, height: 2, },
+	redrawTimer = 0;
 
 // Local variables
 
@@ -44,6 +50,8 @@ function redraw(limit, rect = undefined) {
 
 	var x = 0, y = 0, width = 0, height = 0;
 	
+	lastLimit = limit;
+
 	for (y = 0; y < chunksY; ++y) {
 		height = Math.min(rect.height - y * CHUNK_HEIGHT, CHUNK_HEIGHT);
 		for (x = 0; x < chunksX; ++x) {
@@ -57,6 +65,7 @@ function redraw(limit, rect = undefined) {
 					height: height / canvas.height * viewport.height,
 				},
 				limit: limit,
+				viewport: viewport,
 				offsetX: offsetX,
 				offsetY: offsetY,
 				pixelX: rect.x + x * CHUNK_WIDTH,
@@ -78,7 +87,7 @@ function resizeCanvas() {
 	viewport.width *= changeX;
 	viewport.height *= changeY;
 	// TODO/Greg: reuse existent image
-	redraw(Number(limitInput.value));
+	redraw(lastLimit);
 }
 
 /** Pan the image provided number of pixels.
@@ -88,7 +97,6 @@ function resizeCanvas() {
 function pan(x, y) {
 	let midX = x >= 0 ? x : canvas.width + x,
 		midY = y >= 0 ? y : canvas.height + y,
-		limit = Number(limitInput.value),
 		quadrants = [];
 	
 	offsetX += x;
@@ -123,34 +131,83 @@ function pan(x, y) {
 		quadrants.splice(3, 1);
 	}
 
-	quadrants.forEach(quad => redraw(limit, quad));
+	quadrants.forEach(quad => redraw(lastLimit, quad));
 }
+
+/** Zoom the picture in or out around pixel at {x, y}.
+ * @param {Number} x The horizontal coordinate of the point being zoomed around.
+ * @param {Number} y The vertical coordinate of the point being zoomed around.
+ * @param {Number} scale The scaling of the zoom.
+ * @param {Number} delay The number of milliseconds to wait before redrawing the picture.
+ */
+function zoom(x, y, scale, delay = 0) {
+	let relX = x / canvas.width,
+		relY = y / canvas.height,
+		pointX = viewport.x + viewport.width * relX,
+		pointY = viewport.y + viewport.height * relY;
+	
+	viewport.width *= scale;
+	viewport.height *= scale;
+	viewport.x = pointX - viewport.width * relX;
+	viewport.y = pointY - viewport.height * relY;
+
+	window.clearTimeout(redrawTimer);
+	redrawTimer = setTimeout(() => redraw(lastLimit), delay);
+}
+
+// Perform initialization
 
 // Spin workers
 for (i = 0; i < WORKER_COUNT; ++i) {
 	workers.push(new Worker('./scripts/draw.js'));
-	workers[i].onmessage = function (event) {
-		context.putImageData(
-			event.data.image,
-			event.data.pixelX + offsetX - event.data.offsetX,
-			event.data.pixelY + offsetY - event.data.offsetY);
+	workers[i].onmessage = event => {
+		if (event.data.limit == lastLimit
+			&& event.data.viewport.width == viewport.width
+			&& event.data.viewport.height == viewport.height)
+		{
+			context.putImageData(
+				event.data.image,
+				event.data.pixelX + offsetX - event.data.offsetX,
+				event.data.pixelY + offsetY - event.data.offsetY);
+		}
 	};
 }
 
 // Register events
+
 window.addEventListener('resize', resizeCanvas);
-canvas.addEventListener('mousedown', function(event) {
+
+canvas.addEventListener('pointerdown', event => {
 	enablePan = true;
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 });
-canvas.addEventListener('mouseup', function(){ enablePan = false; });
-canvas.addEventListener('mousemove', function(event) {
+canvas.addEventListener('pointerup', () => { enablePan = false; });
+canvas.addEventListener('pointermove', event => {
 	if (enablePan) {
 		pan(event.clientX - mouseX, event.clientY - mouseY);
 		mouseX = event.clientX;
 		mouseY = event.clientY;
 	}
+});
+
+canvas.addEventListener('wheel', event => {
+	zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY, WHEEL_REDRAW_DELAY);	
+});
+canvas.addEventListener('gesturechange', event => {
+	zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
+});
+canvas.addEventListener('gestureend', event => {
+	zoom(event.clientX, event.clientY, event.scale);
+});
+
+canvas.addEventListener('mousemove', event => {
+	labelX.textContent = `X: ${viewport.x + event.clientX / canvas.width * viewport.width}`;
+	labelY.textContent = `Y: ${viewport.y + event.clientY / canvas.height * viewport.height}`;
+});
+canvas.addEventListener('mouseleave', () => {
+	labelX.textContent = `X: ${viewport.x + viewport.width*.5}`;
+	labelY.textContent = `Y: ${viewport.y + viewport.height*.5}`;
 });
 
 // Clear canvas to red
@@ -166,7 +223,10 @@ if (canvas.width < canvas.height) {
 	let ratio = canvas.width / canvas.height;
 	viewport = { x: -1 * ratio, y: -1, width: 2 * ratio, height: 2, };
 }
-redraw(Number(limitInput.value));
+redraw(Number(document.getElementById('limit').value));
+
+labelX.textContent = `X: ${viewport.x + viewport.width*.5}`;
+labelY.textContent = `Y: ${viewport.y + viewport.height*.5}`;
 
 // Export function
 return redraw;
