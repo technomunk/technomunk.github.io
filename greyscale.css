@@ -16,21 +16,12 @@ div {
 }
 
 input[type="number"] {
-	-webkit-appearance: textfield;
-	-moz-appearance: textfield;
-	appearance: textfield;
-
 	text-align: center;
 	outline: none;
 	font: 20pt 'Roboto';
 	line-height: 20pt;
 	width: 60pt;
 	border: 2pt solid black;
-}
-
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-	-webkit-appearance: none;
 }
 
 button {
