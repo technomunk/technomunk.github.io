@@ -21,7 +21,7 @@ let limit = document.getElementById('limit'),
 function redrawAfterDelay(limit, delay) {
 	clearTimeout(redrawTimer);
 	redrawTimer = window.setTimeout(
-		function(){ 
+		() => {
 			if (limit !== drawnLimit) {
 				redraw(limit);
 				drawnLimit = limit;
@@ -43,7 +43,7 @@ function redrawImmediately(limit) {
 
 // Register event listeners
 
-limit.addEventListener('input', function() {
+limit.addEventListener('input', () => {
 	let value = Number(limit.value);
 
 	if (value < limit.min) {
@@ -56,7 +56,7 @@ limit.addEventListener('input', function() {
 		redrawAfterDelay(value, REDRAW_DELAY);
 	}
 });
-limit.addEventListener('change', function(){
+limit.addEventListener('change', () => {
 	let value = 0;
 	
 	// Validate input

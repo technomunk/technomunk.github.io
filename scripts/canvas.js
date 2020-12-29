@@ -87,6 +87,8 @@ function resizeCanvas() {
 	viewport.width *= changeX;
 	viewport.height *= changeY;
 	// TODO/Greg: reuse existent image
+	context.fillStyle = 'red';
+	context.fillRect(0, 0, canvas.width, canvas.height);
 	redraw(lastLimit);
 }
 
@@ -182,7 +184,6 @@ canvas.addEventListener('pointerdown', event => {
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 });
-canvas.addEventListener('pointerup', () => { enablePan = false; });
 canvas.addEventListener('pointermove', event => {
 	if (enablePan) {
 		pan(event.clientX - mouseX, event.clientY - mouseY);
@@ -190,6 +191,9 @@ canvas.addEventListener('pointermove', event => {
 		mouseY = event.clientY;
 	}
 });
+canvas.addEventListener('pointerup', () => enablePan = false);
+canvas.addEventListener('pointerleave', () => enablePan = false);
+canvas.addEventListener('pointercancel', () => enablePan = false);
 
 canvas.addEventListener('wheel', event => {
 	zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY, WHEEL_REDRAW_DELAY);	

@@ -5,7 +5,6 @@
 // Constants
 
 const SIXTH = 1 / 6;
-const SCALE = 1.2;
 
 // Class declarations
 
