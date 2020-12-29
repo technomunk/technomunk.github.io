@@ -23,7 +23,7 @@ function redrawAfterDelay(limit, delay) {
 	redrawTimer = window.setTimeout(
 		() => {
 			if (limit !== drawnLimit) {
-				redraw(limit);
+				view.update(limit);
 				drawnLimit = limit;
 			}
 		},
@@ -36,7 +36,7 @@ function redrawAfterDelay(limit, delay) {
 function redrawImmediately(limit) {
 	clearTimeout(redrawTimer);
 	if (limit !== drawnLimit) {
-		redraw(limit);
+		view.update(limit);
 		drawnLimit = limit;
 	}
 }

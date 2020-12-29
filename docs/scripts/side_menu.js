@@ -9,9 +9,10 @@ const TOGGLE_BUTTON_MARGIN = 20;
 
 // Global variables
 
-let sideMenu = document.getElementById('side-menu');
-let toggleButton = document.getElementById('toggle-menu');
-let arrow = document.getElementById('toggle-menu-arrow');
+let limit = document.getElementById('limit'),
+	sideMenu = document.getElementById('side-menu'),
+	toggleButton = document.getElementById('toggle-menu'),
+	arrow = document.getElementById('toggle-menu-arrow');
 
 // Free functions
 
@@ -46,5 +47,7 @@ function toggleSideMenu() {
 // Register events
 
 toggleButton.addEventListener('click', toggleSideMenu);
+document.getElementById('redraw').onclick = view.update.bind(view, Number(limit.value));
+document.getElementById('reset').onclick = view.reset.bind(view, Number(limit.value));
 
 }());

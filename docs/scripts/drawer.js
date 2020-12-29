@@ -135,9 +135,9 @@ function draw(image, rect, limit) {
 	}
 }
 
-onmessage = function (event) {
-	draw(event.data.image, event.data.rect, event.data.limit);
-	postMessage(event.data);
+onmessage = function (msg) {
+	draw(msg.data.image, msg.data.rect, msg.data.limit);
+	postMessage(msg.data);
 };
 
 }());
