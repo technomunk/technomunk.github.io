@@ -153,6 +153,28 @@ function zoom(x, y, scale, delay = 0) {
 	viewport.x = pointX - viewport.width * relX;
 	viewport.y = pointY - viewport.height * relY;
 
+	if (scale > 1) {
+		let invScale = 1 / scale;
+		context.drawImage(
+			canvas,
+			canvas.width * relX - canvas.width * relX * invScale,
+			canvas.height * relY - canvas.height * relY * invScale,
+			canvas.width * invScale,
+			canvas.height * invScale);
+	} else {
+		// Possible optimization: only redraw the rectangles around
+		context.drawImage(
+			canvas,
+			canvas.width * relX - canvas.width * relX * scale,
+			canvas.height * relY - canvas.height * relY * scale,
+			canvas.width * scale,
+			canvas.height * scale,
+			0,
+			0,
+			canvas.width,
+			canvas.height);
+	}
+
 	window.clearTimeout(redrawTimer);
 	redrawTimer = setTimeout(() => redraw(lastLimit), delay);
 }
