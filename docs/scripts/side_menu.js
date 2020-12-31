@@ -47,7 +47,7 @@ function toggleSideMenu() {
 // Register events
 
 toggleButton.addEventListener('click', toggleSideMenu);
-document.getElementById('redraw').onclick = view.update.bind(view, Number(limit.value));
+document.getElementById('redraw').onclick = view.update.bind(view, Number(limit.value), undefined);
 document.getElementById('reset').onclick = view.reset.bind(view, Number(limit.value));
 
 }());

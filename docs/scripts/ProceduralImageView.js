@@ -19,13 +19,9 @@ class ProceduralImageView {
 		if (viewport != null) {
 			this.viewport = viewport;
 		} else {
-			if (this.canvas.width >= this.canvas.height) {
-				let ratio = this.canvas.width / this.canvas.height;
-				this.viewport = { x: -ratio, y: -1, width: 2*ratio, height: 2, };
-			} else {
-				let ratio = this.canvas.height / this.canvas.height;
-				this.viewport = { x: -1, y: -ratio, width: 2, height: 2*ratio, };
-			}
+			// Default viewport centers around -1 because the mandelbrot look better that way.
+			let ratio = this.canvas.width / this.canvas.height;
+			this.viewport = { x: -.8 - 1.1*ratio, y: -1.1, width: 2.2*ratio, height: 2.2, };
 		}
 		this.workers = [];
 		this.nextWorkerIndex = 0;
@@ -218,7 +214,6 @@ class ProceduralImageView {
 		this.viewport.height *= height / this.canvas.height;
 		this.canvas.width = width;
 		this.canvas.height = height;
-		// The span is kept the same, allowing reuse of chunks
 		this.update(this.limit);
 	}
 }
