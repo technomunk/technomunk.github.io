@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<link rel="stylesheet" href="styles/fullscreen.css">
+		<link rel="stylesheet" href="styles/mandel.css">
+		<link rel="stylesheet" href="styles/greyscale.css">
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi">
+		<meta name="author" content="Grigory 'Technomunk' Glukhov">
+	</head>
+	
+	<body>
+		<main>
+			<script src="scripts/ProceduralImageView.js"></script>
+			<canvas id="canvas"></canvas>
+		</main>
+		<aside id="side-menu" class="flex">
+			<div class="row"><a class="button" href="index.html">Home</a></div>
+			<div id="coord-x", class="row coord">X:</div>
+			<div id="coord-y", class="row coord">Y:</div>
+			<div class="row">
+				<label for="limit">Limit</label>
+				<input id="limit" type="number" min="1" value="30" max="1024">
+				<script src="scripts/numeric_input.js"></script>
+			</div>
+			<div class="row">
+				<button id="redraw">Redraw</button>
+				<button id="reset">Reset</button>
+			</div>
+		</aside>
+		<button id="toggle-menu" data-toggle="collapse" data-target="#side-menu"><i class="arrow-big left" id="toggle-menu-arrow"></i></button>
+		<script src="scripts/canvas.js"></script>
+		<script src="scripts/side_menu.js"></script>
+	</body>
+</html>

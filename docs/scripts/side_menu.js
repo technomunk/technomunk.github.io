@@ -1,10 +1,10 @@
 'strict mode';
 
-(function(){
+displayCoordinates = (function(){
 
 // Constants
 
-const MENU_WIDTH = 200;
+const MENU_WIDTH = 240;
 const TOGGLE_BUTTON_MARGIN = 20;
 
 // Global variables
@@ -49,5 +49,4 @@ function toggleSideMenu() {
 toggleButton.addEventListener('click', toggleSideMenu);
 document.getElementById('redraw').onclick = view.update.bind(view, Number(limit.value), undefined);
 document.getElementById('reset').onclick = view.reset.bind(view, Number(limit.value));
-
 }());

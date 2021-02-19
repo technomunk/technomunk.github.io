@@ -1,0 +1,57 @@
+* {
+	font-family: 'Open Sans Condensed', sans-serif;
+}
+
+body {
+	padding-left: 6%;
+	padding-right: 6%;
+}
+
+img.avatar {
+	border-radius: 50%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 260pt;
+}
+
+h1.name, h1.name i {
+	text-align: center;
+	font-size: 32pt;
+}
+
+p {
+	text-indent: 6%;
+	font-size: 18pt;
+}
+
+nav {
+	font-size: 20pt;
+}
+
+address, nav {
+	text-align: center;
+	font-size: 20pt;
+	font-style: normal;
+	font-weight: lighter;
+}
+
+address ul, nav ul {
+	padding-left: 0;
+	font-size: 18pt;
+	list-style: none;
+}
+
+address ul a, nav ul a {
+	font-style: italic;
+}
+
+footer {
+	text-align: center;
+	font-style: italic;
+}
+
+footer i {
+	font-style: normal;
+	font-size: 20pt;
+}
