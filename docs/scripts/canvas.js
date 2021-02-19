@@ -40,6 +40,15 @@ function putCookie(name, value) {
 	document.cookie = `${name}=${JSON.stringify(value)}; expires=${Date.now() + COOKIE_TIMEOUT}`;
 }
 
+/** Set the coordinates to display provided values.
+ * @param {Number} x The horizontal coordinate to display.
+ * @param {Number} y The vertical coordinate to display.
+ */
+function displayCoordinates(x, y) {
+	labelX.textContent = `X: ${x.toExponential(3)}`;
+	labelY.textContent = `Y: ${y.toExponential(3)}`;
+}
+
 let canvas = document.getElementById('canvas');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -56,7 +65,7 @@ canvas.addEventListener('pointerdown', event => {
 });
 canvas.addEventListener('pointermove', event => {
 	if (enablePan) {
-		view.pan(event.clientX - mouseX, event.clientY - mouseY);
+		view.pan(Math.round(event.clientX - mouseX), Math.round(event.clientY - mouseY));
 		mouseX = event.clientX;
 		mouseY = event.clientY;
 	}
@@ -76,18 +85,21 @@ canvas.addEventListener('gestureend', event => {
 });
 
 canvas.addEventListener('mousemove', event => {
-	labelX.textContent = `X: ${view.viewport.x + event.clientX / canvas.width * view.viewport.width}`;
-	labelY.textContent = `Y: ${view.viewport.y + event.clientY / canvas.height * view.viewport.height}`;
+	displayCoordinates(
+		view.viewport.x + event.clientX / canvas.width * view.viewport.width,
+		view.viewport.y + event.clientY / canvas.height * view.viewport.height);
 });
 canvas.addEventListener('mouseleave', () => {
-	labelX.textContent = `X: ${view.viewport.x + view.viewport.width*.5}`;
-	labelY.textContent = `Y: ${view.viewport.y + view.viewport.height*.5}`;
+	displayCoordinates(
+		view.viewport.x + view.viewport.width*.5,
+		view.viewport.y + view.viewport.height*.5);
 });
 
 view.resize(window.innerWidth, window.innerHeight);
 
-labelX.textContent = `X: ${view.viewport.x + view.viewport.width*.5}`;
-labelY.textContent = `Y: ${view.viewport.y + view.viewport.height*.5}`;
+displayCoordinates(
+	view.viewport.x + view.viewport.width*.5,
+	view.viewport.y + view.viewport.height*.5);
 
 // Export function
 return view;

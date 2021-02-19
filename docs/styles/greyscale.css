@@ -1,0 +1,59 @@
+body {
+	background-color: snow;
+}
+
+input[type="number"] {
+	border: 2pt solid black;
+}
+
+button, .button {
+	border: 2pt solid black;
+	outline: none;
+	color: black;
+	background-color: lightgray;
+}
+
+button:hover, .button:hover {
+	background-color: darkgray;
+}
+
+button:active, .button:active {
+	background-color: gray;
+}
+
+img.avatar {
+	border: solid black;
+}
+
+.arrow-big {
+	border: solid black;
+	border-width: 0 5pt 5pt 0;
+	border-radius: 3pt;
+}
+
+.arrow-small {
+	border: solid black;
+	border-width: 0 4pt 4pt 0;
+}
+
+#side-menu {
+	background-color: rgba(200, 200, 216, .6);
+}
+
+#toggle-menu {
+	background-color: lightgray;
+	border: 2pt solid black;
+	outline: none;
+	opacity: .6;
+}
+
+#toggle-menu:hover {
+	background: darkgray;
+	opacity: .9;
+}
+
+#toggle-menu:active {
+	background: gray;
+	opacity: 1;
+}
+

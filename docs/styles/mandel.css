@@ -2,15 +2,6 @@
 	--background: #ff0000;
 }
 
-body {
-	width: 100%;
-	height: 100%;
-	margin: 0px;
-	border: 0px;
-	overflow: hidden; /* disable scrollbars */
-	display: block; /* no floating content */
-}
-
 div {
 	font: 30pt 'Roboto';
 }
@@ -18,31 +9,18 @@ div {
 input[type="number"] {
 	text-align: center;
 	outline: none;
-	font: 20pt 'Roboto';
+	font: 30pt 'Roboto';
 	line-height: 20pt;
 	width: 60pt;
-	border: 2pt solid black;
 }
 
-button {
-	border: 2pt solid black;
-	outline: none;
-	font: 20pt 'Roboto';
-	background-color: lightgray;
-}
-
-button:hover {
-	background-color: darkgray;
-}
-
-button:active {
-	background-color: gray;
+button, .button {
+	font: 30pt 'Roboto';
+	text-decoration: none;
+	padding: 0 6pt 0 6pt;
 }
 
 .arrow-big {
-	border: solid black;
-	border-width: 0 5pt 5pt 0;
-	border-radius: 3pt;
 	display: inline-block;
 	width: 10pt;
 	height: 10pt;
@@ -51,8 +29,6 @@ button:active {
 }
 
 .arrow-small {
-	border: solid black;
-	border-width: 0 4pt 4pt 0;
 	border-radius: 3pt;
 	display: inline-block;
 	width: 10pt;
@@ -80,11 +56,11 @@ button:active {
 	display: flex;
 	justify-content: space-evenly;
 	flex-direction: row;
-	margin-top: 10pt;
+	margin-top: 20pt;
 }
 
 .coord {
-	font: 12pt 'Roboto';
+	font: 24pt 'Roboto';
 }
 
 #side-menu > .column {
@@ -92,7 +68,6 @@ button:active {
 }
 
 #side-menu {
-	background-color: rgba(200, 200, 200, .6);
 	position: fixed;
 	padding-top: 5%;
 	height: 100%;
@@ -108,22 +83,8 @@ button:active {
 	top: 5%;
 	right: 0;
 	margin-right: 20pt;
-	background-color: lightgray;
-	border: 2pt solid black;
-	outline: none;
 	border-radius: 25pt;
 	width: 50pt;
 	height: 50pt;
 	transition: .5s;
-	opacity: .6;
-}
-
-#toggle-menu:hover {
-	background: darkgray;
-	opacity: .9;
-}
-
-#toggle-menu:active {
-	background: gray;
-	opacity: 1;
 }

@@ -2,32 +2,41 @@
 
 <html>
 	<head>
-		<link rel="stylesheet" href="greyscale.css" />
-		<script src="scripts/Chunk.js"></script>
-		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi">
-		<meta name="author" content="Grigory 'Griffone' Glukhov">
+		<link rel="preconnect" href="https://fonts.gstatic.com">
+		<link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed" rel="stylesheet">
+		<link rel="stylesheet" href="styles/shape.css">
+		<link rel="stylesheet" href="styles/greyscale.css">
+		<meta name="author" content="Grigory 'Technomunk' Glukhov">
+		<title>Grigory 'Technomunk' Glukhov</title>
 	</head>
-	
+
 	<body>
+		<header>
+			<img class="avatar" src="images/avatar.jpg" alt="Avatar">
+			<h1 class="name">Grigory '<i>Technomunk</i>' Glukhov</div>
+		</header>
 		<main>
-			<script src="scripts/ProceduralImageView.js"></script>
-			<canvas id="canvas"></canvas>
+			<p>
+				Salutations! I'm a programmer by trade and passion. Versed in a variety of topics, tools and methodologies. My goal is to be a great universal programmer, capable of solving any problem thrown my way in a concise and performant manner. I've done backend, gamedev, networking, functional programming, test-driven development, tool development, 3d rendering, procedural animation and more. 
+			</p>
 		</main>
-		<aside id="side-menu" class="flex">
-			<div id="coord-x", class="row coord">X:</div>
-			<div id="coord-y", class="row coord">Y:</div>
-			<div class="row">
-				<label for="limit">Limit</label>
-				<input id="limit" type="number" min="1" value="30" max="1024">
-				<script src="scripts/numeric_input.js"></script>
+		<address>
+			Contact details:
+			<ul>
+				<li><a href="mailto thegriffones@gmail.com">thegriffones@gmail.com</a></li>
+				<li><a href="https://github.com/technomunk">Github</a></li>
+			</ul>
+		</address>
+		<nav>
+			<div>
+				Personal projects:
+				<ul>
+					<li><a href="mandelexplorer.html">Interactive Mandelbrot set explorer</a></li>
+				</ul>
 			</div>
-			<div class="row">
-				<button id="redraw">Redraw</button>
-				<button id="reset">Reset</button>
-			</div>
-		</aside>
-		<button id="toggle-menu"><i class="arrow-big left" id="toggle-menu-arrow"></i></button>
-		<script src="scripts/canvas.js"></script>
-		<script src="scripts/side_menu.js"></script>
+		</nav>
+		<footer>
+			This webpage is under development, feel free to check back later! <i>🙃</i>
+		</footer>
 	</body>
 </html>
