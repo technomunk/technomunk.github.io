@@ -1,9 +1,5 @@
 import { view } from "./canvas";
 
-// Constants
-
-const REDRAW_DELAY = 600;
-
 // Global variables
 
 let limit = document.getElementById('limit') as HTMLInputElement,
@@ -12,27 +8,10 @@ let limit = document.getElementById('limit') as HTMLInputElement,
 
 // Free functions
 
-/** Redraw the picture on the 'mainCanvas' after a set delay. Cancels any pending redraws.
- * @param {number} limit The limit to use when redrawing.
- * @param {number} delay The number of milliseconds to wait before redrawing.
- */
-function redrawAfterDelay(limit: number, delay: number): void {
-	clearTimeout(redrawTimer);
-	redrawTimer = window.setTimeout(
-		() => {
-			if (limit !== drawnLimit) {
-				view.update(limit);
-				drawnLimit = limit;
-			}
-		},
-		delay);
-}
-
 /** Redraw the picture immediately and cancel any pending redraws.
  * @param {number} limit The limit to use when redrawing.
  */
 function redrawImmediately(limit: number): void {
-	clearTimeout(redrawTimer);
 	if (limit !== drawnLimit) {
 		view.update(limit);
 		drawnLimit = limit;
@@ -53,7 +32,7 @@ limit.addEventListener('input', () => {
 	}
 
 	if (value >= min && value <= max) {
-		redrawAfterDelay(value, REDRAW_DELAY);
+		redrawImmediately(value);
 	}
 });
 limit.addEventListener('change', () => {

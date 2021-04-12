@@ -131,7 +131,11 @@ function draw(image: ImageData, rect: DOMRect, limit: number): void {
 	}
 }
 
-onmessage = function (msg) {
-	draw(msg.data.image, msg.data.rect, msg.data.limit);
-	postMessage(msg.data);
+onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
+	let image = new ImageData(
+		new Uint8ClampedArray(msg.data.pixels),
+		msg.data.width,
+		msg.data.height);
+	draw(image, msg.data.rect, msg.data.limit);
+	postMessage(msg.data, [msg.data.pixels]);
 };
