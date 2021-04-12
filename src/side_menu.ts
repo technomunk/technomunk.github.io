@@ -1,6 +1,4 @@
-'strict mode';
-
-displayCoordinates = (function(){
+import { view } from "./canvas";
 
 // Constants
 
@@ -9,10 +7,10 @@ const TOGGLE_BUTTON_MARGIN = 20;
 
 // Global variables
 
-let limit = document.getElementById('limit'),
-	sideMenu = document.getElementById('side-menu'),
-	toggleButton = document.getElementById('toggle-menu'),
-	arrow = document.getElementById('toggle-menu-arrow');
+let limit = document.getElementById('limit') as HTMLInputElement,
+	sideMenu = document.getElementById('side-menu')!,
+	toggleButton = document.getElementById('toggle-menu')!,
+	arrow = document.getElementById('toggle-menu-arrow')!;
 
 // Free functions
 
@@ -29,7 +27,7 @@ function openSideMenu() {
 
 /** Close the side menu of the document. */
 function closeSideMenu() {
-	sideMenu.style.width = 0;
+	sideMenu.style.width = '0';
 	toggleButton.style.marginRight = `${TOGGLE_BUTTON_MARGIN}pt`;
 	arrow.classList.remove('right');
 	arrow.classList.add('left');
@@ -47,6 +45,5 @@ function toggleSideMenu() {
 // Register events
 
 toggleButton.addEventListener('click', toggleSideMenu);
-document.getElementById('redraw').onclick = view.update.bind(view, Number(limit.value), undefined);
-document.getElementById('reset').onclick = view.reset.bind(view, Number(limit.value));
-}());
+document.getElementById('redraw')!.onclick = view.update.bind(view, Number(limit.value), undefined);
+document.getElementById('reset')!.onclick = view.reset.bind(view, Number(limit.value));

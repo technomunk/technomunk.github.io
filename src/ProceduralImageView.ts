@@ -1,7 +1,7 @@
 /** A view of a procedural image that can be panned or zoomed.
  * Takes a canvas element to draw the image on. Does not capture inputs, only handles drawing the actual image. 
  */
-class ProceduralImageView {
+export class ProceduralImageView {
 	canvas: HTMLCanvasElement;
 	context: CanvasRenderingContext2D;
 	chunkWidth: number;
@@ -50,7 +50,7 @@ class ProceduralImageView {
 		this.offsetY = 0;
 
 		for (var i = 0; i < workerCount; ++i) {
-			this.workers.push(new Worker('./scripts/drawer.js'));
+			this.workers.push(new Worker('./scripts/draw_worker.js'));
 			this.workers[i].onmessage = (msg) => {
 				if (msg.data.limit == this.limit
 					&& msg.data.viewport.width == this.viewport.width
