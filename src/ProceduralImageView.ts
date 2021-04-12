@@ -1,20 +1,25 @@
+const PLACEHOLDER_BUFFER = new Uint8ClampedArray();
+
 /** A view of a procedural image that can be panned or zoomed.
  * Takes a canvas element to draw the image on. Does not capture inputs, only handles drawing the actual image. 
  */
 export class ProceduralImageView {
-	canvas: HTMLCanvasElement;
-	context: CanvasRenderingContext2D;
-	chunkWidth: number;
-	chunkHeight: number;
-	viewport: DOMRect;
-	clearStyle?: string | CanvasGradient | CanvasPattern;
 
-	workers: Array<Worker>;
-	nextWorkerIndex: number;
-	limit: number;
-	updateTimer: number;
-	offsetX: number;
-	offsetY: number;
+	clearStyle?: string | CanvasGradient | CanvasPattern;
+	viewport: DOMRect;
+
+	private canvas: HTMLCanvasElement;
+	private context: CanvasRenderingContext2D;
+	private chunkWidth: number;
+	private chunkHeight: number;
+
+	private freeWorkers: Array<[Worker, Uint8ClampedArray]>;
+	private work: Array<DrawRegionMessage>;
+	private limit: number;
+	private offsetX: number;
+	private offsetY: number;
+
+	private cleanRect: DOMRect | null;
 
 	/**
 	 * @param {HTMLCanvasElement} canvas The canvas to use.
@@ -42,26 +47,42 @@ export class ProceduralImageView {
 			this.viewport = viewport;
 		}
 		workerCount = workerCount || window.navigator.hardwareConcurrency;
-		this.workers = [];
-		this.nextWorkerIndex = 0;
+		this.freeWorkers = [];
+		this.work = [];
 		this.limit = 30;
-		this.updateTimer = 0;
 		this.offsetX = 0;
 		this.offsetY = 0;
+		this.cleanRect = null;
 
 		for (var i = 0; i < workerCount; ++i) {
-			this.workers.push(new Worker('./scripts/draw_worker.js'));
-			this.workers[i].onmessage = (msg) => {
-				if (msg.data.limit == this.limit
-					&& msg.data.viewport.width == this.viewport.width
-					&& msg.data.viewport.height == this.viewport.height
-				) {
-					this.context.putImageData(
-						msg.data.image,
-						msg.data.pixelX + this.offsetX - msg.data.offsetX,
-						msg.data.pixelY + this.offsetY - msg.data.offsetY);
-				}
-			};
+			let worker = new Worker('./scripts/draw_worker.js');
+			let pixels = new Uint8ClampedArray(chunkWidth * chunkHeight * 4);
+			/// Capture index
+			((worker: Worker, view: ProceduralImageView, index: number) => {
+				worker.onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
+					let pixels = new Uint8ClampedArray(msg.data.pixels);
+					if (msg.data.limit == view.limit
+						&& msg.data.viewport.width == view.viewport.width
+						&& msg.data.viewport.height == view.viewport.height
+					) {
+						let image = new ImageData(pixels, msg.data.width, msg.data.height);
+						view.context.putImageData(
+							image,
+							msg.data.pixelX + view.offsetX - msg.data.offsetX,
+							msg.data.pixelY + view.offsetY - msg.data.offsetY);
+					}
+
+					let work = view.work.pop();
+					if (work != null) {
+						work.pixels = pixels.buffer;
+						worker.postMessage(work, [work.pixels]);
+					} else {
+						view.freeWorkers.push([worker, pixels]);
+						view.cleanRect = view.viewport;
+					}
+				};
+			})(worker, this, i);
+			this.freeWorkers.push([worker, pixels]);
 		}
 	}
 
@@ -70,8 +91,11 @@ export class ProceduralImageView {
 	 * @param {DOMRect} rect The region of the image to redraw (in pixels). Defaults to the whole image if null.
 	 */
 	update(limit: number, rect?: DOMRect) {
-		rect = rect || new DOMRect(0, 0, this.canvas.width, this.canvas.height);
+		if (this.limit != limit || rect == null) {
+			this.clearWork();
+		}
 
+		rect = rect || new DOMRect(0, 0, this.canvas.width, this.canvas.height);
 		this.limit = limit;
 
 		let chunksX = rect.width / this.chunkWidth,
@@ -80,46 +104,43 @@ export class ProceduralImageView {
 		if (this.clearStyle != null) {
 			this.context.fillStyle = this.clearStyle;
 		}
-		
-		var message: DrawRegionMessage = {
-			image: undefined,
-			rect: new DOMRect(),
-			limit: this.limit,
-			viewport: this.viewport,
-			offsetX: this.offsetX,
-			offsetY: this.offsetY,
-			pixelX: 0,
-			pixelY: 0,
-		};
 
+		const rectW = this.chunkWidth / this.canvas.width * this.viewport.width;
+		const rectH = this.chunkHeight / this.canvas.height * this.viewport.height;
+
+		// this.context.fillStyle = 'green';
 		for (var y = 0; y < chunksY; ++y) {
-			var height = Math.min(rect.height - y * this.chunkHeight, this.chunkHeight);
-
-			message.pixelY = rect.y + y * this.chunkHeight;
-			message.rect.y = this.viewport.y + (rect.y + y * this.chunkHeight) / this.canvas.height * this.viewport.height;
-			message.rect.height = height / this.canvas.height * this.viewport.height;
+			const pixelY = rect.y + y * this.chunkHeight;
+			const rectY = this.viewport.y + (rect.y + y * this.chunkHeight) / this.canvas.height * this.viewport.height;
 
 			for (var x = 0; x < chunksX; ++x) {
-				var width = Math.min(rect.width - x * this.chunkWidth, this.chunkWidth);
+				const pixelX = rect.x + x * this.chunkWidth;
+				const rectX = this.viewport.x + (rect.x + x * this.chunkWidth) / this.canvas.width * this.viewport.width;
 
-				message.pixelX = rect.x + x * this.chunkWidth;
-				message.rect.x = this.viewport.x + (rect.x + x * this.chunkWidth) / this.canvas.width * this.viewport.width;
-				message.rect.width = width / this.canvas.width * this.viewport.width;
-
-				if (message.image == null || message.image.width != width || message.image.height != height) {
-					message.image = this.context.createImageData(width, height);
-				}
-
-				this.workers[this.nextWorkerIndex].postMessage(message);
-				this.nextWorkerIndex = (this.nextWorkerIndex + 1) % this.workers.length;
+				// this.context.fillRect(pixelX, pixelY, this.chunkWidth, this.chunkHeight);
+				this.queueWork({
+					pixels: PLACEHOLDER_BUFFER,
+					width: this.chunkWidth,
+					height: this.chunkHeight,
+					rect: new DOMRect(rectX, rectY, rectW, rectH),
+					limit: limit,
+					pixelX: pixelX,
+					pixelY: pixelY,
+					viewport: DOMRect.fromRect(this.viewport),
+					offsetX: this.offsetX,
+					offsetY: this.offsetY
+				});
 			}
 		}
+
+		this.work.reverse();
 	}
 
 	/** Reset the viewport to default state and redraw the image with provided limit.
 	 * @param {number} limit Maximum number of iterations to use when drawing the image.
 	 */
 	reset(limit: number) {
+		this.clearWork();
 		if (this.canvas.width >= this.canvas.height) {
 			let ratio = this.canvas.width / this.canvas.height;
 			this.viewport = new DOMRect(-ratio, -1, 2*ratio, 2);
@@ -135,6 +156,8 @@ export class ProceduralImageView {
 	 * @param {number} y Vertical number of pixels to shift the image by.
 	 */
 	pan(x: number, y: number) {
+		this.clearWork();
+
 		let midX = x >= 0 ? x : this.canvas.width + x,
 			midY = y >= 0 ? y : this.canvas.height + y,
 			quadrants: DOMRect[] = [];
@@ -156,31 +179,28 @@ export class ProceduralImageView {
 		if (x < 0 && y < 0) {
 			let imageData = this.context.getImageData(-x, -y, quadrants[0].width, quadrants[0].height);
 			this.context.putImageData(imageData, 0, 0);
-			quadrants.splice(0, 1);
 		} else if (x >= 0 && y < 0) {
 			let imageData = this.context.getImageData(0, -y, quadrants[1].width, quadrants[1].height);
 			this.context.putImageData(imageData, x, 0);
-			quadrants.splice(1, 1);
 		} else if (x < 0 && y >= 0) {
 			let imageData = this.context.getImageData(-x, 0, quadrants[2].width, quadrants[2].height);
 			this.context.putImageData(imageData, 0, y);
-			quadrants.splice(2, 1);
 		} else if (x >= 0 && y >= 0) {
 			let imageData = this.context.getImageData(0, 0, quadrants[3].width, quadrants[3].height);
 			this.context.putImageData(imageData, x, y);
-			quadrants.splice(3, 1);
 		}
 	
-		quadrants.forEach(quad => this.update(this.limit, quad));
+		this.update(this.limit);
 	}
 
 	/** Zoom the image in or out around a provided point.
 	 * @param {number} x The horizontal index of the pixel around which to zoom.
 	 * @param {number} y The vertical index of the pixel around which to zoom.
 	 * @param {number} scale The ratio by how much to zoom the picture.
-	 * @param {number} delay The number of milliseconds to wait before redrawing the image.
 	 */
-	zoom(x: number, y: number, scale: number, delay: number = 0) {
+	zoom(x: number, y: number, scale: number) {
+		this.clearWork();
+
 		let relX = x / this.canvas.width,
 			relY = y / this.canvas.height,
 			pointX = this.viewport.x + this.viewport.width * relX,
@@ -213,8 +233,7 @@ export class ProceduralImageView {
 				this.canvas.height);
 		}
 
-		window.clearTimeout(this.updateTimer);
-		this.updateTimer = setTimeout(this.update.bind(this, this.limit), delay);
+		this.update(this.limit);
 	}
 
 	/** Resize the view.
@@ -222,10 +241,27 @@ export class ProceduralImageView {
 	 * @param {number} height The new height of the view in pixels.
 	 */
 	resize(width: number, height: number) {
+		this.clearWork();
 		this.viewport.width *= width / this.canvas.width;
 		this.viewport.height *= height / this.canvas.height;
 		this.canvas.width = width;
 		this.canvas.height = height;
 		this.update(this.limit);
+	}
+
+	/** Clear any queued work */
+	private clearWork() {
+		this.work.length = 0;
+	}
+
+	/** Queue a piece of work to be done. */
+	private queueWork(work: DrawRegionMessage) {
+		let free = this.freeWorkers.pop();
+		if (free != null) {
+			work.pixels = free[1].buffer;
+			free[0].postMessage(work, [work.pixels]);
+		} else {
+			this.work.push(work);
+		}
 	}
 }

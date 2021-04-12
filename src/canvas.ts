@@ -3,8 +3,6 @@ import { ProceduralImageView } from "./ProceduralImageView";
 // Constants
 
 const WHEEL_SENSITIVITY = 1e-3;
-const WHEEL_REDRAW_DELAY = 200;
-const GESTURE_SCALE_DELAY = 600;
 
 // Global variables
 
@@ -27,7 +25,7 @@ function displayCoordinates(x: number, y: number) {
 let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-let view = new ProceduralImageView(canvas, undefined, 1, 64, 64);
+let view = new ProceduralImageView(canvas);
 
 // Register events
 
@@ -50,7 +48,7 @@ canvas.addEventListener('pointerleave', () => enablePan = false);
 canvas.addEventListener('pointercancel', () => enablePan = false);
 
 canvas.addEventListener('wheel', event => {
-	view.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY, WHEEL_REDRAW_DELAY);	
+	view.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY);	
 });
 // canvas.addEventListener('gesturechange', event => {
 // 	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
