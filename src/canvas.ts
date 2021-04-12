@@ -1,7 +1,4 @@
-'use strict';
-
-/** The procedural image view. */
-let view = (function(){
+import { ProceduralImageView } from "./ProceduralImageView";
 
 // Constants
 
@@ -11,45 +8,23 @@ const GESTURE_SCALE_DELAY = 600;
 
 // Global variables
 
-let labelX = document.getElementById('coord-x'),
-	labelY = document.getElementById('coord-y'),
+let labelX = document.getElementById('coord-x') as HTMLElement,
+	labelY = document.getElementById('coord-y') as HTMLElement,
 	mouseX = 0, mouseY = 0,
 	enablePan = false;
 
 // Free function declarations
 
-/** Get the cookie associated with provided name.
- * @param {String} name The name of the cookie to get.
- * @param {*} value The default value returned if the cookie is not found.
- * @returns {*} Value associated with the cookie or default value.
- */
-function getCookie(name, value = undefined) {
-	let cookie = decodeURIComponent(document.cookie).split(';').filter(element => element.split('=')[0] === name);
-	if (cookie.length) {
-		console.log(cookie);
-		return JSON.parse(cookie[0]);
-	}
-	return value;
-}
-
-/** Associate provided value with a given name cookie.
- * @param {String} name The name of the cookie.
- * @param {*} value The new value of the cookie.
- */
-function putCookie(name, value) {
-	document.cookie = `${name}=${JSON.stringify(value)}; expires=${Date.now() + COOKIE_TIMEOUT}`;
-}
-
 /** Set the coordinates to display provided values.
- * @param {Number} x The horizontal coordinate to display.
- * @param {Number} y The vertical coordinate to display.
+ * @param {number} x The horizontal coordinate to display.
+ * @param {number} y The vertical coordinate to display.
  */
-function displayCoordinates(x, y) {
+function displayCoordinates(x: number, y: number) {
 	labelX.textContent = `X: ${x.toExponential(3)}`;
 	labelY.textContent = `Y: ${y.toExponential(3)}`;
 }
 
-let canvas = document.getElementById('canvas');
+let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let view = new ProceduralImageView(canvas, undefined, 1, 64, 64);
@@ -77,12 +52,12 @@ canvas.addEventListener('pointercancel', () => enablePan = false);
 canvas.addEventListener('wheel', event => {
 	view.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY, WHEEL_REDRAW_DELAY);	
 });
-canvas.addEventListener('gesturechange', event => {
-	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
-});
-canvas.addEventListener('gestureend', event => {
-	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
-});
+// canvas.addEventListener('gesturechange', event => {
+// 	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
+// });
+// canvas.addEventListener('gestureend', event => {
+// 	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
+// });
 
 canvas.addEventListener('mousemove', event => {
 	displayCoordinates(
@@ -101,7 +76,4 @@ displayCoordinates(
 	view.viewport.x + view.viewport.width*.5,
 	view.viewport.y + view.viewport.height*.5);
 
-// Export function
-return view;
-
-}());
+export { view };

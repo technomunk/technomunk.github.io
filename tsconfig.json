@@ -2,13 +2,14 @@
 	"compilerOptions": {
 		"module": "commonjs",
 		"outDir": "docs/scripts",
-		"removeComments": true,
-		"target": "ES6",
+		"target": "es6",
+		"lib": ["WebWorker", "es6", "ScriptHost", "DOM"],
 
 		"alwaysStrict": true,
-		// "noImplicitAny": true,
+		"noImplicitAny": true,
+		"sourceMap": true,
 		"noImplicitThis": true,
 		"strict": true,
 	},
-	"include": ["src/scripts/**/*"]
+	"include": ["src/**/*",]
 }

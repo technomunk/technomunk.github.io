@@ -11,3 +11,8 @@ webpage. The `index.html` uses asynchronous workers to compute the mandelbrot
 set in the background, relying on loading the script file. To run the page
 locally supply `--allow-file-access-from-files` command line argument to your
 browser.
+
+## Building
+
+The project uses [npm](https://www.npmjs.com/) to build the project. Use
+`npm run build` to build the static webpages.
