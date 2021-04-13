@@ -1,6 +1,6 @@
 # Griffone's Github Pages
 
-A place to showcase some of personal projects an abilities.
+A place to showcase some of personal projects and abilities.
 
 ## Disclaimer
 
