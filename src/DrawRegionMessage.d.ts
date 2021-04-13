@@ -14,8 +14,4 @@ interface DrawRegionMessage {
 
 	pixelX: number,
 	pixelY: number,
-
-	viewport: DOMRect,
-	offsetX: number,
-	offsetY: number,
 }

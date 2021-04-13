@@ -5,7 +5,8 @@ module.exports = {
 		bundle: ['./src/numeric_input.ts', './src/side_menu.ts',],
 		draw_worker: './src/draw_worker.ts',
 	},
-	devtool: 'inline-source-map',
+	// devtool: 'inline-source-map',
+	mode: 'production',
 	module: {
 	  rules: [
 		{
