@@ -16,10 +16,6 @@ export class ProceduralImageView {
 	private freeWorkers: Array<[Worker, Uint8ClampedArray]>;
 	private work: Array<DrawRegionMessage>;
 	private limit: number;
-	private offsetX: number;
-	private offsetY: number;
-
-	private cleanRect: DOMRect | null;
 
 	/**
 	 * @param {HTMLCanvasElement} canvas The canvas to use.
@@ -29,7 +25,7 @@ export class ProceduralImageView {
 	 * @param {number} chunkHeight Height of a single chunk of the processed image in pixels.
 	 */
 	constructor(
-		canvas: HTMLCanvasElement,
+		canvas: HTMLCanvasElement,	
 		viewport?: DOMRect,
 		workerCount?: number,
 		chunkWidth: number = 64,
@@ -50,38 +46,24 @@ export class ProceduralImageView {
 		this.freeWorkers = [];
 		this.work = [];
 		this.limit = 30;
-		this.offsetX = 0;
-		this.offsetY = 0;
-		this.cleanRect = null;
 
 		for (var i = 0; i < workerCount; ++i) {
 			let worker = new Worker('./scripts/draw_worker.js');
 			let pixels = new Uint8ClampedArray(chunkWidth * chunkHeight * 4);
-			/// Capture index
-			((worker: Worker, view: ProceduralImageView, index: number) => {
+			((worker: Worker, view: ProceduralImageView) => {
 				worker.onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
 					let pixels = new Uint8ClampedArray(msg.data.pixels);
-					if (msg.data.limit == view.limit
-						&& msg.data.viewport.width == view.viewport.width
-						&& msg.data.viewport.height == view.viewport.height
-					) {
-						let image = new ImageData(pixels, msg.data.width, msg.data.height);
-						view.context.putImageData(
-							image,
-							msg.data.pixelX + view.offsetX - msg.data.offsetX,
-							msg.data.pixelY + view.offsetY - msg.data.offsetY);
-					}
-
+					let image = new ImageData(pixels, msg.data.width, msg.data.height);
+					view.context.putImageData(image, msg.data.pixelX, msg.data.pixelY);
 					let work = view.work.pop();
 					if (work != null) {
 						work.pixels = pixels.buffer;
 						worker.postMessage(work, [work.pixels]);
 					} else {
 						view.freeWorkers.push([worker, pixels]);
-						view.cleanRect = view.viewport;
 					}
 				};
-			})(worker, this, i);
+			})(worker, this);
 			this.freeWorkers.push([worker, pixels]);
 		}
 	}
@@ -126,9 +108,6 @@ export class ProceduralImageView {
 					limit: limit,
 					pixelX: pixelX,
 					pixelY: pixelY,
-					viewport: DOMRect.fromRect(this.viewport),
-					offsetX: this.offsetX,
-					offsetY: this.offsetY
 				});
 			}
 		}
@@ -164,9 +143,6 @@ export class ProceduralImageView {
 		
 		this.viewport.x -= x / this.canvas.width * this.viewport.width;
 		this.viewport.y -= y / this.canvas.height * this.viewport.height;
-
-		this.offsetX += x;
-		this.offsetY += y;
 
 		quadrants = [
 			new DOMRect(0, 0, midX, midY),
