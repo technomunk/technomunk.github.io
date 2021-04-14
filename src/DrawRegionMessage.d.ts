@@ -14,4 +14,6 @@ interface DrawRegionMessage {
 
 	pixelX: number,
 	pixelY: number,
+	offsetX: number,
+	offsetY: number,
 }

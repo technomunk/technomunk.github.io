@@ -51,7 +51,7 @@ bindConfig(
 		let updateRequired = view.limit != value;
 		view.limit = value;
 		if (updateRequired) {
-			view.update();
+			view.queueUpdate();
 		}
 	});
 bindConfig(
@@ -60,7 +60,7 @@ bindConfig(
 		let updateRequired = view.escapeRadius != value;
 		view.escapeRadius = value;
 		if (updateRequired) {
-			view.update();
+			view.queueUpdate();
 		}
 	});
 
