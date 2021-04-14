@@ -1,4 +1,5 @@
 import { view } from "./canvas";
+import { resetConfigs } from "./draw_config";
 
 // Constants
 
@@ -7,8 +8,7 @@ const TOGGLE_BUTTON_MARGIN = 20;
 
 // Global variables
 
-let limit = document.getElementById('limit') as HTMLInputElement,
-	sideMenu = document.getElementById('side-menu')!,
+let sideMenu = document.getElementById('side-menu')!,
 	toggleButton = document.getElementById('toggle-menu')!,
 	arrow = document.getElementById('toggle-menu-arrow')!;
 
@@ -45,9 +45,9 @@ function toggleSideMenu() {
 // Register events
 
 toggleButton.addEventListener('click', toggleSideMenu);
-document.getElementById('redraw')!.onclick = () => {
-	view.update(Number(limit.value));
-}
+document.getElementById('redraw')!.onclick = () => view.update();
 document.getElementById('reset')!.onclick = () => {
-	view.reset(Number(limit.value));
-}
+	view.viewport = view.defaultViewport;
+	resetConfigs();
+	view.update();
+};
