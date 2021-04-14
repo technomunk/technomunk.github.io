@@ -9,8 +9,8 @@ interface DrawRegionMessage {
 	height: number,
 	/** The rectangle of the Mandelbrot set to draw. */
 	rect: DOMRect,
-	/** The limit of calculations. */
-	limit: number,
+	
+	config: DrawConfig,
 
 	pixelX: number,
 	pixelY: number,

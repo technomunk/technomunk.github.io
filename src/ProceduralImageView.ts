@@ -5,9 +5,9 @@ const PLACEHOLDER_BUFFER = new Uint8ClampedArray();
  */
 export class ProceduralImageView {
 
-	clearStyle?: string | CanvasGradient | CanvasPattern;
-	viewport: DOMRect;
-
+	public clearStyle?: string | CanvasGradient | CanvasPattern;
+	public viewport: DOMRect;
+	
 	private canvas: HTMLCanvasElement;
 	private context: CanvasRenderingContext2D;
 	private chunkWidth: number;
@@ -15,7 +15,11 @@ export class ProceduralImageView {
 
 	private freeWorkers: Array<[Worker, Uint8ClampedArray]>;
 	private work: Array<DrawRegionMessage>;
-	private limit: number;
+
+	private config = {
+		limit: 30,
+		escapeRadius: 4,
+	};
 
 	/**
 	 * @param {HTMLCanvasElement} canvas The canvas to use.
@@ -24,7 +28,7 @@ export class ProceduralImageView {
 	 * @param {number} chunkWidth Width of a single chunk of the processed image in pixels.
 	 * @param {number} chunkHeight Height of a single chunk of the processed image in pixels.
 	 */
-	constructor(
+	public constructor(
 		canvas: HTMLCanvasElement,	
 		viewport?: DOMRect,
 		workerCount?: number,
@@ -35,17 +39,10 @@ export class ProceduralImageView {
 		this.context = canvas.getContext('2d')!;
 		this.chunkWidth = chunkWidth;
 		this.chunkHeight = chunkHeight;
-		if (typeof(viewport) == "undefined") {
-			// Default viewport centers around -1 because the mandelbrot look better that way.
-			let ratio = this.canvas.width / this.canvas.height;
-			this.viewport = new DOMRect(-.8 - 1.1*ratio, -1.1, 2.2*ratio, 2.2);
-		} else {
-			this.viewport = viewport;
-		}
+		this.viewport = viewport || this.defaultViewport;
 		workerCount = workerCount || window.navigator.hardwareConcurrency;
 		this.freeWorkers = [];
 		this.work = [];
-		this.limit = 30;
 
 		for (var i = 0; i < workerCount; ++i) {
 			let worker = new Worker('./scripts/draw_worker.js');
@@ -68,17 +65,43 @@ export class ProceduralImageView {
 		}
 	}
 
+	/** Get default viewport for the current canvas. */
+	public get defaultViewport() {
+		if (this.canvas.width >= this.canvas.height) {
+			let ratio = this.canvas.width / this.canvas.height;
+			return new DOMRect(-ratio, -1, 2*ratio, 2);
+		} else {
+			let ratio = this.canvas.height / this.canvas.height;
+			return new DOMRect(-1, -ratio, 2, 2*ratio);
+		}
+	}
+
+	public get limit() {
+		return this.config.limit;
+	}
+
+	public set limit(value: number) {
+		this.config.limit = value;
+	}
+
+	public get escapeRadius() {
+		return this.config.escapeRadius;
+	}
+
+	public set escapeRadius(value: number) {
+		this.config.escapeRadius = value;
+	}
+
 	/** Update part of the viewed image.
 	 * @param {number} limit Maximum number of iterations to use when drawing the image. 
 	 * @param {DOMRect} rect The region of the image to redraw (in pixels). Defaults to the whole image if null.
 	 */
-	update(limit: number, rect?: DOMRect) {
-		if (this.limit != limit || rect == null) {
+	public update(rect?: DOMRect) {
+		if (rect == null) {
 			this.clearWork();
 		}
 
 		rect = rect || new DOMRect(0, 0, this.canvas.width, this.canvas.height);
-		this.limit = limit;
 
 		let chunksX = rect.width / this.chunkWidth,
 			chunksY = rect.height / this.chunkHeight;
@@ -105,7 +128,7 @@ export class ProceduralImageView {
 					width: this.chunkWidth,
 					height: this.chunkHeight,
 					rect: new DOMRect(rectX, rectY, rectW, rectH),
-					limit: limit,
+					config: this.config,
 					pixelX: pixelX,
 					pixelY: pixelY,
 				});
@@ -115,34 +138,19 @@ export class ProceduralImageView {
 		this.work.reverse();
 	}
 
-	/** Reset the viewport to default state and redraw the image with provided limit.
-	 * @param {number} limit Maximum number of iterations to use when drawing the image.
-	 */
-	reset(limit: number) {
-		this.clearWork();
-		if (this.canvas.width >= this.canvas.height) {
-			let ratio = this.canvas.width / this.canvas.height;
-			this.viewport = new DOMRect(-ratio, -1, 2*ratio, 2);
-		} else {
-			let ratio = this.canvas.height / this.canvas.height;
-			this.viewport = new DOMRect(-1, -ratio, 2, 2*ratio);
-		}
-		this.update(limit);
-	}
-
 	/** Shift thee image provided number of pixels.
-	 * @param {number} x Horizontal number of pixels to shift the image by.
-	 * @param {number} y Vertical number of pixels to shift the image by.
+	 * @param {number} dx Horizontal number of pixels to shift the image by.
+	 * @param {number} dy Vertical number of pixels to shift the image by.
 	 */
-	pan(x: number, y: number) {
+	public pan(dx: number, dy: number) {
 		this.clearWork();
 
-		let midX = x >= 0 ? x : this.canvas.width + x,
-			midY = y >= 0 ? y : this.canvas.height + y,
+		let midX = dx >= 0 ? dx : this.canvas.width + dx,
+			midY = dy >= 0 ? dy : this.canvas.height + dy,
 			quadrants: DOMRect[] = [];
 		
-		this.viewport.x -= x / this.canvas.width * this.viewport.width;
-		this.viewport.y -= y / this.canvas.height * this.viewport.height;
+		this.viewport.x -= dx / this.canvas.width * this.viewport.width;
+		this.viewport.y -= dy / this.canvas.height * this.viewport.height;
 
 		quadrants = [
 			new DOMRect(0, 0, midX, midY),
@@ -152,21 +160,21 @@ export class ProceduralImageView {
 		];
 
 		// Remove the clean quadrant.
-		if (x < 0 && y < 0) {
-			let imageData = this.context.getImageData(-x, -y, quadrants[0].width, quadrants[0].height);
+		if (dx < 0 && dy < 0) {
+			let imageData = this.context.getImageData(-dx, -dy, quadrants[0].width, quadrants[0].height);
 			this.context.putImageData(imageData, 0, 0);
-		} else if (x >= 0 && y < 0) {
-			let imageData = this.context.getImageData(0, -y, quadrants[1].width, quadrants[1].height);
-			this.context.putImageData(imageData, x, 0);
-		} else if (x < 0 && y >= 0) {
-			let imageData = this.context.getImageData(-x, 0, quadrants[2].width, quadrants[2].height);
-			this.context.putImageData(imageData, 0, y);
-		} else if (x >= 0 && y >= 0) {
+		} else if (dx >= 0 && dy < 0) {
+			let imageData = this.context.getImageData(0, -dy, quadrants[1].width, quadrants[1].height);
+			this.context.putImageData(imageData, dx, 0);
+		} else if (dx < 0 && dy >= 0) {
+			let imageData = this.context.getImageData(-dx, 0, quadrants[2].width, quadrants[2].height);
+			this.context.putImageData(imageData, 0, dy);
+		} else if (dx >= 0 && dy >= 0) {
 			let imageData = this.context.getImageData(0, 0, quadrants[3].width, quadrants[3].height);
-			this.context.putImageData(imageData, x, y);
+			this.context.putImageData(imageData, dx, dy);
 		}
 	
-		this.update(this.limit);
+		this.update();
 	}
 
 	/** Zoom the image in or out around a provided point.
@@ -174,7 +182,7 @@ export class ProceduralImageView {
 	 * @param {number} y The vertical index of the pixel around which to zoom.
 	 * @param {number} scale The ratio by how much to zoom the picture.
 	 */
-	zoom(x: number, y: number, scale: number) {
+	public zoom(x: number, y: number, scale: number) {
 		this.clearWork();
 
 		let relX = x / this.canvas.width,
@@ -209,20 +217,19 @@ export class ProceduralImageView {
 				this.canvas.height);
 		}
 
-		this.update(this.limit);
+		this.update();
 	}
 
 	/** Resize the view.
 	 * @param {number} width The new width of the view in pixels.
 	 * @param {number} height The new height of the view in pixels.
 	 */
-	resize(width: number, height: number) {
-		this.clearWork();
+	public resize(width: number, height: number) {
 		this.viewport.width *= width / this.canvas.width;
 		this.viewport.height *= height / this.canvas.height;
 		this.canvas.width = width;
 		this.canvas.height = height;
-		this.update(this.limit);
+		this.update();
 	}
 
 	/** Clear any queued work */
