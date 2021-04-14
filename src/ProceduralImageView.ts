@@ -93,10 +93,14 @@ export class ProceduralImageView {
 			((worker: Worker, view: ProceduralImageView) => {
 				worker.onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
 					let pixels = new Uint8ClampedArray(msg.data.pixels);
-					view.context.putImageData(
-						new ImageData(pixels, msg.data.width, msg.data.height),
-						msg.data.pixelX + view.offsetX - msg.data.offsetX,
-						msg.data.pixelY + view.offsetY - msg.data.offsetY);
+					if (msg.data.zoomW === this.viewport.width
+						&& msg.data.zoomH === this.viewport.height
+					) {
+						view.context.putImageData(
+							new ImageData(pixels, msg.data.width, msg.data.height),
+							msg.data.pixelX + view.offsetX - msg.data.offsetX,
+							msg.data.pixelY + view.offsetY - msg.data.offsetY);
+					}
 					let work = view.work.pop();
 					if (work != null) {
 						work.pixels = pixels.buffer;
@@ -210,6 +214,8 @@ export class ProceduralImageView {
 					pixelY: pixelY,
 					offsetX: this.offsetX,
 					offsetY: this.offsetY,
+					zoomW: this.viewport.width,
+					zoomH: this.viewport.height,
 				});
 			}
 		}
