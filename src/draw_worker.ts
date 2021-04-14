@@ -2,69 +2,29 @@
 
 const SIXTH = 1 / 6;
 
-// Class declarations
-
-/** A complex number. */
-class Complex {
-	re = 0;
-	im = 0;
-	
-	/** Create a new complex number.
-	 * @param {number} real Real part.
-	 * @param {number} imaginary Imaginary (multiplied by sqrt(-1)) part.
-	 */
-	constructor(real: number, imaginary: number) {
-		this.re = real;
-		this.im = imaginary;
-	}
-
-	/** Add another complex number.
-	 * @param {Complex} other The other complex number to add.
-	 * @returns {this} Self.
-	 */
-	add(other: Complex): this {
-		this.re += other.re;
-		this.im += other.im;
-		return this;
-	}
-
-	/** Multiply with itself.
-	 * @returns {this} Self.
-	 */
-	sqr(): this {
-		let re = this.re;
-		let im = this.im;
-		this.re = re*re - im*im;
-		this.im = 2*re*im;
-		return this;
-	}
-
-	/** Get the magnitude of the complex number.
-	 * @returns {number} The magnitude of the number.
-	 */
-	mag2(): number {
-		return this.re*this.re + this.im*this.im;
-	}
-}
-
 // Free function declarations
 
 /** Check whether the provided point is within the Mandelbrot set.
  * See https://en.wikipedia.org/wiki/Mandelbrot_set for more details.
- * @param {Complex} point The complex number to check.
+ * @param {number} re real part of the number to check.
+ * @param {number} im imaginary part of the number to check.
  * @param {number} limit Maximum number of iterations to check whether the number is within the Mandelbrot set.
- * @returns {[number, Complex]} number of iterations the number passed and the last checked value.
+ * @returns {[number]} iterations the number passed.
  */
-function mandelbrot(point: Complex, limit: number): [number, Complex] {
-	let c = new Complex(point.re, point.im);
-	var i = 0;
-	for (i = 0; i < limit; ++i) {
-		if (point.mag2() > 4) {
-			return [ i, point, ];
-		}
-		point.sqr().add(c);
+function mandelbrot(re: number, im: number, limit: number): number {
+	var i = 0,
+		x = 0,
+		x2 = 0,
+		y = 0,
+		y2 = 0;
+	while ((x2 + y2 < 4) && (i < limit)) {
+		y = 2 * x * y + im;
+		x = x2 - y2 + re;
+		x2 = x * x;
+		y2 = y * y;
+		++i;
 	}
-	return [ i, point, ];
+	return i;
 }
 
 /** Translate a hue value to a fully saturated RGB value using
@@ -115,14 +75,14 @@ function draw(image: ImageData, rect: DOMRect, limit: number): void {
 		pixel: [number, number, number] = [0, 0, 0],
 		x = 0,
 		y = 0,
-		result: [number, Complex] = [0, new Complex(0, 0)];
+		result = 0;
 
 	for (y = 0; y < image.height; ++y) {
 		yCoord = rect.y + rect.height * y / image.height;
 		for (x = 0; x < image.width; ++x) {
 			xCoord = rect.x + rect.width * x / image.width;
-			result = mandelbrot(new Complex(xCoord, yCoord), limit);
-			pixel = mapColor(result[0], limit);
+			result = mandelbrot(xCoord, yCoord, limit);
+			pixel = mapColor(result, limit);
 			pixels[offset++] = pixel[0]; // red
 			pixels[offset++] = pixel[1]; // green
 			pixels[offset++] = pixel[2]; // blue
