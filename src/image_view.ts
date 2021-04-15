@@ -1,26 +1,15 @@
 import ProceduralImageView from "./ProceduralImageView";
 import { DragEvent as DragGest, ZoomEvent as ZoomGest, GestureDecoder } from "./gesture";
+import { displayCoordinates } from "./coordinates";
 
 // Constants
 
 const WHEEL_SENSITIVITY = 1e-3;
 
 // Global variables
-
-let labelX = document.getElementById('coord-x') as HTMLElement,
-	labelY = document.getElementById('coord-y') as HTMLElement,
-	lastX = 0, lastY = 0, lastScale = 1;
+let lastX = 0, lastY = 0, lastScale = 1;
 
 // Free function declarations
-
-/** Set the coordinates to display provided values.
- * @param {number} x The horizontal coordinate to display.
- * @param {number} y The vertical coordinate to display.
- */
-function displayCoordinates(x: number, y: number) {
-	labelX.textContent = `X: ${x.toExponential(3)}`;
-	labelY.textContent = `Y: ${y.toExponential(3)}`;
-}
 
 function handleDrag(drag: DragGest) {
 	if (lastX != drag.x || lastY != drag.y) {

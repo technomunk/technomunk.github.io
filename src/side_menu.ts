@@ -3,7 +3,7 @@ import { resetConfigs } from "./draw_config";
 
 // Constants
 
-const MENU_WIDTH = 240;
+const MENU_WIDTH = 280;
 const TOGGLE_BUTTON_MARGIN = 20;
 
 // Global variables
