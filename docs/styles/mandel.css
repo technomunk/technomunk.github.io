@@ -2,6 +2,10 @@
 	--background: #ff0000;
 }
 
+canvas {
+	touch-action: none;
+}
+
 div {
 	font: 30pt 'Roboto';
 }

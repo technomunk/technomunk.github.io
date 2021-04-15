@@ -1,4 +1,5 @@
-import { ProceduralImageView } from "./ProceduralImageView";
+import ProceduralImageView from "./ProceduralImageView";
+import { DragEvent as DragGest, ZoomEvent as ZoomGest, GestureDecoder } from "./gesture";
 
 // Constants
 
@@ -8,8 +9,7 @@ const WHEEL_SENSITIVITY = 1e-3;
 
 let labelX = document.getElementById('coord-x') as HTMLElement,
 	labelY = document.getElementById('coord-y') as HTMLElement,
-	mouseX = 0, mouseY = 0,
-	enablePan = false;
+	lastX = 0, lastY = 0, lastScale = 1;
 
 // Free function declarations
 
@@ -22,6 +22,22 @@ function displayCoordinates(x: number, y: number) {
 	labelY.textContent = `Y: ${y.toExponential(3)}`;
 }
 
+function handleDrag(drag: DragGest) {
+	if (lastX != drag.x || lastY != drag.y) {
+		view.pan(Math.round(drag.x - lastX), Math.round(drag.y - lastY));
+	}
+	lastX = drag.x;
+	lastY = drag.y;
+}
+
+function handleZoom(zoom: ZoomGest) {
+	handleDrag(zoom);
+	if (zoom.scale != lastScale) {
+		view.zoom(zoom.x, zoom.y, lastScale / zoom.scale);
+	}
+	lastScale = zoom.scale;
+}
+
 let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -31,31 +47,25 @@ let view = new ProceduralImageView(canvas);
 
 window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight));
 
-canvas.addEventListener('pointerdown', event => {
-	enablePan = true;
-	mouseX = event.clientX;
-	mouseY = event.clientY;
+let gd = new GestureDecoder(canvas);
+gd.on('dragstart', drag => {
+	lastX = drag.x;
+	lastY = drag.y;
 });
-canvas.addEventListener('pointermove', event => {
-	if (enablePan) {
-		view.pan(Math.round(event.clientX - mouseX), Math.round(event.clientY - mouseY));
-		mouseX = event.clientX;
-		mouseY = event.clientY;
-	}
-});
-canvas.addEventListener('pointerup', () => enablePan = false);
-canvas.addEventListener('pointerleave', () => enablePan = false);
-canvas.addEventListener('pointercancel', () => enablePan = false);
+gd.on('dragupdate', handleDrag);
+gd.on('dragstop', handleDrag);
+
+gd.on('zoomstart', zoom => {
+	lastX = zoom.x;
+	lastY = zoom.y;
+	lastScale = zoom.scale;
+})
+gd.on('zoomupdate', handleZoom);
+gd.on('zoomstop', handleZoom);
 
 canvas.addEventListener('wheel', event => {
 	view.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY);	
 });
-// canvas.addEventListener('gesturechange', event => {
-// 	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
-// });
-// canvas.addEventListener('gestureend', event => {
-// 	view.zoom(event.clientX, event.clientY, event.scale, GESTURE_SCALE_DELAY);
-// });
 
 canvas.addEventListener('mousemove', event => {
 	displayCoordinates(
