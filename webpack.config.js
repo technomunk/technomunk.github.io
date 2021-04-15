@@ -2,7 +2,7 @@ path = require('path');
 
 module.exports = {
 	entry: {
-		bundle: './src/side_menu.ts',
+		mandel: './src/side_menu.ts',
 		dw: './src/draw_worker.ts',
 	},
 	// devtool: 'inline-source-map',
