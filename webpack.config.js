@@ -3,7 +3,7 @@ path = require('path');
 module.exports = {
 	entry: {
 		bundle: './src/side_menu.ts',
-		draw_worker: './src/draw_worker.ts',
+		dw: './src/draw_worker.ts',
 	},
 	// devtool: 'inline-source-map',
 	mode: 'production',
@@ -21,6 +21,6 @@ module.exports = {
 	},
 	output: {
 		filename: '[name].js',
-		path: path.resolve(__dirname, 'docs', 'scripts'),
+		path: path.resolve(__dirname, 'docs'),
 	},
 };

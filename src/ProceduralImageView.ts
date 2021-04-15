@@ -88,7 +88,7 @@ export class ProceduralImageView {
 		this.work = [];
 
 		for (var i = 0; i < workerCount; ++i) {
-			let worker = new Worker('./scripts/draw_worker.js');
+			let worker = new Worker('./dw.js');
 			let pixels = new Uint8ClampedArray(chunkWidth * chunkHeight * 4);
 			((worker: Worker, view: ProceduralImageView) => {
 				worker.onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
