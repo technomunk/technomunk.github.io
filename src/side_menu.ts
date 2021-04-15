@@ -1,4 +1,4 @@
-import { view } from "./canvas";
+import { view } from "./image_view";
 import { resetConfigs } from "./draw_config";
 
 // Constants

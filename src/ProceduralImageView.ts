@@ -33,7 +33,7 @@ function isFullyContained(a: number, aw: number, ca: number, cw: number) {
 /** A view of a procedural image that can be panned or zoomed.
  * Takes a canvas element to draw the image on. Does not capture inputs, only handles drawing the actual image. 
  */
-export class ProceduralImageView {
+export default class ProceduralImageView {
 
 	public viewport: DOMRect;
 	

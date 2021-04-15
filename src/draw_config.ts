@@ -1,4 +1,4 @@
-import { view } from "./canvas";
+import { view } from "./image_view";
 
 // Variables
 var configs: Array<HTMLInputElement> = [];
