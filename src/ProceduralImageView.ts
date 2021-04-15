@@ -79,7 +79,7 @@ export class ProceduralImageView {
 		chunkHeight: number = 64,
 	) {
 		this.canvas = canvas;
-		this.context = canvas.getContext('2d')!;
+		this.context = canvas.getContext('2d', { alpha: false, })!;
 		this.chunkWidth = chunkWidth;
 		this.chunkHeight = chunkHeight;
 		this.viewport = viewport || this.defaultViewport;
@@ -129,7 +129,7 @@ export class ProceduralImageView {
 			let ratio = this.canvas.width / this.canvas.height;
 			return new DOMRect(-ratio, -1, 2*ratio, 2);
 		} else {
-			let ratio = this.canvas.height / this.canvas.height;
+			let ratio = this.canvas.height / this.canvas.width;
 			return new DOMRect(-1, -ratio, 2, 2*ratio);
 		}
 	}
