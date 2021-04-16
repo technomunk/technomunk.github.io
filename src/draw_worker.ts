@@ -18,12 +18,13 @@ interface MandelbrotConfig {
  * @returns {[number, [number, number]]} iterations the number passed and the values of the final iteration.
  */
 function mandelbrot(re: number, im: number, config: MandelbrotConfig): [number, [number, number]] {
+	let r2 = config.escapeRadius * config.escapeRadius;
 	var i = 0,
 		x = 0,
 		x2 = 0,
 		y = 0,
 		y2 = 0;
-	while ((x2 + y2 < config.escapeRadius) && (i < config.limit)) {
+	while ((x2 + y2 < r2) && (i < config.limit)) {
 		y = 2 * x * y + im;
 		x = x2 - y2 + re;
 		x2 = x * x;
