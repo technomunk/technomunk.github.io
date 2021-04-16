@@ -6,6 +6,6 @@ let labelX = document.getElementById('coord-x')!,
  * @param {number} y The vertical coordinate to display.
  */
 export function displayCoordinates(x: number, y: number) {
-	labelX.textContent = `X: ${x.toFixed(15)}`;
-	labelY.textContent = `Y: ${y.toFixed(15)}`;
+	labelX.textContent = `Re: ${x.toFixed(15)}`;
+	labelY.textContent = `Im: ${y.toFixed(15)}`;
 }
