@@ -1,6 +1,5 @@
 path = require('path');
 
-
 module.exports = {
 	entry: {
 		worker: './src/scripts/worker.ts',

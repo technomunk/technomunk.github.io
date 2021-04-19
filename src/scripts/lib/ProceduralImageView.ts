@@ -30,6 +30,9 @@ function isFullyContained(a: number, aw: number, ca: number, cw: number) {
 		&& (b >= ca) && (b <= cb);
 }
 
+export type RequestTileFn = (tileRect: DOMRect, viewRect: DOMRect) => Promise<ImageData>;
+export type CancelTilesFn = () => void;
+
 /** A view of a procedural image that can be panned or zoomed.
  * Takes a canvas element to draw the image on. Does not capture inputs, only handles drawing the actual image. 
  */
@@ -42,37 +45,29 @@ export default class ProceduralImageView {
 	private chunkWidth: number;
 	private chunkHeight: number;
 
-	private freeWorkers: Array<[Worker, Uint8ClampedArray]>;
-	private work: Array<DrawRegionMessage>;
+	private requestTileCb: RequestTileFn;
 
-	private updateInProgress = false;
+	private pendingTiles = 0;
+	private updateFailed = false;
 	private updateQueued = false;
-	
-	private offsetX = 0;
-	private offsetY = 0;
 
 	/// Disassembled clean rectangle for easy manipulation.
 	private cleanX = 0;
 	private cleanY = 0;
 	private cleanW = 0;
 	private cleanH = 0;
-	
-	private config = {
-		limit: 30,
-		escapeRadius: 4,
-	};
 
 	/**
 	 * @param {HTMLCanvasElement} canvas The canvas to use.
+	 * @param {RequestTileFn} tileCallback The function to invoke when a new tile needs to be drawn.
 	 * @param {DOMRect} viewport The viewed region of the image.
-	 * @param {number} workerCount Number of background workers to use. Must be at least 1.
 	 * @param {number} chunkWidth Width of a single chunk of the processed image in pixels.
 	 * @param {number} chunkHeight Height of a single chunk of the processed image in pixels.
 	 */
 	public constructor(
-		canvas: HTMLCanvasElement,	
+		canvas: HTMLCanvasElement,
+		tileCallback: RequestTileFn,
 		viewport?: DOMRect,
-		workerCount?: number,
 		chunkWidth: number = 64,
 		chunkHeight: number = 64,
 	) {
@@ -80,45 +75,8 @@ export default class ProceduralImageView {
 		this.context = canvas.getContext('2d', { alpha: false, })!;
 		this.chunkWidth = chunkWidth;
 		this.chunkHeight = chunkHeight;
+		this.requestTileCb = tileCallback;
 		this.viewport = viewport || this.defaultViewport;
-		workerCount = workerCount || window.navigator.hardwareConcurrency;
-		this.freeWorkers = [];
-		this.work = [];
-
-		for (var i = 0; i < workerCount; ++i) {
-			let worker = new Worker('./worker.js');
-			let pixels = new Uint8ClampedArray(chunkWidth * chunkHeight * 4);
-			((worker: Worker, view: ProceduralImageView) => {
-				worker.onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
-					let pixels = new Uint8ClampedArray(msg.data.pixels);
-					if (msg.data.zoomW === this.viewport.width
-						&& msg.data.zoomH === this.viewport.height
-					) {
-						view.context.putImageData(
-							new ImageData(pixels, msg.data.width, msg.data.height),
-							msg.data.pixelX + view.offsetX - msg.data.offsetX,
-							msg.data.pixelY + view.offsetY - msg.data.offsetY);
-					}
-					let work = view.work.shift();
-					if (work != null) {
-						work.pixels = pixels.buffer;
-						worker.postMessage(work, [work.pixels]);
-					} else {
-						view.freeWorkers.push([worker, pixels]);
-						view.updateInProgress = false;
-						if (view.updateQueued) {
-							view.update();
-						} else {
-							view.cleanX = 0;
-							view.cleanY = 0;
-							view.cleanW = view.canvas.width;
-							view.cleanH = view.canvas.height;
-						}
-					}
-				};
-			})(worker, this);
-			this.freeWorkers.push([worker, pixels]);
-		}
 	}
 
 	/** Get default viewport for the current canvas. */
@@ -132,30 +90,12 @@ export default class ProceduralImageView {
 		}
 	}
 
-	public get limit() {
-		return this.config.limit;
-	}
-
-	public set limit(value) {
-		this.config.limit = value;
-	}
-
-	public get escapeRadius() {
-		return this.config.escapeRadius;
-	}
-
-	public set escapeRadius(value) {
-		this.config.escapeRadius = value;
-	}
-
 	/** Update the displayed image using current config, effectively redrawing it.
 	 */
 	public update() {
 		// Mark the clean rect as empty
 		this.cleanW = 0;
 		this.cleanH = 0;
-		this.offsetX = 0;
-		this.offsetY = 0;
 		this.updateDirty();
 	}
 
@@ -164,9 +104,8 @@ export default class ProceduralImageView {
 	 * Useful after panning or zooming out, where part of the image is known to be correct.
 	 */
 	public updateDirty() {
-		this.clearWork();
+		this.updateFailed = false;
 		this.updateQueued = false;
-		this.updateInProgress = true;
 		
 		let chunksX = Math.ceil(this.canvas.width / this.chunkWidth),
 			chunksY = Math.ceil(this.canvas.height / this.chunkHeight);
@@ -186,19 +125,9 @@ export default class ProceduralImageView {
 				}
 
 				const rectX = this.viewport.x + (x * this.chunkWidth) / this.canvas.width * this.viewport.width;
-				this.queueWork({
-					pixels: PLACEHOLDER_BUFFER,
-					width: this.chunkWidth,
-					height: this.chunkHeight,
-					rect: new DOMRect(rectX, rectY, rectW, rectH),
-					config: this.config,
-					pixelX: pixelX,
-					pixelY: pixelY,
-					offsetX: this.offsetX,
-					offsetY: this.offsetY,
-					zoomW: this.viewport.width,
-					zoomH: this.viewport.height,
-				});
+				this.requestTile(
+					new DOMRect(pixelX, pixelY, this.chunkWidth, this.chunkHeight),
+					new DOMRect(rectX, rectY, rectW, rectH));
 			}
 		}
 	}
@@ -209,7 +138,7 @@ export default class ProceduralImageView {
 	 * immediately if there are no running updates.
 	 */
 	public queueUpdate() {
-		if (this.updateInProgress) {
+		if (this.pendingTiles > 0) {
 			this.updateQueued = true;
 		} else {
 			this.update();
@@ -250,8 +179,6 @@ export default class ProceduralImageView {
 			this.context.putImageData(imageData, dx, dy);
 		}
 
-		this.offsetX += dx;
-		this.offsetY += dy;
 		this.cleanX += dx;
 		this.cleanY += dy;
 		this.clampCleanRect();
@@ -314,19 +241,34 @@ export default class ProceduralImageView {
 		this.update();
 	}
 
-	/** Clear any queued work */
-	private clearWork() {
-		this.work.length = 0;
+	/** Request a tile to be redrawn.
+	 * @param tileRect The canvas-space rectangle of the tile.
+	 * @param viewRect The view-space rectangle of the potion of the image represented by the tile.
+	 */
+	private requestTile(tileRect: DOMRect, viewRect: DOMRect) {
+		this.pendingTiles += 1;
+		this.requestTileCb(tileRect, viewRect).then(
+			image => {
+				this.context.putImageData(image, tileRect.x, tileRect.y);
+				this.receiveTile();
+			},
+			() => {
+				this.updateFailed = true;
+				this.receiveTile();
+			});
 	}
 
-	/** Queue a piece of work to be done. */
-	private queueWork(work: DrawRegionMessage) {
-		let free = this.freeWorkers.pop();
-		if (free != null) {
-			work.pixels = free[1].buffer;
-			free[0].postMessage(work, [work.pixels]);
-		} else {
-			this.work.push(work);
+	private receiveTile() {
+		this.pendingTiles -= 1;
+		if (this.pendingTiles == 0) {
+			if (this.updateQueued) {
+				this.update();
+			} else if (!this.updateFailed) {
+				this.cleanX = 0;
+				this.cleanY = 0;
+				this.cleanW = this.canvas.width;
+				this.cleanH = this.canvas.height;
+			}
 		}
 	}
 

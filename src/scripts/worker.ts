@@ -114,8 +114,8 @@ function draw(image: ImageData, rect: DOMRect, config: DrawConfig): void {
 onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
 	let image = new ImageData(
 		new Uint8ClampedArray(msg.data.pixels),
-		msg.data.width,
-		msg.data.height);
-	draw(image, msg.data.rect, msg.data.config);
+		msg.data.tile.width,
+		msg.data.tile.height);
+	draw(image, msg.data.view, msg.data.config);
 	postMessage(msg.data, [msg.data.pixels]);
 };

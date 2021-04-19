@@ -3,19 +3,9 @@
 interface DrawRegionMessage {
 	/** The pixels to be filled by the worker. */
 	pixels: ArrayBuffer,
-	/** Number of horizontal pixels in the image. */
-	width: number,
-	/** Number of vertical pixels in the image. */
-	height: number,
+	/** The canvas-space tile to fill. */
+	tile: DOMRect,
 	/** The rectangle of the Mandelbrot set to draw. */
-	rect: DOMRect,
-	
+	view: DOMRect,
 	config: DrawConfig,
-
-	pixelX: number,
-	pixelY: number,
-	offsetX: number,
-	offsetY: number,
-	zoomW: number,
-	zoomH: number,
 }

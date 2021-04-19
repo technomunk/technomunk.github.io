@@ -1,4 +1,4 @@
-import { view } from "./image_view";
+import { mandel, mandelConfig } from "./image_view";
 
 // Variables
 var configs: Array<HTMLInputElement> = [];
@@ -48,19 +48,19 @@ function resetConfigs() {
 bindConfig(
 	document.getElementById('limit') as HTMLInputElement,
 	value => {
-		let updateRequired = view.limit != value;
-		view.limit = value;
+		let updateRequired = mandelConfig.limit != value;
+		mandelConfig.limit = value;
 		if (updateRequired) {
-			view.queueUpdate();
+			mandel.queueUpdate();
 		}
 	});
 bindConfig(
 	document.getElementById('escaper') as HTMLInputElement,
 	value => {
-		let updateRequired = view.escapeRadius != value;
-		view.escapeRadius = value;
+		let updateRequired = mandelConfig.escapeRadius != value;
+		mandelConfig.escapeRadius = value;
 		if (updateRequired) {
-			view.queueUpdate();
+			mandel.queueUpdate();
 		}
 	});
 

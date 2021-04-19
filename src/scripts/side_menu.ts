@@ -1,4 +1,4 @@
-import { view } from "./image_view";
+import { mandel } from "./image_view";
 import { resetConfigs } from "./draw_config";
 
 // Constants
@@ -45,9 +45,9 @@ function toggleSideMenu() {
 // Register events
 
 toggleButton.addEventListener('click', toggleSideMenu);
-document.getElementById('redraw')!.onclick = () => view.update();
+document.getElementById('redraw')!.onclick = () => mandel.update();
 document.getElementById('reset')!.onclick = () => {
-	view.viewport = view.defaultViewport;
+	mandel.viewport = mandel.defaultViewport;
 	resetConfigs();
-	view.update();
+	mandel.update();
 };
