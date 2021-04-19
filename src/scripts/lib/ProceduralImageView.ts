@@ -48,8 +48,6 @@ export default class ProceduralImageView {
 	private updateInProgress = false;
 	private updateQueued = false;
 	
-	private prefill = false;
-
 	private offsetX = 0;
 	private offsetY = 0;
 
@@ -58,7 +56,7 @@ export default class ProceduralImageView {
 	private cleanY = 0;
 	private cleanW = 0;
 	private cleanH = 0;
-
+	
 	private config = {
 		limit: 30,
 		escapeRadius: 4,
@@ -88,7 +86,7 @@ export default class ProceduralImageView {
 		this.work = [];
 
 		for (var i = 0; i < workerCount; ++i) {
-			let worker = new Worker('./dw.js');
+			let worker = new Worker('./worker.js');
 			let pixels = new Uint8ClampedArray(chunkWidth * chunkHeight * 4);
 			((worker: Worker, view: ProceduralImageView) => {
 				worker.onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
@@ -101,7 +99,7 @@ export default class ProceduralImageView {
 							msg.data.pixelX + view.offsetX - msg.data.offsetX,
 							msg.data.pixelY + view.offsetY - msg.data.offsetY);
 					}
-					let work = view.work.pop();
+					let work = view.work.shift();
 					if (work != null) {
 						work.pixels = pixels.buffer;
 						worker.postMessage(work, [work.pixels]);
@@ -150,19 +148,6 @@ export default class ProceduralImageView {
 		this.config.escapeRadius = value;
 	}
 
-	public get fillStyle() {
-		return this.prefill ? this.context.fillStyle : null;
-	}
-
-	public set fillStyle(value) {
-		if (value != null) {
-			this.prefill = true;
-			this.context.fillStyle = value;
-		} else {
-			this.prefill = false;
-		}
-	}
-
 	/** Update the displayed image using current config, effectively redrawing it.
 	 */
 	public update() {
@@ -201,9 +186,6 @@ export default class ProceduralImageView {
 				}
 
 				const rectX = this.viewport.x + (x * this.chunkWidth) / this.canvas.width * this.viewport.width;
-				if (this.prefill) {
-					this.context.fillRect(pixelX, pixelY, this.chunkWidth, this.chunkHeight);
-				}
 				this.queueWork({
 					pixels: PLACEHOLDER_BUFFER,
 					width: this.chunkWidth,
@@ -219,8 +201,6 @@ export default class ProceduralImageView {
 				});
 			}
 		}
-
-		this.work.reverse();
 	}
 
 	/** Update the image in the near future.
