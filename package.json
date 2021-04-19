@@ -6,12 +6,9 @@
     "webpack-cli": "^4.6.0"
   },
   "name": "technomunk.github.io",
-  "description": "A place to showcase some of personal projects an abilities.",
+  "description": "A place to showcase some of personal projects and abilities.",
   "version": "1.0.0",
   "private": true,
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"

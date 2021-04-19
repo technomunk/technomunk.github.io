@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
-		"outDir": "docs/scripts",
+		"outDir": "docs",
 		"target": "es6",
 		"lib": ["WebWorker", "es6", "ScriptHost", "DOM"],
 
@@ -11,5 +11,5 @@
 		"noImplicitThis": true,
 		"strict": true,
 	},
-	"include": ["src/scripts/**/*",]
+	"include": ["src/scripts/**/*",],
 }

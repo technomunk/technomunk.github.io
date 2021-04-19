@@ -2,8 +2,8 @@ path = require('path');
 
 module.exports = {
 	entry: {
-		worker: './src/scripts/worker.ts',
-		main: ['./src/scripts/side_menu.ts', './src/scripts/toggle_fullscreen.ts',],
+		cdw: './src/scripts/worker.ts',
+		cde: ['./src/scripts/side_menu.ts', './src/scripts/toggle_fullscreen.ts',],
 	},
 	// devtool: 'inline-source-map',
 	mode: 'production',

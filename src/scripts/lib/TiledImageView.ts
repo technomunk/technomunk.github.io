@@ -1,5 +1,3 @@
-const PLACEHOLDER_BUFFER = new Uint8ClampedArray();
-
 /** Make sure the value is inside the provided range.
  * @param val The value.
  * @param min The minimum allowed value.
@@ -33,10 +31,11 @@ function isFullyContained(a: number, aw: number, ca: number, cw: number) {
 export type RequestTileFn = (tileRect: DOMRect, viewRect: DOMRect) => Promise<ImageData>;
 export type CancelTilesFn = () => void;
 
-/** A view of a procedural image that can be panned or zoomed.
- * Takes a canvas element to draw the image on. Does not capture inputs, only handles drawing the actual image. 
+/** A view of an image that is drawn in tiles.
+ *
+ * Can be panned or zoomed, which will request new tiles as necessary.
  */
-export default class ProceduralImageView {
+export default class TiledImageView {
 
 	public viewport: DOMRect;
 	

@@ -1,9 +1,8 @@
-import ProceduralImageView from "./lib/ProceduralImageView";
+import ProceduralImageView from "./lib/TiledImageView";
 import { DragEvent as DragGest, ZoomEvent as ZoomGest, GestureDecoder } from "./lib/gesture";
 import { displayCoordinates } from "./coordinates";
 
 const WHEEL_SENSITIVITY = 1e-3;
-const PLACEHOLDER_BUFFER = new Uint8ClampedArray();
 
 type ResolveTileFn = (img: ImageData) => void;
 type RejectTileFn = () => void;
@@ -113,7 +112,7 @@ function setupWorker(index: number) {
 for (var i = 0; i < /* navigator.hardwareConcurrency */ 1; ++i) {
 	// chunkW * chunkH * 4bpp
 	workers.push([
-		new Worker("./worker.js"),
+		new Worker("./cdw.js"),
 		new Uint8ClampedArray(64*64*4),
 		()=>void(0),
 		()=>void(0)]);
