@@ -47,8 +47,7 @@ export default class ProceduralImageView {
 
 	private requestTileCb: RequestTileFn;
 
-	private pendingTiles = 0;
-	private updateFailed = false;
+	private updateInProgress = false;
 	private updateQueued = false;
 
 	/// Disassembled clean rectangle for easy manipulation.
@@ -104,7 +103,7 @@ export default class ProceduralImageView {
 	 * Useful after panning or zooming out, where part of the image is known to be correct.
 	 */
 	public updateDirty() {
-		this.updateFailed = false;
+		this.updateInProgress = true;
 		this.updateQueued = false;
 		
 		let chunksX = Math.ceil(this.canvas.width / this.chunkWidth),
@@ -113,6 +112,7 @@ export default class ProceduralImageView {
 		const rectW = this.chunkWidth / this.canvas.width * this.viewport.width;
 		const rectH = this.chunkHeight / this.canvas.height * this.viewport.height;
 
+		let promises: Array<Promise<void>> = [];
 		for (var y = 0; y < chunksY; ++y) {
 			const pixelY = y * this.chunkHeight;
 			const rectY = this.viewport.y + (y * this.chunkHeight) / this.canvas.height * this.viewport.height;
@@ -125,11 +125,25 @@ export default class ProceduralImageView {
 				}
 
 				const rectX = this.viewport.x + (x * this.chunkWidth) / this.canvas.width * this.viewport.width;
-				this.requestTile(
+				let promise = this.requestTile(
 					new DOMRect(pixelX, pixelY, this.chunkWidth, this.chunkHeight),
 					new DOMRect(rectX, rectY, rectW, rectH));
+				promises.push(promise);
 			}
 		}
+
+		Promise.all(promises).then(
+			() => {
+				if (this.updateQueued) {
+					this.update();
+				} else {
+					this.cleanX = 0;
+					this.cleanY = 0;
+					this.cleanW = this.canvas.width;
+					this.cleanH = this.canvas.height;
+				}
+			},
+			() => this.updateInProgress = false);
 	}
 
 	/** Update the image in the near future.
@@ -138,7 +152,7 @@ export default class ProceduralImageView {
 	 * immediately if there are no running updates.
 	 */
 	public queueUpdate() {
-		if (this.pendingTiles > 0) {
+		if (this.updateInProgress) {
 			this.updateQueued = true;
 		} else {
 			this.update();
@@ -245,31 +259,9 @@ export default class ProceduralImageView {
 	 * @param tileRect The canvas-space rectangle of the tile.
 	 * @param viewRect The view-space rectangle of the potion of the image represented by the tile.
 	 */
-	private requestTile(tileRect: DOMRect, viewRect: DOMRect) {
-		this.pendingTiles += 1;
-		this.requestTileCb(tileRect, viewRect).then(
-			image => {
-				this.context.putImageData(image, tileRect.x, tileRect.y);
-				this.receiveTile();
-			},
-			() => {
-				this.updateFailed = true;
-				this.receiveTile();
-			});
-	}
-
-	private receiveTile() {
-		this.pendingTiles -= 1;
-		if (this.pendingTiles == 0) {
-			if (this.updateQueued) {
-				this.update();
-			} else if (!this.updateFailed) {
-				this.cleanX = 0;
-				this.cleanY = 0;
-				this.cleanW = this.canvas.width;
-				this.cleanH = this.canvas.height;
-			}
-		}
+	private requestTile(tileRect: DOMRect, viewRect: DOMRect): Promise<void> {
+		return this.requestTileCb(tileRect, viewRect).then(
+			image => this.context.putImageData(image, tileRect.x, tileRect.y));
 	}
 
 	/** Make sure the clean rectangle has valid values. */

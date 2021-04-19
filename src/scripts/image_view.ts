@@ -7,12 +7,19 @@ const PLACEHOLDER_BUFFER = new Uint8ClampedArray();
 
 type ResolveTileFn = (img: ImageData) => void;
 type RejectTileFn = () => void;
+type TileType = 'mandel' | 'julia';
+type WorkItem = {
+	tile: DOMRect,
+	view: DOMRect,
+	resolveCb: ResolveTileFn,
+	rejectCb: RejectTileFn,
+};
 
 // Global variables
 let lastX = 0, lastY = 0, lastScale = 1;
 let workers: Array<[Worker, Uint8ClampedArray, ResolveTileFn, RejectTileFn]> = [];
 let freeWorkers: Array<number> = [];
-let work: Array<[DOMRect, DOMRect, ResolveTileFn, RejectTileFn]> = [];
+let workQueue: Array<WorkItem> = [];
 let mandelConfig = {
 	limit: 30,
 	escapeRadius: 2,
@@ -39,27 +46,32 @@ function handleZoom(zoom: ZoomGest) {
 }
 
 function cancelTiles() {
-	for (var i = 0; i < work.length; ++i) {
-		work[i][3]();
+	for (var i = 0; i < workQueue.length; ++i) {
+		workQueue[i].rejectCb();
 	}
-	work.length = 0;
-	console.assert(work.shift() == null, "Work is not empty!");
+	workQueue.length = 0;
 }
 
-function queueTile(tile: DOMRect, view: DOMRect, resolve: ResolveTileFn, reject: RejectTileFn) {
+/** Queue provided work for asynchronous execution.
+ *
+ * The work will be dispatched immediately if there are free workers or
+ * deferred until a worker becomes free.
+ * @param item The work to queue for execution.
+ */
+function queueWork(item: WorkItem) {
 	let index = freeWorkers.pop();
 	if (index != null) {
 		let [worker, pixels] = workers[index];
-		workers[index][2] = resolve;
-		workers[index][3] = reject;
+		workers[index][2] = item.resolveCb;
+		workers[index][3] = item.rejectCb;
 		worker.postMessage({
 			pixels: pixels.buffer,
-			tile: tile,
-			view: view,
+			tile: item.tile,
+			view: item.view,
 			config: mandelConfig,
 		}, [pixels.buffer]);
 	} else {
-		work.push([tile, view, resolve, reject]);
+		workQueue.push(item);
 	}
 }
 
@@ -78,16 +90,15 @@ function setupWorker(index: number) {
 		// Queue work once the promise is resolved
 		queueMicrotask(() => {
 			// Pop next work item
-			let workItem = work.shift();
-			if (workItem != null) {
+			let work = workQueue.shift();
+			if (work != null) {
 				let workerElem = workers[index];
-				let [tile, view, resolve, reject] = workItem;
-				workerElem[2] = resolve;
-				workerElem[3] = reject;
+				workerElem[2] = work.resolveCb;
+				workerElem[3] = work.rejectCb;
 				workerElem[0].postMessage({
 					pixels: pixels.buffer,
-					tile: tile,
-					view: view,
+					tile: work.tile,
+					view: work.view,
 					config: mandelConfig,
 				}, [pixels.buffer]);
 			} else {
@@ -114,7 +125,7 @@ let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let mandel = new ProceduralImageView(canvas, (tile, view) => {
-	return new Promise((resolve, reject) => queueTile(tile, view, resolve, reject));
+	return new Promise((resolveCb, rejectCb) => queueWork({ tile, view, resolveCb, rejectCb }));
 });
 
 // Register events
