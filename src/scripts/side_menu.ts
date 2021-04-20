@@ -45,9 +45,9 @@ function toggleSideMenu() {
 // Register events
 
 toggleButton.addEventListener('click', toggleSideMenu);
-document.getElementById('redraw')!.onclick = () => mandel.update();
+document.getElementById('redraw')!.onclick = () => mandel.draw();
 document.getElementById('reset')!.onclick = () => {
-	mandel.viewport = mandel.defaultViewport;
 	resetConfigs();
-	mandel.update();
+	mandel.clearCachedTiles();
+	mandel.draw();
 };

@@ -51,7 +51,8 @@ bindConfig(
 		let updateRequired = mandelConfig.limit != value;
 		mandelConfig.limit = value;
 		if (updateRequired) {
-			mandel.queueUpdate();
+			// TODO:
+			// mandel.queueDraw();
 		}
 	});
 bindConfig(
@@ -60,7 +61,8 @@ bindConfig(
 		let updateRequired = mandelConfig.escapeRadius != value;
 		mandelConfig.escapeRadius = value;
 		if (updateRequired) {
-			mandel.queueUpdate();
+			// TODO:
+			// mandel.queueDraw();
 		}
 	});
 

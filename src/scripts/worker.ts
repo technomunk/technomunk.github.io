@@ -1,5 +1,7 @@
 // Constants
 
+import { resetConfigs } from "./draw_config";
+
 const SIXTH = 1 / 6;
 const LOG_2 = Math.log(2);
 
@@ -86,23 +88,14 @@ function mapColor(iterationCount: number, limit: number): [number, number, numbe
  */
 function draw(image: ImageData, rect: DOMRect, config: DrawConfig): void {
 	let pixels = image.data;
-	
-	var offset = 0,
-		xCoord = 0,
-		yCoord = 0,
-		pixel: [number, number, number] = [0, 0, 0],
-		x = 0,
-		y = 0,
-		result = 0,
-		re = 0,
-		im = 0;
+	var offset = 0;
 
-	for (y = 0; y < image.height; ++y) {
-		yCoord = rect.y + rect.height * y / image.height;
-		for (x = 0; x < image.width; ++x) {
-			xCoord = rect.x + rect.width * x / image.width;
-			[result, [re, im]] = mandelbrot(xCoord, yCoord, config);
-			pixel = mapColor(result, config.limit);
+	for (var y = 0; y < image.height; ++y) {
+		const yCoord = rect.y + rect.height * y / image.height;
+		for (var x = 0; x < image.width; ++x) {
+			const xCoord = rect.x + rect.width * x / image.width;
+			const [result, [re, im]] = mandelbrot(xCoord, yCoord, config);
+			const pixel = mapColor(result, config.limit);
 			pixels[offset++] = pixel[0]; // red
 			pixels[offset++] = pixel[1]; // green
 			pixels[offset++] = pixel[2]; // blue
@@ -116,6 +109,13 @@ onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
 		new Uint8ClampedArray(msg.data.pixels),
 		msg.data.tile.width,
 		msg.data.tile.height);
-	draw(image, msg.data.view, msg.data.config);
+
+	let view = DOMRect.fromRect(msg.data.tile);
+	view.x /= msg.data.zoom;
+	view.y /= msg.data.zoom;
+	view.width /= msg.data.zoom;
+	view.height /= msg.data.zoom;
+
+	draw(image, view, msg.data.config);
 	postMessage(msg.data, [msg.data.pixels]);
 };

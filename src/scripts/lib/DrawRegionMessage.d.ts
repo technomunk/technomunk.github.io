@@ -5,7 +5,7 @@ interface DrawRegionMessage {
 	pixels: ArrayBuffer,
 	/** The canvas-space tile to fill. */
 	tile: DOMRect,
-	/** The rectangle of the Mandelbrot set to draw. */
-	view: DOMRect,
+	/** The amount by which to divide tile rectangle to get intended complex numbers. */
+	zoom: number
 	config: DrawConfig,
 }

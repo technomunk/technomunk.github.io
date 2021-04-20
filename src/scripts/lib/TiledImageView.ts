@@ -1,34 +1,4 @@
-/** Make sure the value is inside the provided range.
- * @param val The value.
- * @param min The minimum allowed value.
- * @param max The maximum allowed value.
- * @returns The number within the allowed range that is the closest to the provided value.
- */
-function clamp(val: number, min: number, max: number): number {
-	if (val < min) {
-		return min;
-	}
-	if (val > max) {
-		return max;
-	}
-	return val;
-}
-
-/** Check whether [ca, ca + cw] fully contains [a, a + aw].
- * @param a The beginning of the contained range.
- * @param aw The width of the contained range.
- * @param b The beginning of the containing range.
- * @param bw The width of the containing range.
- * @returns 
- */
-function isFullyContained(a: number, aw: number, ca: number, cw: number) {
-	let b = a + aw,
-		cb = ca + cw;
-	return (a >= ca) && (a <= cb)
-		&& (b >= ca) && (b <= cb);
-}
-
-export type RequestTileFn = (tileRect: DOMRect, viewRect: DOMRect) => Promise<ImageData>;
+export type RequestTileFn = (x: number, y: number) => Promise<ImageData>;
 export type CancelTilesFn = () => void;
 
 /** A view of an image that is drawn in tiles.
@@ -37,44 +7,41 @@ export type CancelTilesFn = () => void;
  */
 export default class TiledImageView {
 
-	public viewport: DOMRect;
-	
 	private canvas: HTMLCanvasElement;
 	private context: CanvasRenderingContext2D;
-	private chunkWidth: number;
-	private chunkHeight: number;
+	private tw: number;
+	private th: number;
 
 	private requestTileCb: RequestTileFn;
 
-	private updateInProgress = false;
-	private updateQueued = false;
+	private tiles: Map<string, Promise<ImageData | undefined>> = new Map();
 
-	/// Disassembled clean rectangle for easy manipulation.
-	private cleanX = 0;
-	private cleanY = 0;
-	private cleanW = 0;
-	private cleanH = 0;
+	private x: number;
+	private y: number;
 
 	/**
 	 * @param {HTMLCanvasElement} canvas The canvas to use.
 	 * @param {RequestTileFn} tileCallback The function to invoke when a new tile needs to be drawn.
-	 * @param {DOMRect} viewport The viewed region of the image.
-	 * @param {number} chunkWidth Width of a single chunk of the processed image in pixels.
-	 * @param {number} chunkHeight Height of a single chunk of the processed image in pixels.
+	 * @param {number} x The coordinate of the left edge of the canvas.
+	 * @param {number} y The coordinate of the top edge of the canvas.
+	 * @param {number} tileWidth Width of a single tile of the processed image in pixels.
+	 * @param {number} tileHeight Height of a single tile of the processed image in pixels.
 	 */
 	public constructor(
 		canvas: HTMLCanvasElement,
 		tileCallback: RequestTileFn,
-		viewport?: DOMRect,
-		chunkWidth: number = 64,
-		chunkHeight: number = 64,
+		x = 0,
+		y = 0,
+		tileWidth = 64,
+		tileHeight = 64,
 	) {
 		this.canvas = canvas;
 		this.context = canvas.getContext('2d', { alpha: false, })!;
-		this.chunkWidth = chunkWidth;
-		this.chunkHeight = chunkHeight;
+		this.tw = tileWidth;
+		this.th = tileHeight;
 		this.requestTileCb = tileCallback;
-		this.viewport = viewport || this.defaultViewport;
+		this.x = x;
+		this.y = y;
 	}
 
 	/** Get default viewport for the current canvas. */
@@ -88,77 +55,46 @@ export default class TiledImageView {
 		}
 	}
 
-	/** Update the displayed image using current config, effectively redrawing it.
-	 */
-	public update() {
-		// Mark the clean rect as empty
-		this.cleanW = 0;
-		this.cleanH = 0;
-		this.updateDirty();
+	/** Get the width of a single tile used by the view in pixels. */
+	public get tileWidth() {
+		return this.tw;
 	}
 
-	/** Perform update of only the dirty parts of the image.
-	 *
-	 * Useful after panning or zooming out, where part of the image is known to be correct.
-	 */
-	public updateDirty() {
-		this.updateInProgress = true;
-		this.updateQueued = false;
+	/** Get the height of a single tile used by the view in pixels. */
+	public get tileHeight() {
+		return this.th;
+	}
+
+	/** Update the displayed image using current config, effectively redrawing it. */
+	public draw() {		
+		let minX = Math.floor(this.x / this.tw);
+		let maxX = minX + Math.ceil(this.canvas.width / this.tw);
+
+		let minY = Math.floor(this.y / this.th);
+		let maxY = minY + Math.ceil(this.canvas.height / this.th);
 		
-		let chunksX = Math.ceil(this.canvas.width / this.chunkWidth),
-			chunksY = Math.ceil(this.canvas.height / this.chunkHeight);
-
-		const rectW = this.chunkWidth / this.canvas.width * this.viewport.width;
-		const rectH = this.chunkHeight / this.canvas.height * this.viewport.height;
-
-		let promises: Array<Promise<void>> = [];
-		for (var y = 0; y < chunksY; ++y) {
-			const pixelY = y * this.chunkHeight;
-			const rectY = this.viewport.y + (y * this.chunkHeight) / this.canvas.height * this.viewport.height;
-			const cleanRow = isFullyContained(pixelY, this.chunkHeight, this.cleanY, this.cleanH);
-
-			for (var x = 0; x < chunksX; ++x) {
-				const pixelX = x * this.chunkWidth;
-				if (cleanRow && isFullyContained(pixelX, this.chunkWidth, this.cleanX, this.cleanW)) {
-					continue;
-				}
-
-				const rectX = this.viewport.x + (x * this.chunkWidth) / this.canvas.width * this.viewport.width;
-				let promise = this.requestTile(
-					new DOMRect(pixelX, pixelY, this.chunkWidth, this.chunkHeight),
-					new DOMRect(rectX, rectY, rectW, rectH));
-				promises.push(promise);
+		for (var tileY = minY; tileY < maxY; ++tileY) {
+			for (var tileX = minX; tileX < maxX; ++tileX) {
+				this.requestTile(tileX, tileY);
 			}
 		}
-
-		Promise.all(promises).then(
-			() => {
-				if (this.updateQueued) {
-					this.update();
-				} else {
-					this.cleanX = 0;
-					this.cleanY = 0;
-					this.cleanW = this.canvas.width;
-					this.cleanH = this.canvas.height;
-				}
-			},
-			() => this.updateInProgress = false);
 	}
 
-	/** Update the image in the near future.
-	 * 
-	 * The update will be dispatched after the currently running one is finished or
-	 * immediately if there are no running updates.
+	/** Clear any cached tiles, resulting in calls to update() to request all tiles anew.
+	 * @param take optional function that is provided released image data for reuse.
 	 */
-	public queueUpdate() {
-		if (this.updateInProgress) {
-			this.updateQueued = true;
-		} else {
-			this.update();
+	public clearCachedTiles(take?: (data: ImageData) => void) {
+		if (take != null) {
+			this.tiles.forEach(promise => promise.then(image => {
+				if (image) {
+					take(image);
+				}
+			}));
 		}
+		this.tiles.clear();
 	}
 
-	/** Shift thee image provided number of pixels.
+	/** Shift the image provided number of pixels.
 	 * @param {number} dx Horizontal number of pixels to shift the image by.
 	 * @param {number} dy Vertical number of pixels to shift the image by.
 	 */
@@ -166,9 +102,6 @@ export default class TiledImageView {
 		let midX = dx >= 0 ? dx : this.canvas.width + dx,
 			midY = dy >= 0 ? dy : this.canvas.height + dy,
 			quadrants: DOMRect[] = [];
-		
-		this.viewport.x -= dx / this.canvas.width * this.viewport.width;
-		this.viewport.y -= dy / this.canvas.height * this.viewport.height;
 
 		quadrants = [
 			new DOMRect(0, 0, midX, midY),
@@ -192,11 +125,10 @@ export default class TiledImageView {
 			this.context.putImageData(imageData, dx, dy);
 		}
 
-		this.cleanX += dx;
-		this.cleanY += dy;
-		this.clampCleanRect();
-	
-		this.updateDirty();
+		this.x -= dx;
+		this.y -= dy;
+
+		this.draw();
 	}
 
 	/** Zoom the image in or out around a provided point.
@@ -206,38 +138,40 @@ export default class TiledImageView {
 	 */
 	public zoom(x: number, y: number, scale: number) {
 		let relX = x / this.canvas.width,
-			relY = y / this.canvas.height,
-			pointX = this.viewport.x + this.viewport.width * relX,
-			pointY = this.viewport.y + this.viewport.height * relY;
-		
-		this.viewport.width *= scale;
-		this.viewport.height *= scale;
-		this.viewport.x = pointX - this.viewport.width * relX;
-		this.viewport.y = pointY - this.viewport.height * relY;
+			relY = y / this.canvas.height;
 
 		// Reuse the existent image while the workers are redrawing it.
 		if (scale > 1) {
 			let invScale = 1 / scale;
+			let nx = x * (1 - invScale);
+			let ny = y * (1 - invScale);
 			this.context.drawImage(
 				this.canvas,
-				this.canvas.width * relX - this.canvas.width * relX * invScale,
-				this.canvas.height * relY - this.canvas.height * relY * invScale,
+				nx,
+				ny,
 				this.canvas.width * invScale,
 				this.canvas.height * invScale);
+			this.x += Math.round(nx);
+			this.y += Math.round(ny);
 		} else {
+			let nx = x * (1 - scale);
+			let ny = y * (1 - scale);
 			this.context.drawImage(
 				this.canvas,
-				this.canvas.width * relX - this.canvas.width * relX * scale,
-				this.canvas.height * relY - this.canvas.height * relY * scale,
+				nx,
+				ny,
 				this.canvas.width * scale,
 				this.canvas.height * scale,
 				0,
 				0,
 				this.canvas.width,
 				this.canvas.height);
+			this.x += Math.round(nx);
+			this.y += Math.round(ny);
 		}
 
-		this.update();
+		this.clearCachedTiles();
+		this.draw();
 	}
 
 	/** Resize the view.
@@ -246,44 +180,27 @@ export default class TiledImageView {
 	 */
 	public resize(width: number, height: number) {
 		let fillStyle = this.context.fillStyle;
-		this.viewport.width *= width / this.canvas.width;
-		this.viewport.height *= height / this.canvas.height;
 		this.canvas.width = width;
 		this.canvas.height = height;
 		this.context.fillStyle = fillStyle;
-		this.update();
+		this.draw();
 	}
 
 	/** Request a tile to be redrawn.
-	 * @param tileRect The canvas-space rectangle of the tile.
-	 * @param viewRect The view-space rectangle of the potion of the image represented by the tile.
+	 * @param {number} x The horizontal index of the tile.
+	 * @param {number} y The vertical index of the tile.
 	 */
-	private requestTile(tileRect: DOMRect, viewRect: DOMRect): Promise<void> {
-		return this.requestTileCb(tileRect, viewRect).then(
-			image => this.context.putImageData(image, tileRect.x, tileRect.y));
-	}
-
-	/** Make sure the clean rectangle has valid values. */
-	private clampCleanRect() {
-		if (this.cleanX < 0) {
-			this.cleanW += this.cleanX;
-			this.cleanX = 0;
-		}
-		if (this.cleanY < 0) {
-			this.cleanH += this.cleanY;
-			this.cleanY = 0;
-		}
-		if (this.cleanW + this.cleanX > this.canvas.width) {
-			this.cleanW = this.canvas.width - this.cleanX;
-		}
-		if (this.cleanH + this.cleanY > this.canvas.height) {
-			this.cleanH = this.canvas.height - this.cleanY;
-		}
-		if (this.cleanW < 0) {
-			this.cleanW = 0;
-		}
-		if (this.cleanH < 0) {
-			this.cleanH = 0;
-		}
+	private requestTile(x: number, y: number) {
+		let key = `${x}|${y}`;
+		let promise = this.tiles.get(key) || this.requestTileCb(x, y);
+		promise = promise.then(
+			image => {
+				if (image != null) {
+					this.context.putImageData(image, x*this.tw - this.x, y*this.th - this.y);
+				}
+				return image;
+			},
+			() => { this.tiles.delete(key); return undefined });
+		this.tiles.set(key, promise);
 	}
 }
