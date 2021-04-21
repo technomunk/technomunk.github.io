@@ -1,76 +1,119 @@
 // let vertexShader = fetch('shaders/identity.vs');
 
-import { setupScreenRenderer } from "./frag_renderer";
+import { deserialize } from "node:v8";
+import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "../lib/gesture";
+import SideMenu from "../lib/side_menu";
+import createViewer from "./viewer";
 
-function main() {
+const WHEEL_SENSITIVITY = -1e-3;
+
+function setupMandelbrot(fragment: string) {
 	let canvas = document.getElementById('canvas') as HTMLCanvasElement;
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-	let gl = canvas.getContext('webgl', { alpha: false, });
+
+	let viewer = createViewer(canvas, fragment, { uRes: null, uRect: null, uLimit: null, uLimitColor: null });
+
+	if (viewer == null) {
+		alert("Failed to setup WebGL :(");
+		return;
+	}
+
+	const limit = document.getElementById('limit') as HTMLInputElement;
 	
-	if (gl === null) {
-		alert("Unable to initialize WebGL. Looks like your browser does not support it!");
-		return;
-	}
-
-	const shader = setupScreenRenderer(gl, FRAG_SHADER_SRC);
-
-	if (shader == null) {
-		// alert("Failed to compile shaders!");
-		return;
-	}
-
-	gl.useProgram(shader);
-
-	const uniformLocations = {
-		res: gl.getUniformLocation(shader, 'uRes'),
-		rect: gl.getUniformLocation(shader, 'uRect'),
-		limit: gl.getUniformLocation(shader, 'uLimit'),
-		limitColor: gl.getUniformLocation(shader, 'uLimitColor'),
-	}
 	const widthToHeight = canvas.width / canvas.height;
+	let rect = new DOMRect(-1*widthToHeight, -1, 2*widthToHeight, 2);
 
-	gl.uniform2f(uniformLocations.res, canvas.width, canvas.height);
-	gl.uniform4f(uniformLocations.rect, -1*widthToHeight, -1, 2*widthToHeight, 2);
-	gl.uniform1i(uniformLocations.limit, 32);
-	gl.uniform4f(uniformLocations.limitColor, 0, 0, 0, 0);
+	viewer.set('uRes', canvas.width, canvas.height);
+	viewer.set('uRect', rect.x, rect.y, rect.width, rect.height);
+	viewer.seti('uLimit', Number(limit.value));
+	viewer.set('uLimitColor', 0, 0, 0, 1);
 
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-}
+	viewer.requestDraw();
 
-const FRAG_SHADER_SRC = `
-const int MAX_LOOP = 4096;
-uniform lowp vec2 uRes;
+	window.addEventListener('resize', () => {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		if (viewer != null) {
+			const widthToHeight = canvas.width / canvas.height;
+			rect.x = -1*widthToHeight;
+			rect.y = -1;
+			rect.width = 2*widthToHeight;
+			rect.height = 2;
 
-uniform highp vec4 uRect;
-uniform int uLimit;
-uniform lowp vec4 uLimitColor;
-
-highp vec2 csqr(in vec2 z) {
-	return vec2(z.x*z.x - z.y*z.y, 2.*z.x*z.y);
-}
-
-int mandel(in vec2 c) {
-	highp vec2 z = vec2(0);
-	for (int i = 0; i < MAX_LOOP; ++i) {
-		z = csqr(z) + c;
-		if (i >= uLimit || dot(z, z) >= 4.) {
-			return i;
+			viewer.set('uRes', canvas.width, canvas.height);
+			viewer.set('uRect', rect.x, rect.y, rect.width, rect.height);
+			viewer.requestDraw();
 		}
-	}
-	return uLimit;
+	});
+
+	limit.addEventListener('input', () => {
+		viewer!.seti('uLimit', Number(limit.value));
+		viewer!.requestDraw();
+	});
+
+	const panView = (dx: number, dy: number) => {
+		rect.x -= dx / canvas.width * rect.width;
+		rect.y += dy / canvas.height * rect.height;
+		viewer!.set('uRect', rect.x, rect.y, rect.width, rect.height);
+		viewer!.requestDraw();
+	};
+	const zoomView = (x: number, y: number, scale: number) => {
+		const nx = x / canvas.width;
+		const ny = 1 - y / canvas.height;
+		// The relative points x+nx*w should stay the same after scaling
+		rect.x += rect.width * nx * (scale - 1);
+		rect.y += rect.height * ny * (scale - 1);
+		rect.width /= scale;
+		rect.height /= scale;
+		viewer!.set('uRect', rect.x, rect.y, rect.width, rect.height);
+		viewer!.requestDraw();
+	};
+
+	let gestureDecoder = new GestureDecoder(canvas);
+	let lastX = 0, lastY = 0;
+	const handleDrag = (drag: DragGest) => {
+		const dx = drag.x - lastX, dy = drag.y - lastY;
+		if (dx != 0 || dy != 0) {
+			panView(dx, dy);
+		}
+		lastX = drag.x;
+		lastY = drag.y;
+	};
+
+	let lastScale = 1;
+	const handleZoom = (zoom: ZoomGest) => {
+		handleDrag(zoom);
+		if (lastScale != zoom.scale) {
+			const dz = zoom.scale / lastScale;
+			zoomView(zoom.x, zoom.y, dz);
+		}
+		lastScale = zoom.scale;
+	};
+
+	gestureDecoder.on('dragstart', ({ x, y }) => { lastX = x; lastY = y; });
+	gestureDecoder.on('dragupdate', handleDrag);
+	gestureDecoder.on('dragstop', handleDrag);
+
+	gestureDecoder.on('zoomstart', ({ x, y, scale }) => {
+		lastX = x, lastY = y;
+		lastScale = scale;
+	});
+	gestureDecoder.on('zoomupdate', handleZoom);
+	gestureDecoder.on('zoomstop', handleZoom);
+
+	canvas.addEventListener('wheel', ({ x, y, deltaY }) => {
+		const dz = 1 + deltaY * WHEEL_SENSITIVITY;
+		zoomView(x, y, dz);
+	});
+
+	return viewer;
 }
 
-void main() {
-	highp vec2 coord = uRect.xy + uRect.zw * (gl_FragCoord.xy / uRes);
-	int val = mandel(coord);
-	if (val == uLimit) {
-		gl_FragColor = uLimitColor;
-	} else {
-		lowp float fval = float(val)/float(uLimit);
-		gl_FragColor = vec4(fval, fval, fval, 1);
-	}
-}
-`;
+fetch('shaders/mandel.fs')
+	.then(response => response.text())
+	.then(src => setupMandelbrot(src));
 
-window.onload = main;
+window.onload = () => {
+	const menu = new SideMenu(document.getElementById('side-menu')!, document.getElementById('toggle-menu')!);
+};
