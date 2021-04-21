@@ -2,8 +2,8 @@ path = require('path');
 
 module.exports = {
 	entry: {
-		mandel: ['./src/side_menu.ts', './src/toggle_fullscreen.ts',],
-		dw: './src/draw_worker.ts',
+		cpu_main: ['./src/cpu_mandelbrot/side_menu.ts', './src/cpu_mandelbrot/toggle_fullscreen.ts',],
+		cpu_worker: './src/cpu_mandelbrot/draw_worker.ts',
 	},
 	// devtool: 'inline-source-map',
 	mode: 'production',
