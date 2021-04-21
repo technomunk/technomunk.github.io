@@ -1,5 +1,5 @@
 import ProceduralImageView from "./ProceduralImageView";
-import { DragEvent as DragGest, ZoomEvent as ZoomGest, GestureDecoder } from "./gesture";
+import { DragEvent as DragGest, ZoomEvent as ZoomGest, GestureDecoder } from "../lib/gesture";
 import { displayCoordinates } from "./coordinates";
 
 // Constants
