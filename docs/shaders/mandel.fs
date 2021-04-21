@@ -1,3 +1,5 @@
+const int MAX_LOOP = 4096;
+
 uniform lowp vec2 uRes;
 
 uniform highp vec4 uRect;
@@ -10,9 +12,9 @@ highp vec2 csqr(in vec2 z) {
 
 int mandel(in vec2 c) {
 	highp vec2 z = vec2(0);
-	for (int i = 0; i < uLimit; ++i) {
+	for (int i = 0; i < MAX_LOOP; ++i) {
 		z = csqr(z) + c;
-		if (dot(z, z) >= 4.) {
+		if (i >= uLimit || dot(z, z) >= 4.) {
 			return i;
 		}
 	}
