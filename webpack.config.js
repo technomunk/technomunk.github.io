@@ -4,6 +4,7 @@ module.exports = {
 	entry: {
 		cpu_main: ['./src/cpu_mandelbrot/side_menu.ts', './src/cpu_mandelbrot/toggle_fullscreen.ts',],
 		cpu_worker: './src/cpu_mandelbrot/draw_worker.ts',
+		comdyn: ['./src/webgl/main.ts'],
 	},
 	// devtool: 'inline-source-map',
 	mode: 'production',
