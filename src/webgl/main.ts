@@ -62,8 +62,9 @@ function setupMandelbrot(fragment: string) {
 		const nx = x / canvas.width;
 		const ny = 1 - y / canvas.height;
 		// The relative points x+nx*w should stay the same after scaling
-		rect.x += rect.width * nx * (scale - 1);
-		rect.y += rect.height * ny * (scale - 1);
+		const invScale = 1 / scale;
+		rect.x += rect.width * nx * (1 - invScale);
+		rect.y += rect.height * ny * (1 - invScale);
 		rect.width /= scale;
 		rect.height /= scale;
 		viewer!.set('uRect', rect.x, rect.y, rect.width, rect.height);
