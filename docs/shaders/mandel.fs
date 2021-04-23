@@ -1,33 +1,38 @@
-const int MAX_LOOP = 4096;
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
 
-uniform lowp vec2 uRes;
+const int MAX_LOOP_COUNT = 4096;
 
-uniform highp vec4 uRect;
-uniform int uLimit;
-uniform lowp vec4 uLimitColor;
+varying vec2 vPos;
 
-highp vec2 csqr(in vec2 z) {
-	return vec2(z.x*z.x - z.y*z.y, 2.*z.x*z.y);
-}
+uniform int uLim;
+uniform lowp vec4 uInsideColor;
 
-int mandel(in vec2 c) {
-	highp vec2 z = vec2(0);
-	for (int i = 0; i < MAX_LOOP; ++i) {
-		z = csqr(z) + c;
-		if (i >= uLimit || dot(z, z) >= 4.) {
+int mandel(in float re, in float im) {
+	float x = re;
+	float y = im;
+	float tmp;
+	for (int i = 0; i < MAX_LOOP_COUNT; ++i) {
+		if (i >= uLim || x*x+y*y >= 4.) {
 			return i;
 		}
+
+		tmp = x;
+		x = x*x - y*y + re;
+		y = 2.*tmp*y + im;
 	}
-	return uLimit;
+	return uLim;
 }
 
 void main() {
-	highp vec2 coord = uRect.xy + uRect.zw * (gl_FragCoord.xy / uRes);
-	int val = mandel(coord);
-	if (val == uLimit) {
-		gl_FragColor = uLimitColor;
+	int val = mandel(vPos.x, vPos.y);
+	if (val == uLim) {
+		gl_FragColor = uInsideColor;
 	} else {
-		lowp float fval = float(val)/float(uLimit);
-		gl_FragColor = vec4(fval, fval, fval, 1);
+		float nval = float(val) / float(uLim);
+		gl_FragColor = vec4(nval, nval, nval, 1);
 	}
 }
