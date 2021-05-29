@@ -1,44 +1,76 @@
-// let vertexShader = fetch('shaders/identity.vs');
-
 import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "../lib/gesture";
-import { compileProgram, setupFullviewQuad } from "../lib/glutil";
+import { init_gpu_renderer } from "../lib/gpu_renderer";
 import SideMenu from "../lib/side_menu";
 
-const WHEEL_SENSITIVITY = -1e-3;
+// Constants
 
-function setupMandelbrot(vertex: string, fragment: string) {
-	let canvas = document.getElementById('canvas') as HTMLCanvasElement;
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+const WHEEL_SENSITIVITY = 1e-3;
 
-	const gl = canvas.getContext('webgl')!;
-	const program = compileProgram(gl, vertex, fragment);
-	setupFullviewQuad(gl, program, 'aPos');
 
-	const widthToHeight = canvas.width / canvas.height;
-	gl.useProgram(program);
-	const uPosLoc = gl.getUniformLocation(program, 'uPos');
-	gl.uniform2f(uPosLoc, 0, 0);
-	const uDimLoc = gl.getUniformLocation(program, 'uDims');
-	gl.uniform2f(uDimLoc, widthToHeight, 1);
-	const uLimLoc = gl.getUniformLocation(program, 'uLim');
-	gl.uniform1i(uLimLoc, 32);
-	const uInsideColor = gl.getUniformLocation(program, 'uInsideColor');
-	gl.uniform4f(uInsideColor, 0, 0, 0, 1);
-	
-	const draw = ()=>{
-		gl.clearColor(0, 0, 0, 1);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	};
+// Local variables
 
-	requestAnimationFrame(draw);
+let renderer: Renderer | null = null;
+let lastX = 0, lastY = 0, lastScale = 0;
+
+
+// Function definitions
+
+function draw() {
+	if (renderer) {
+		renderer.draw({});
+	}
 }
 
-Promise.all([
-	fetch('shaders/mandel.vs').then(response => response.text()),
-	fetch('shaders/mandel.fs').then(response => response.text()),
-]).then(
-	([vertex, fragment]) => setupMandelbrot(vertex, fragment));
+function handleDrag(drag: DragGest) {
+	if ((lastX != drag.x || lastY != drag.y) && renderer) {
+		renderer.pan(Math.round(drag.x - lastX), Math.round(drag.y - lastY));
+	}
+	lastX = drag.x;
+	lastY = drag.y;
+}
+
+function handleZoom(zoom: ZoomGest) {
+	handleDrag(zoom);
+	if (zoom.scale != lastScale && renderer) {
+		renderer.zoom(zoom.x, zoom.y, lastScale / zoom.scale);
+	}
+	lastScale = zoom.scale;
+}
+
+
+// Script logic
+
+(()=>{
+	const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+	
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	
+	init_gpu_renderer(canvas, 'mandel')
+		.then(r => {
+			renderer = r;
+			requestAnimationFrame(draw);
+		});
+	
+	let gd = new GestureDecoder(canvas);
+	gd.on('dragstart', drag => {
+		lastX = drag.x;
+		lastY = drag.y;
+	});
+	gd.on('dragupdate', handleDrag);
+	gd.on('dragstop', handleDrag);
+	
+	gd.on('zoomstart', zoom => {
+		lastX = zoom.x;
+		lastY = zoom.y;
+		lastScale = zoom.scale;
+	})
+	gd.on('zoomupdate', handleZoom);
+	gd.on('zoomstop', handleZoom);
+
+	canvas.addEventListener('wheel', event => renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY));
+	window.addEventListener('resize', () => renderer?.resize(window.innerWidth, window.innerHeight));
+})();
 
 window.onload = () => {
 	const menu = new SideMenu(document.getElementById('side-menu')!, document.getElementById('toggle-menu')!);
