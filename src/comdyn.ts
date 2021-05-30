@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { displayCoordinates } from "../lib/coordinates";
-import { bindConfig, resetConfigs } from "../lib/draw_config";
-import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "../lib/gesture";
-import { init_gpu_renderer } from "../lib/gpu_renderer";
-import { MandelConfig, Renderer } from "../lib/irenderer";
-import SideMenu from "../lib/side_menu";
+import { displayCoordinates } from "./lib/coordinates";
+import { bindConfig, resetConfigs } from "./lib/draw_config";
+import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "./lib/gesture";
+import { init_gpu_renderer } from "./lib/gpu_renderer";
+import { MandelConfig, Renderer } from "./lib/irenderer";
+import SideMenu from "./lib/side_menu";
 
 // Constants
 
