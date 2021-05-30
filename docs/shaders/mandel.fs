@@ -11,6 +11,16 @@ varying vec2 vPos;
 uniform int uLim;
 uniform lowp vec4 uInsideColor;
 
+const float SIXTH = 1. / 6.;
+
+// Copied from https://github.com/hughsk/glsl-hsv2rgb/blob/master/index.glsl
+// Which in tern was sourced from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+vec3 hsv2rgb(vec3 c) {
+	vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 int mandel(in float re, in float im) {
 	float x = re;
 	float y = im;
@@ -32,7 +42,7 @@ void main() {
 	if (val == uLim) {
 		gl_FragColor = uInsideColor;
 	} else {
-		float nval = float(val) / float(uLim);
-		gl_FragColor = vec4(nval, nval, nval, 1);
+		vec3 hsv = vec3(float(val) / float(uLim), 1, 1);
+		gl_FragColor = vec4(hsv2rgb(hsv), 1);
 	}
 }
