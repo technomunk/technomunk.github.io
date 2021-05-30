@@ -1,3 +1,4 @@
+import { bindConfig, resetConfigs } from "../lib/draw_config";
 import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "../lib/gesture";
 import { init_gpu_renderer } from "../lib/gpu_renderer";
 import SideMenu from "../lib/side_menu";
@@ -11,13 +12,14 @@ const WHEEL_SENSITIVITY = 1e-3;
 
 let renderer: Renderer | null = null;
 let lastX = 0, lastY = 0, lastScale = 0;
+let drawConfig: MandelConfig = { limit: 0, escapeR: 0, };
 
 
 // Function definitions
 
 function draw() {
 	if (renderer) {
-		renderer.draw({});
+		renderer.draw(drawConfig);
 	}
 }
 
@@ -73,5 +75,43 @@ function handleZoom(zoom: ZoomGest) {
 })();
 
 window.onload = () => {
-	const menu = new SideMenu(document.getElementById('side-menu')!, document.getElementById('toggle-menu')!);
+	new SideMenu(document.getElementById('side-menu')!, document.getElementById('toggle-menu')!);
+	// Link configs
+	{
+		const limit = document.getElementById('limit') as HTMLInputElement;
+		drawConfig.limit = Number(limit.value);
+		bindConfig(limit, value => {
+			drawConfig.limit = value;
+			requestAnimationFrame(draw);
+		});
+
+		const escapeR = document.getElementById('escaper') as HTMLInputElement;
+		drawConfig.escapeR = Number(escapeR.value);
+		bindConfig(escapeR, value => {
+			drawConfig.escapeR = value;
+			requestAnimationFrame(draw);
+		});
+	}
+
+	// Setup fullscreen toggle button
+	{
+		const button = document.getElementById("toggle_fs") as HTMLButtonElement;
+		if (document.fullscreenEnabled) {
+			button.onclick = () => {
+				if (document.fullscreenElement) {
+					document.exitFullscreen();
+				} else {
+					document.documentElement.requestFullscreen();
+				}
+			};
+		} else {
+			button.remove();
+		}
+	}
+	
+	// Setup redraw and reset buttons
+	{
+		document.getElementById('redraw')!.onclick = draw;
+		document.getElementById('reset')!.onclick = resetConfigs;
+	}
 };
