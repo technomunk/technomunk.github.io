@@ -33,9 +33,9 @@ type ZoomEventHandler = (event: ZoomEvent) => void;
 /** Multi-touch gesture decoder. */
 export class GestureDecoder {
 	private cache: PointerEvent[] = [];
-	private x: number = 0;
-	private y: number = 0;
-	private delta: number = 0;
+	private x = 0;
+	private y = 0;
+	private delta = 0;
 
 	private dragStartHandler?: DragEventHandler;
 	private dragUpdateHandler?: DragEventHandler;
@@ -107,7 +107,7 @@ export class GestureDecoder {
 
 	private handlePointerMove(event: PointerEvent) {
 		// Update event
-		for (var i = 0; i < this.cache.length; ++i) {
+		for (let i = 0; i < this.cache.length; ++i) {
 			if (this.cache[i].pointerId == event.pointerId) {
 				this.cache[i] = event;
 				break;
@@ -146,7 +146,7 @@ export class GestureDecoder {
 		}
 
 		// Remove the event from the cache
-		for (var i = 0; i < this.cache.length; ++i) {
+		for (let i = 0; i < this.cache.length; ++i) {
 			if (this.cache[i].pointerId == event.pointerId) {
 				this.cache.splice(i, 1);
 				break;
@@ -206,13 +206,13 @@ export class GestureDecoder {
 	 * Uses this.delta.
 	 */
 	private startZoom() {
-		let deltaX = this.cache[0].clientX - this.cache[1].clientX;
-		let deltaY = this.cache[0].clientY - this.cache[1].clientY;
+		const deltaX = this.cache[0].clientX - this.cache[1].clientX;
+		const deltaY = this.cache[0].clientY - this.cache[1].clientY;
 		this.delta = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
 
 		if (this.zoomStartHandler != null) {
-			let x = (this.cache[0].clientX + this.cache[1].clientX) / 2;
-			let y = (this.cache[0].clientY + this.cache[1].clientY) / 2;
+			const x = (this.cache[0].clientX + this.cache[1].clientX) / 2;
+			const y = (this.cache[0].clientY + this.cache[1].clientY) / 2;
 
 			this.zoomStartHandler({ x: x, y: y, scale: 1, });
 		}
@@ -224,11 +224,11 @@ export class GestureDecoder {
 	 */
 	private updateZoom() {
 		if (this.zoomUpdateHandler != null) {
-			let x = (this.cache[0].clientX + this.cache[1].clientX) / 2;
-			let y = (this.cache[0].clientY + this.cache[1].clientY) / 2;
-			let deltaX = this.cache[0].clientX - this.cache[1].clientX;
-			let deltaY = this.cache[0].clientY - this.cache[1].clientY;
-			let delta = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+			const x = (this.cache[0].clientX + this.cache[1].clientX) / 2;
+			const y = (this.cache[0].clientY + this.cache[1].clientY) / 2;
+			const deltaX = this.cache[0].clientX - this.cache[1].clientX;
+			const deltaY = this.cache[0].clientY - this.cache[1].clientY;
+			const delta = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
 
 			this.zoomUpdateHandler({ x: x, y: y, scale: delta / this.delta, });
 		}
@@ -240,11 +240,11 @@ export class GestureDecoder {
 	 */
 	private stopZoom() {
 		if (this.zoomStopHandler != null) {
-			let x = (this.cache[0].clientX + this.cache[1].clientX) / 2;
-			let y = (this.cache[0].clientY + this.cache[1].clientY) / 2;
-			let deltaX = this.cache[0].clientX - this.cache[1].clientX;
-			let deltaY = this.cache[0].clientY - this.cache[1].clientY;
-			let delta = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+			const x = (this.cache[0].clientX + this.cache[1].clientX) / 2;
+			const y = (this.cache[0].clientY + this.cache[1].clientY) / 2;
+			const deltaX = this.cache[0].clientX - this.cache[1].clientX;
+			const deltaY = this.cache[0].clientY - this.cache[1].clientY;
+			const delta = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
 
 			this.zoomStopHandler({ x: x, y: y, scale: delta / this.delta, });
 		}

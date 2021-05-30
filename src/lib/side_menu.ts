@@ -32,21 +32,21 @@ export default class SideMenu {
 	}
 
 	/** Open the side menu. */
-	public open() {
+	public open(): void {
 		this.menu.style.width = `${this.width}pt`;
 		this.button.style.marginRight = `${this.width + this.margin}pt`;
 		// TODO: animate button
 	}
 
 	/** Close the side menu. */
-	public close() {
+	public close(): void {
 		this.menu.style.width = '0';
 		this.button.style.marginRight = `${this.margin}pt`;
 		// TODO: animate button
 	}
 
 	/** Toggle between open and closed states. */
-	public toggle() {
+	public toggle(): void {
 		if (this.menu.style.width === `${this.width}pt`) {
 			this.close();
 		} else {

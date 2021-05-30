@@ -26,8 +26,8 @@ export class Complex {
 	 * @returns {this} Self.
 	 */
 	sqr(): this {
-		let re = this.re;
-		let im = this.im;
+		const re = this.re;
+		const im = this.im;
 		this.re = re*re - im*im;
 		this.im = 2*re*im;
 		return this;

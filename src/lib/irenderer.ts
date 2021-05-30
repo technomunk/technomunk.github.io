@@ -1,13 +1,13 @@
-type ImageType = "mandel" | "julia";
+export type ImageType = "mandel" | "julia";
 
 /** Configuration used when rendering the mandelbrot set. */
-interface MandelConfig {
+export interface MandelConfig {
 	limit: number,
 	escapeR: number,
 }
 
 /** Procedural image renderer. */
-interface Renderer {
+export interface Renderer {
 	/** The region of the complex plane being rendered. */
 	rect: DOMRect;
 

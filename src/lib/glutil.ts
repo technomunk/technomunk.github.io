@@ -1,3 +1,5 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
+
 /** Compile a shader from the provided source.
  * @param gl The rendering context to compile the shader with.
  * @param type The type of the shader to compile.
@@ -9,7 +11,7 @@ export function compileShader(
 	gl: WebGLRenderingContext,
 	type: GLenum,
 	source: string
-) {
+): WebGLShader {
 	const shader = gl.createShader(type);
 	if (shader == null) {
 		throw new Error(`Failed to create a shader of type: ${type}`);
@@ -38,7 +40,7 @@ export function compileProgram(
 	gl: WebGLRenderingContext,
 	vertexSource: string,
 	fragmentSource: string
-) {
+): WebGLProgram {
 	const program = gl.createProgram();
 	if (program == null) {
 		throw new Error("Failed to create a GL program");
@@ -107,7 +109,7 @@ export function setupFullviewQuad(
 	gl: WebGLRenderingContext,
 	program: WebGLProgram,
 	attribute: GLint | string
-) {
+): WebGLBuffer {
 	// Get attribute location
 	let attributeLoc: GLint;
 	if (typeof attribute === typeof 'number') {
