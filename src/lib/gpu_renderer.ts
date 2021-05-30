@@ -1,7 +1,14 @@
 import { compileProgram, setupFullviewQuad } from "./glutil";
 
-/** WebGL-based image renderer.
- */
+type MandelUniforms = {
+	uPos: WebGLUniformLocation,
+	uDims: WebGLUniformLocation,
+	uLim: WebGLUniformLocation,
+	uEscapeD: WebGLUniformLocation,
+	uInsideColor: WebGLUniformLocation,
+};
+
+/** WebGL-based image renderer. */
 class GpuRenderer implements Renderer {
 	rect: DOMRect = new DOMRect(-1, -1, 2, 2);
 	
@@ -9,11 +16,8 @@ class GpuRenderer implements Renderer {
 	private gl: WebGLRenderingContext;
 	private program: WebGLProgram;
 
-	private uPosLoc: WebGLUniformLocation;
-	private uDimsLoc: WebGLUniformLocation;
-	private uLimLoc: WebGLUniformLocation;
-	private uInsideColorLoc: WebGLUniformLocation;
-	private cachedConfig: {} | undefined;
+	private uniforms: MandelUniforms;
+	private cachedConfig: MandelConfig | undefined;
 
 	constructor(canvas: HTMLCanvasElement, vertex: string, fragment: string) {
 		this.canvas = canvas;
@@ -27,10 +31,13 @@ class GpuRenderer implements Renderer {
 		this.rect.x *= widthToHeight;
 
 		this.gl.useProgram(this.program);
-		this.uPosLoc = this.gl.getUniformLocation(this.program, 'uPos')!;
-		this.uDimsLoc = this.gl.getUniformLocation(this.program, 'uDims')!;
-		this.uLimLoc = this.gl.getUniformLocation(this.program, 'uLim')!;
-		this.uInsideColorLoc = this.gl.getUniformLocation(this.program, 'uInsideColor')!;
+		this.uniforms = {
+			uPos: this.gl.getUniformLocation(this.program, 'uPos')!,
+			uDims: this.gl.getUniformLocation(this.program, 'uDims')!,
+			uLim: this.gl.getUniformLocation(this.program, 'uLim')!,
+			uEscapeD: this.gl.getUniformLocation(this.program, 'uEscapeD')!,
+			uInsideColor: this.gl.getUniformLocation(this.program, 'uInsideColor')!,
+		};
 	}
 
 	resize(width: number, height: number): void {
@@ -67,12 +74,13 @@ class GpuRenderer implements Renderer {
 		}
 	}
 
-	draw(config: any): void {
+	draw(config: MandelConfig): void {
 		this.gl.useProgram(this.program);
-		this.gl.uniform2f(this.uPosLoc, this.centerX, this.centerY);
-		this.gl.uniform2f(this.uDimsLoc, this.rect.width*.5, this.rect.height*.5);
-		this.gl.uniform1i(this.uLimLoc, 32);
-		this.gl.uniform4f(this.uInsideColorLoc, 0, 0, 0, 1);
+		this.gl.uniform2f(this.uniforms['uPos'], this.centerX, this.centerY);
+		this.gl.uniform2f(this.uniforms['uDims'], this.rect.width*.5, this.rect.height*.5);
+		this.gl.uniform1i(this.uniforms['uLim'], config.limit);
+		this.gl.uniform1f(this.uniforms['uEscapeD'], config.escapeR * 2)
+		this.gl.uniform4f(this.uniforms['uInsideColor'], 0, 0, 0, 1);
 
 		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
 		this.cachedConfig = config;

@@ -1,5 +1,11 @@
 type ImageType = "mandel" | "julia";
 
+/** Configuration used when rendering the mandelbrot set. */
+interface MandelConfig {
+	limit: number,
+	escapeR: number,
+}
+
 /** Procedural image renderer. */
 interface Renderer {
 	/** The region of the complex plane being rendered. */
@@ -27,5 +33,5 @@ interface Renderer {
 	/** Queue the render of the image with provided configuration.
 	 * @param config 
 	 */
-	draw(config: any): void;
+	draw(config: MandelConfig): void;
 }

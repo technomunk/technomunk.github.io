@@ -9,6 +9,7 @@ const int MAX_LOOP_COUNT = 4096;
 varying vec2 vPos;
 
 uniform int uLim;
+uniform float uEscapeD;
 uniform lowp vec4 uInsideColor;
 
 const float SIXTH = 1. / 6.;
@@ -26,7 +27,7 @@ int mandel(in float re, in float im) {
 	float y = im;
 	float tmp;
 	for (int i = 0; i < MAX_LOOP_COUNT; ++i) {
-		if (i >= uLim || x*x+y*y >= 4.) {
+		if (i >= uLim || x*x+y*y >= uEscapeD) {
 			return i;
 		}
 
