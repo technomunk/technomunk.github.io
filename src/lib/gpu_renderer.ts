@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { compileProgram, setupFullviewQuad } from "./glutil";
+import { ImageType, MandelConfig, Renderer } from "./irenderer";
 
 type MandelUniforms = {
 	uPos: WebGLUniformLocation,
@@ -11,7 +13,7 @@ type MandelUniforms = {
 /** WebGL-based image renderer. */
 class GpuRenderer implements Renderer {
 	rect: DOMRect = new DOMRect(-1, -1, 2, 2);
-	
+
 	private canvas: HTMLCanvasElement;
 	private gl: WebGLRenderingContext;
 	private program: WebGLProgram;
@@ -42,7 +44,7 @@ class GpuRenderer implements Renderer {
 
 	resize(width: number, height: number): void {
 		const widthToHeight = width / height;
-		
+
 		this.rect.height *= height / this.canvas.height;
 		this.rect.width = this.rect.height * widthToHeight;
 
@@ -55,6 +57,7 @@ class GpuRenderer implements Renderer {
 			this.draw(this.cachedConfig);
 		}
 	}
+
 	pan(dx: number, dy: number): void {
 		this.rect.x -= dx / this.canvas.width * this.rect.width;
 		this.rect.y += dy / this.canvas.height * this.rect.height;
@@ -63,6 +66,7 @@ class GpuRenderer implements Renderer {
 			this.draw(this.cachedConfig);
 		}
 	}
+
 	zoom(x: number, y: number, scale: number): void {
 		this.rect.x += x / this.canvas.width * (this.rect.width - this.rect.width * scale);
 		this.rect.y += (1 - y / this.canvas.height) * (this.rect.height - this.rect.height * scale);
@@ -76,22 +80,14 @@ class GpuRenderer implements Renderer {
 
 	draw(config: MandelConfig): void {
 		this.gl.useProgram(this.program);
-		this.gl.uniform2f(this.uniforms['uPos'], this.centerX, this.centerY);
-		this.gl.uniform2f(this.uniforms['uDims'], this.rect.width*.5, this.rect.height*.5);
+		this.gl.uniform2f(this.uniforms['uPos'], this.rect.x + this.rect.width * .5, this.rect.y + this.rect.height * .5);
+		this.gl.uniform2f(this.uniforms['uDims'], this.rect.width * .5, this.rect.height * .5);
 		this.gl.uniform1i(this.uniforms['uLim'], config.limit);
 		this.gl.uniform1f(this.uniforms['uEscapeD'], config.escapeR * 2)
 		this.gl.uniform4f(this.uniforms['uInsideColor'], 0, 0, 0, 1);
 
 		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
 		this.cachedConfig = config;
-	}
-
-	get centerX() {
-		return this.rect.x + this.rect.width*.5;
-	}
-
-	get centerY() {
-		return this.rect.y + this.rect.height*.5;
 	}
 }
 
