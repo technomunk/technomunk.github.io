@@ -23,7 +23,7 @@ function draw() {
 
 function handleDrag(drag: DragGest) {
 	if ((lastX != drag.x || lastY != drag.y) && renderer) {
-		renderer.pan(Math.round(drag.x - lastX), Math.round(drag.y - lastY));
+		renderer.pan(drag.x - lastX, drag.y - lastY);
 	}
 	lastX = drag.x;
 	lastY = drag.y;

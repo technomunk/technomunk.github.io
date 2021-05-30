@@ -34,10 +34,15 @@ class GpuRenderer implements Renderer {
 	}
 
 	resize(width: number, height: number): void {
-		this.rect.width *= width / this.canvas.width;
+		const widthToHeight = width / height;
+		
 		this.rect.height *= height / this.canvas.height;
+		this.rect.width = this.rect.height * widthToHeight;
+
 		this.canvas.width = width;
 		this.canvas.height = height;
+
+		this.gl.viewport(0, 0, width, height);
 
 		if (this.cachedConfig) {
 			this.draw(this.cachedConfig);
@@ -69,7 +74,6 @@ class GpuRenderer implements Renderer {
 		this.gl.uniform1i(this.uLimLoc, 32);
 		this.gl.uniform4f(this.uInsideColorLoc, 0, 0, 0, 1);
 
-		this.gl.clearColor(0, 0, 0, 1);
 		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
 		this.cachedConfig = config;
 	}
