@@ -22,7 +22,7 @@ button:active, .button:active {
 }
 
 img.avatar {
-	border: solid black;
+	border: 4px solid black;
 }
 
 .arrow-big {
