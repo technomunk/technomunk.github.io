@@ -1,11 +1,14 @@
 :root {
+	--color-background: ghostwhite;
 	--color-form-background: antiquewhite;
 	--color-invalid: crimson;
 	--color-valid: darkgreen;
 	--color-focus: blue;
-	--color-input-border: black;
+	--color-border: black;
 	--color-text: black;
 	--color-text-placeholder: dimgray;
+	--color-text-link: darkgreen;
+	--color-text-visited-link: darkgreen;
 	--color-shadow: black;
 	--color-button: floralwhite;
 	--color-hover: blanchedalmond;
@@ -26,35 +29,34 @@
 }
 
 body {
-	margin-left: 5%;
-	margin-right: 5%;
-	min-height: 100%;
-	height: 100%;
+	margin: 1rem max(1rem, 5%) 0;
+}
+
+body>* {
+	margin: .5rem auto;
 }
 
 section {
-	margin-top: 12px;
+	margin: 1rem auto;
 }
 
 img.avatar {
 	border-radius: 50%;
 	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	min-width: 20%;
-	max-width: 80%;
+	margin: 0 auto .5rem;
+	min-width: 128px;
+	max-width: 100%;
+	border: 2px solid var(--color-border);
+	box-shadow: 4px 4px 8px 4px var(--color-border);
 }
 
 p {
-	text-indent: 6vw;
+	text-indent: clamp(1rem, 5%, 2rem);
 	text-align: justify;
 }
 
+address,
 nav {
-	font-size: larger;
-}
-
-address, nav {
 	text-align: center;
 	font-size: larger;
 	font-style: normal;
@@ -62,7 +64,15 @@ address, nav {
 }
 
 ul {
-	margin-top: 0;
+	margin: 0 auto;
+}
+
+a {
+	color: var(--color-text-link);
+}
+
+a:visited {
+	color: var(--color-text-visited-link);
 }
 
 address ul, nav ul {
@@ -97,7 +107,7 @@ form {
 	margin: auto;
 	width: 60%;
 	background-color: var(--color-form-background);
-	padding: clamp(2px, 4vw, 1rem);
+	padding: 1rem;
 	-webkit-box-shadow: 4px 4px 10px 0px var(--color-shadow);
 	box-shadow: 4px 4px 10px 0px var(--color-shadow);
 }
@@ -105,6 +115,8 @@ form {
 form > header {
 	font-size: xxx-large;
 	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 form > input {
@@ -124,7 +136,7 @@ form > input {
 	box-sizing: border-box;
 	padding: .3rem;
 	background-color: transparent;
-	border: 1px solid var(--color-input-border);
+	border: 1px solid var(--color-border);
 	outline: 0;
 }
 
@@ -170,7 +182,7 @@ input:not(:placeholder-shown) + label {
 }
 
 .button {
-	border: 1px solid var(--color-input-border);
+	border: 1px solid var(--color-border);
 	color: var(--color-text);
 	background-color: var(--color-button);
 }
@@ -183,10 +195,17 @@ input:not(:placeholder-shown) + label {
 	background-color: var(--color-active);
 }
 
-@media screen and (max-width: 650px) {
-	body { margin: 0; }
+@media screen and (max-width: 600px) {
+	body {
+		margin: 0;
+		padding: 0;
+	}
+	main {
+		margin: 0;
+	}
 	form {
-		width: 100%;
+		margin: 0;
+		width: max(300px, 100%);
 		box-sizing: border-box;
 	}
 }
