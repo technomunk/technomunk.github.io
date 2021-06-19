@@ -2,12 +2,8 @@ body {
 	background-color: snow;
 }
 
-input[type="number"] {
-	border: 2pt solid black;
-}
-
 button, .button {
-	border: 2pt solid black;
+	border: 2px solid black;
 	outline: none;
 	color: black;
 	background-color: lightgray;

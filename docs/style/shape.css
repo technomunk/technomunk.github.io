@@ -1,6 +1,28 @@
+:root {
+	--color-form-background: antiquewhite;
+	--color-invalid: crimson;
+	--color-valid: darkgreen;
+	--color-focus: blue;
+	--color-input-border: black;
+	--color-text: black;
+	--color-text-placeholder: dimgray;
+	--color-shadow: black;
+	--color-button: floralwhite;
+	--color-hover: blanchedalmond;
+	--color-active: burlywood;
+}
+
+@media (forced-colors: active) {
+	:root {
+		--color-form-background: Field;
+		--color-focus: Highlight;
+	}
+}
+
 * {
 	font-family: 'Open Sans Condensed', sans-serif;
 	font-size: x-large;
+	color: var(--color-text);
 }
 
 body {
@@ -54,6 +76,8 @@ address ul a, nav ul a {
 }
 
 footer {
+	clear: both;
+	bottom: 0;
 	text-align: center;
 	font-style: italic;
 }
@@ -69,6 +93,70 @@ mark {
 	font-size: inherit;
 }
 
+form {
+	margin: auto;
+	width: 60%;
+	background-color: var(--color-form-background);
+	padding: clamp(2px, 4vw, 1rem);
+	-webkit-box-shadow: 4px 4px 10px 0px var(--color-shadow);
+	box-shadow: 4px 4px 10px 0px var(--color-shadow);
+}
+
+form > header {
+	font-size: xxx-large;
+	text-align: center;
+}
+
+form > input {
+	display: block;
+	margin: auto;
+	padding: .2rem .3rem;
+}
+
+.field {
+	width: 100%;
+	position: relative;
+	margin: 1rem auto;
+}
+
+.field input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: .3rem;
+	background-color: transparent;
+	border: 1px solid var(--color-input-border);
+	outline: 0;
+}
+
+.field input:invalid {
+	border: 3px solid var(--color-invalid);
+}
+
+.field:focus-within input {
+	border: 3px solid var(--color-focus);
+}
+
+.field input + label {
+	position: absolute;
+	left: .3rem;
+	top: calc(.3rem + 3px);
+	padding: 0 .1rem;
+    transition: transform 200ms ease-in-out;
+	background-color: var(--color-form-background);
+	color: var(--color-text-placeholder);
+	pointer-events: none;
+}
+
+.field:focus-within label,
+input:not(:placeholder-shown) + label {
+	transform: translateY(-1rem);
+}
+
+.field:hover input,
+.field:hover input + label {
+	background-color: var(--color-hover);
+}
+
 .strong {
 	font-size: xxx-large;
 }
@@ -79,4 +167,26 @@ mark {
 
 .justify {
 	text-align: justify;
+}
+
+.button {
+	border: 1px solid var(--color-input-border);
+	color: var(--color-text);
+	background-color: var(--color-button);
+}
+
+.button:hover {
+	background-color: var(--color-hover);
+}
+
+.button:active {
+	background-color: var(--color-active);
+}
+
+@media screen and (max-width: 650px) {
+	body { margin: 0; }
+	form {
+		width: 100%;
+		box-sizing: border-box;
+	}
 }
