@@ -1,4 +1,4 @@
-# Griffone's Github Pages
+# Technomunk's Github Pages
 
 A place to showcase some of personal projects and abilities.
 
