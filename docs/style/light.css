@@ -164,13 +164,21 @@ form>input {
 }
 
 .field:focus-within label,
-input:not(:placeholder-shown) + label {
+input:not(:placeholder-shown)+label {
 	transform: translateY(-1rem);
 }
 
 .field:hover input,
-.field:hover input + label {
+.field:hover input+label {
 	background-color: var(--color-hover);
+}
+
+label>div.slot {
+	position: relative;
+	top: -50%;
+	width: inherit;
+	height: 3px;
+	background-color: brown;
 }
 
 .strong {
