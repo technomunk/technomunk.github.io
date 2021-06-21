@@ -13,6 +13,10 @@
 	--color-button: floralwhite;
 	--color-hover: blanchedalmond;
 	--color-active: burlywood;
+
+	--fs-normal: 23px;
+	--fs-section-head: 30px;
+	--fs-strong: 50px;
 }
 
 @media (forced-colors: active) {
@@ -23,13 +27,13 @@
 }
 
 * {
-	font-family: 'Open Sans Condensed', sans-serif;
-	font-size: x-large;
-	color: var(--color-text);
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+	font-size: var(--fs-normal);
 }
 
 body {
 	margin: 1rem max(1rem, 5%) 0;
+	min-width: 14rem;
 }
 
 body>* {
@@ -57,10 +61,11 @@ p {
 
 address,
 nav {
+	margin: .5em auto;
 	text-align: center;
-	font-size: larger;
+	font-size: var(--fs-section-head);
 	font-style: normal;
-	font-weight: lighter;
+	font-weight: 400;
 }
 
 ul {
@@ -68,18 +73,18 @@ ul {
 }
 
 a {
-	color: var(--color-text-link);
-}
-
-a:visited {
-	color: var(--color-text-visited-link);
+	font-weight: 300;
+	font-size: var(--fs-normal);
 }
 
 address ul,
 nav ul {
 	padding-left: 0;
-	font-size: larger;
 	list-style: none;
+}
+
+ul li {
+	margin: .1em auto;
 }
 
 address ul a,
@@ -182,7 +187,10 @@ label>div.slot {
 }
 
 .strong {
-	font-size: xxx-large;
+	font-size: var(--fs-strong);
+}
+.strong mark {
+	font-size: calc(var(--fs-strong) + 4px);
 }
 
 .center {
@@ -207,7 +215,7 @@ label>div.slot {
 	background-color: var(--color-active);
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 40em) {
 	form {
 		width: max(300px, 100%);
 		box-sizing: border-box;
