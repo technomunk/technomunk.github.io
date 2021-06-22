@@ -22,7 +22,7 @@
 /* The form itself */
 
 form {
-	min-width: 15em;
+	min-width: 20em;
 	max-width: 30em;
 	width: 70%;
 	margin: auto;
@@ -133,4 +133,18 @@ form>.divider {
 	width: 100%;
 	height: 1px;
 	background: linear-gradient(.25turn, transparent, var(--color-border), transparent);
+}
+
+/* Media adjustments */
+
+/* Small vertical screens */
+@media screen and (max-width: 24em) {
+	body {
+		margin: 0;
+	}
+	form {
+		min-width: 10em;
+		width: 100%;
+		box-sizing: border-box;
+	}
 }
