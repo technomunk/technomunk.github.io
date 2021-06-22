@@ -1,0 +1,136 @@
+/* Replaceable colors and sizes */
+:root {
+	--color-text: black;
+	--color-background: white;
+	--color-border: black;
+	--color-field: #f5f5f5;
+	--color-placeholder: rgba(0, 0, 0, .59);
+	--color-focus: blue;
+	--color-invalid: #E53535;
+
+	--fs-header: 40px;
+	--fs-normal: 20px;
+	--fs-small: 16px;
+	--fs-focus: 24px;
+}
+
+* {
+	font-family: 'Open Sans', sans-serif;
+	font-size: var(--fs-normal);
+}
+
+/* The form itself */
+
+form {
+	min-width: 15em;
+	max-width: 30em;
+	width: 70%;
+	margin: auto;
+	padding: 1em 0;
+	border: 1px solid var(--color-border);
+	box-shadow: 2px 2px 2px var(--color-border);
+}
+
+form>* {
+	margin: 1rem auto;
+}
+
+/* Form header */
+
+header {
+	font-family: 'Sniglet', cursive;
+	width: 100%;
+	text-align: center;
+	font-size: var(--fs-header);
+}
+
+form>header {
+	margin-top: 0;
+}
+
+.field {
+	position: relative;
+	height: max-content;
+	width: 90%;
+}
+
+/* Field input */
+
+.field input {
+	padding: calc(1em + 1px) calc(.6em + 1px) calc(.2em + 1px);
+	background-color: var(--color-field);
+	width: 100%;
+	border: 1px solid var(--color-border);
+	box-shadow: 0px 1px 1px var(--color-border);
+	box-sizing: border-box;
+	font-size: var(--fs-focus);
+	height: var(--height-empty-field);
+	outline: none;
+	border-radius: .1em;
+}
+
+.field:focus-within input,
+.field input:not(:placeholder-shown) {
+	height: var(--height-full-field);
+}
+
+.field input:invalid {
+	padding: 1em .6em .2em;
+	border: 2px solid var(--color-invalid);
+}
+
+.field input:invalid:not(:placeholder-shown) {
+	text-decoration-line: underline;
+	text-decoration-color: var(--color-invalid);
+	text-decoration-style: wavy;
+}
+
+.field:focus-within input {
+	font-style: italic;
+	border: 2px solid var(--color-focus);
+	padding: 1em .6em .2em;
+}
+
+/* Field label */
+
+.field input+label {
+	padding: 0 .4em;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	vertical-align: middle;
+	font-style: italic;
+	color: var(--color-placeholder);
+	pointer-events: none;
+
+	transition: all ease-out .4s;
+	font-size: var(--fs-focus);
+}
+
+.field:focus-within input+label,
+.field input:not(:placeholder-shown)+label {
+	transform: translateY(calc(var(--fs-focus) * -.6));
+	font-size: var(--fs-normal);
+}
+
+/* Submit button */
+
+input[type=submit] {
+	display: block;
+	padding: .2em .5em;
+	margin: auto;
+	border: 1px solid var(--color-border);
+	box-shadow: 0px 1px 1px var(--color-border);
+	font-size: var(--fs-focus);
+}
+
+/* Form divider */
+
+form>.divider {
+	width: 100%;
+	height: 1px;
+	background: linear-gradient(.25turn, transparent, var(--color-border), transparent);
+}
