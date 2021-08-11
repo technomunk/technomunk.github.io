@@ -77,7 +77,11 @@ function handleZoom(zoom: ZoomGest) {
 })();
 
 window.onload = () => {
-	new SideMenu(document.getElementById('side-menu')!, document.getElementById('toggle-menu')!);
+	new SideMenu(
+		document.getElementById('side-menu')!,
+		document.getElementById('toggle-menu')!,
+		{ width: 400, max_rel_width: .6, });
+
 	// Link configs
 	{
 		drawConfig = { limit: 0, escapeR: 0, };

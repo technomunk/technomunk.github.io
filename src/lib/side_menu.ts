@@ -2,19 +2,18 @@
 interface SideMenuConfig {
 	// The width of the opened menu in points.
 	width?: number,
-	// The margin between the opened menu and the button in points.
-	margin?: number,
+	// Maximum relative width of the whole viewport the menu may occupy.
+	max_rel_width?: number,
 }
 
 export default class SideMenu {
-	public static DEFAULT_WIDTH = 300;
-	public static DEFAULT_MARGIN = 20;
+	public static DEFAULT_WIDTH = 400;
 
 	public menu: HTMLElement;
 	public button: HTMLElement;
 
 	private width: number = SideMenu.DEFAULT_WIDTH;
-	private margin: number = SideMenu.DEFAULT_MARGIN;
+	private maxWidth?: number;
 
 	public constructor(
 		menu: HTMLElement,
@@ -25,32 +24,33 @@ export default class SideMenu {
 		this.button = button;
 		if (config != null) {
 			this.width = config.width || SideMenu.DEFAULT_WIDTH;
-			this.margin = config.margin || SideMenu.DEFAULT_MARGIN;
+			this.maxWidth = config.max_rel_width;
 		}
 
 		this.button.addEventListener('click', this.toggle.bind(this));
+		this.close();
 	}
 
 	/** Open the side menu. */
 	public open(): void {
-		this.menu.style.width = `${this.width}pt`;
-		this.button.style.marginRight = `${this.width + this.margin}pt`;
-		// TODO: animate button
+		if (this.maxWidth != null && window.innerWidth * this.maxWidth < this.width) {
+			this.menu.style.width = '100%';
+		} else {
+			this.menu.style.width = `${this.width}px`;
+		}
 	}
 
 	/** Close the side menu. */
 	public close(): void {
-		this.menu.style.width = '0';
-		this.button.style.marginRight = `${this.margin}pt`;
-		// TODO: animate button
+		this.menu.style.width = '0px';
 	}
 
 	/** Toggle between open and closed states. */
 	public toggle(): void {
-		if (this.menu.style.width === `${this.width}pt`) {
-			this.close();
-		} else {
+		if (this.menu.style.width === '0px') {
 			this.open();
+		} else {
+			this.close();
 		}
 	}
 }
