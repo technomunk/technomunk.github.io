@@ -8,7 +8,8 @@
 	--color-focus: blue;
 	--color-invalid: #E53535;
 
-	--fs-header: 40px;
+	--fs-h1: 48px;
+	--fs-h2: 36px;
 	--fs-normal: 20px;
 	--fs-small: 16px;
 	--fs-focus: 24px;
@@ -28,50 +29,61 @@ form {
 	margin: auto;
 	padding: 1em 0;
 	border: 1px solid var(--color-border);
-	box-shadow: 2px 2px 2px var(--color-border);
+	box-shadow: 2px 3px 2px var(--color-border);
 }
 
 form>* {
 	margin: 1rem auto;
 }
 
-/* Form header */
+form>section {
+	margin: 0;
+}
 
-header {
+form>section>* {
+	margin: 1rem auto;
+}
+
+/* Headers */
+
+h1,
+h2 {
 	font-family: 'Sniglet', cursive;
 	width: 100%;
 	text-align: center;
-	font-size: var(--fs-header);
+	margin: 0;
 }
 
-form>header {
-	margin-top: 0;
+h1 {
+	font-size: var(--fs-h1);
 }
+
+h2 {
+	font-size: var(--fs-h2);
+}
+
+/* Form field */
 
 .field {
 	position: relative;
 	height: max-content;
-	width: 90%;
+	margin-left: .4em;
+	margin-right: .4em;
 }
 
 /* Field input */
 
-.field input {
+.field input,
+.field select {
 	padding: calc(1em + 1px) calc(.6em + 1px) calc(.2em + 1px);
 	background-color: var(--color-field);
 	width: 100%;
 	border: 1px solid var(--color-border);
-	box-shadow: 0px 1px 1px var(--color-border);
+	box-shadow: 0px 2px 2px var(--color-border);
 	box-sizing: border-box;
 	font-size: var(--fs-focus);
-	height: var(--height-empty-field);
 	outline: none;
 	border-radius: .1em;
-}
-
-.field:focus-within input,
-.field input:not(:placeholder-shown) {
-	height: var(--height-full-field);
 }
 
 .field input:invalid {
@@ -85,31 +97,45 @@ form>header {
 	text-decoration-style: wavy;
 }
 
+.field:focus-within select,
 .field:focus-within input {
 	font-style: italic;
 	border: 2px solid var(--color-focus);
 	padding: 1em .6em .2em;
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+	-moz-appearance: textfield;
+}
+
 /* Field label */
 
-.field input+label {
-	padding: 0 .4em;
+.field input+label,
+.field select+label {
 	display: flex;
 	align-items: center;
-	height: 100%;
+	vertical-align: middle;
 	position: absolute;
 	top: 0;
 	left: 0;
-	vertical-align: middle;
+	height: 100%;
+	padding: 0 .4em;
 	font-style: italic;
+	font-size: var(--fs-focus);
 	color: var(--color-placeholder);
 	pointer-events: none;
-
-	transition: all ease-out .4s;
-	font-size: var(--fs-focus);
 }
 
+.field input+label {
+	transition: all ease-out .4s;
+}
+
+.field select+label,
 .field:focus-within input+label,
 .field input:not(:placeholder-shown)+label {
 	transform: translateY(calc(var(--fs-focus) * -.6));
@@ -133,6 +159,11 @@ form>.divider {
 	width: 100%;
 	height: 1px;
 	background: linear-gradient(.25turn, transparent, var(--color-border), transparent);
+}
+
+/* Hidden elements */
+.hidden {
+	display: none;
 }
 
 /* Media adjustments */
