@@ -5,6 +5,7 @@
     "eslint": "^7.27.0",
     "ts-loader": "^8.1.0",
     "typescript": "^4.2.4",
+    "wasm-game-of-life": "file:wasm-game-of-life/pkg",
     "webpack": "^5.31.2",
     "webpack-cli": "^4.6.0"
   },
@@ -29,5 +30,8 @@
   "bugs": {
     "url": "https://github.com/technomunk/technomunk.github.io/issues"
   },
-  "homepage": "https://github.com/technomunk/technomunk.github.io#readme"
+  "homepage": "https://github.com/technomunk/technomunk.github.io#readme",
+  "dependencies": {
+    "wasm-loader": "^1.3.0"
+  }
 }
