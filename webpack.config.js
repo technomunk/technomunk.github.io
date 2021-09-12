@@ -17,7 +17,7 @@ module.exports = {
 	mode: 'development',
 	devServer: {
 		static: {
-			directory: path.join(__dirname, 'serve'),
+			directory: path.join(__dirname, 'docs'),
 		},
 	},
 	module: {
@@ -34,6 +34,6 @@ module.exports = {
 	},
 	output: {
 		filename: '[name].js',
-		path: path.resolve(__dirname, 'serve'),
+		path: path.resolve(__dirname, 'docs'),
 	},
 };
