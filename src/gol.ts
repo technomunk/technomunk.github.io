@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Universe } from "wasm-game-of-life";
+import { Universe } from "wasm-game-of-life/wasm_game_of_life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg.wasm";
 
 const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
@@ -45,6 +45,7 @@ function cellAlive(cells: Uint8Array, x: number, y: number): boolean {
 }
 
 function drawCells() {
+	universe.tick();
 	const cells = new Uint8Array(memory.buffer, universe.cells_ptr(), universe.cells_size());
   
 	ctx.beginPath();
