@@ -13,8 +13,7 @@ module.exports = {
 		syncWebAssembly: true,
 		topLevelAwait: true,
 	},
-	devtool: 'inline-source-map',
-	mode: 'development',
+	mode: 'production',
 	devServer: {
 		static: {
 			directory: path.join(__dirname, 'docs'),
