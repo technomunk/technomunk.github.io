@@ -6,3 +6,7 @@ body {
 	overflow: hidden; /* disable scrollbars */
 	display: block; /* no floating content */
 }
+
+main {
+	margin: 0;
+}
