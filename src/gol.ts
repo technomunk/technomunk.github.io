@@ -19,6 +19,8 @@ canvas.width = cellCntX * CELL_SIZE;
 canvas.height = cellCntY * CELL_SIZE;
 
 let universe = Universe.random(cellCntX, cellCntY);
+let redraw: 'none' | 'full' | 'cells' = 'full';
+let lastDraw = Date.now();
 
 window.addEventListener('resize', () => {
 	cellCntX = Math.floor(window.innerWidth / CELL_SIZE);
@@ -29,10 +31,7 @@ window.addEventListener('resize', () => {
 	universe.free();
 	universe = Universe.random(cellCntX, cellCntY);
 
-	requestAnimationFrame(() => {
-		drawGrid();
-		drawCells();
-	})
+	redraw = 'full';
 })
 
 canvas.addEventListener('click', event => {
@@ -44,13 +43,13 @@ canvas.addEventListener('click', event => {
 	} else {
 		universe.toggle(Math.floor(x*cellCntX), Math.floor(y*cellCntY));
 	}
-	requestAnimationFrame(drawCells);
+	redraw = 'cells';
 });
 
 window.addEventListener('keypress', event => {
 	if (event.key == ' ') {
 		universe.tick();
-		requestAnimationFrame(drawCells);
+		redraw = 'cells';
 	}
 })
 
@@ -100,5 +99,28 @@ function drawCells() {
 	ctx.stroke();
 }
 
-drawGrid();
-drawCells();
+function drawLoop() {
+	const now = Date.now();
+
+	if (now - lastDraw >= 500) {
+		universe.tick();
+		lastDraw = now;
+		if (redraw != 'full') {
+			redraw = 'cells';
+		}
+	}
+
+	switch (redraw) {
+	case 'full':
+		drawGrid();
+		drawCells();
+		break;
+	case 'cells':
+		drawCells();
+		break;
+	}
+
+	requestAnimationFrame(drawLoop);
+}
+
+drawLoop();
