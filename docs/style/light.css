@@ -201,17 +201,17 @@ label>div.slot {
 	text-align: justify;
 }
 
-.button {
+button, .button {
 	border: 1px solid var(--color-border);
 	color: var(--color-text);
 	background-color: var(--color-button);
 }
 
-.button:hover {
+button:hover, .button:hover {
 	background-color: var(--color-hover);
 }
 
-.button:active {
+button:active, .button:active {
 	background-color: var(--color-active);
 }
 
