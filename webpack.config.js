@@ -7,7 +7,7 @@ module.exports = {
 		// cpu_main: ['./src/side_menu.ts', './src/cpu_mandelbrot/toggle_fullscreen.ts',],
 		// cpu_worker: './src/cpu_mandelbrot/draw_worker.ts',
 		comdyn: ['./src/comdyn.ts',],
-		gol: ['./src/gol_entry.ts',],
+		gol: ['./src/gol.ts',],
 	},
 	experiments: {
 		syncWebAssembly: true,

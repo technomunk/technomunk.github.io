@@ -79,33 +79,3 @@ button, .button {
 .coord {
 	font: 24pt 'Roboto';
 }
-
-#side-menu > .column {
-	margin-right: 10pt;
-}
-
-#side-menu {
-	position: fixed;
-	padding-top: 5%;
-	height: 100%;
-	width: 0; /* to be changed by JS */
-	top: 0%;
-	right: 0;
-	overflow: hidden; /* disable scrolling */
-	transition: .5s ease-in-out;
-}
-
-button#toggle-menu {
-	position: fixed;
-	top: 5%;
-	right: 0;
-	margin-right: 20pt;
-	border-radius: 25pt;
-	width: 50pt;
-	height: 50pt;
-	transition: .5s ease-in-out;
-	padding: 0;
-}
-button#toggle-menu>svg {
-	width: 90%;
-}
