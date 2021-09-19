@@ -1,0 +1,9 @@
+.control-panel {
+	position: absolute;
+	bottom: 50px;
+	width: 250px;
+	height: 50px;
+	background: lightblue;
+	left: calc(50% - 125px);
+	border-radius: 10px;
+}
