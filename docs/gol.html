@@ -3,8 +3,8 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="style/light.css">
-		<link rel="stylesheet" href="style/side-menu.css">
 		<link rel="stylesheet" href="style/fullscreen.css">
+		<link rel="stylesheet" href="style/control-panel.css">
 		<meta name="author" content="Grigory 'Technomunk' Glukhov">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Connway's Game of Life</title>
@@ -14,14 +14,15 @@
 			<canvas id="main-canvas" style="display: block; margin: auto;"></canvas>
 			<script src="gol.js"></script>
 		</main>
-		<aside id="side-menu" class="flex">
+		<aside class="control-panel">
+			<!-- TODO:
+				pause/resume button
+				slower button
+				speed selector
+				faster button
+				speed indicator
+				info link button
+			 -->
 		</aside>
-		<button id="toggle-menu" data-toggle="collapse" data-target="#side-menu">
-			<svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<rect x="7" y="40" width="47" height="7" rx="3.5" fill="black"/>
-				<rect x="7" y="27" width="47" height="7" rx="3.5" fill="black"/>
-				<rect x="7" y="14" width="47" height="7" rx="3.5" fill="black"/>
-			</svg>
-		</button>
 	</body>
 </html>
