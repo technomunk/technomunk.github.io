@@ -1,24 +1,33 @@
-.control-panel {
+.control.panel {
 	position: absolute;
 	display: flex;
 	bottom: 50px;
 	background: orange;
-	border-radius: 10px;
+	border-radius: 16px;
 	padding: 10px;
 	left: 50%;
 	transform: translateX(-50%);
 }
 
-.control-panel>* {
+.control.panel>* {
 	margin: 5px;
 }
 
-.control-panel>div {
+.control.panel>div {
 	margin: auto 5px;
 }
 
-button.control, .button.control {
-	border-radius: 2px;
+button.control,
+.button.control {
+	border-radius: 12px;
 	width: 48px;
 	height: 48px;
+	padding: 0;
+	border: 2px solid black;
+}
+
+button.control>img,
+.button.control>img {
+	width: 100%;
+	height: auto;
 }
