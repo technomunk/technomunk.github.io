@@ -72,7 +72,10 @@ function handleZoom(zoom: ZoomGest) {
 	gd.on('zoomupdate', handleZoom);
 	gd.on('zoomstop', handleZoom);
 
-	canvas.addEventListener('wheel', event => renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY));
+	canvas.addEventListener('wheel', event => {
+		renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY);
+		event.preventDefault();
+	});
 	window.addEventListener('resize', () => renderer?.resize(window.innerWidth, window.innerHeight));
 })();
 
