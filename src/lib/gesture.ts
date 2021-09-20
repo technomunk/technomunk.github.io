@@ -34,7 +34,9 @@ type ZoomEventHandler = (event: ZoomEvent) => void;
 export class GestureDecoder {
 	private cache: PointerEvent[] = [];
 	private x = 0;
+	private lastX = 0;
 	private y = 0;
+	private lastY = 0;
 	private delta = 0;
 
 	private dragStartHandler?: DragEventHandler;
@@ -56,6 +58,10 @@ export class GestureDecoder {
 		element.addEventListener('pointercancel', this.handlePointerUp.bind(this));
 		element.addEventListener('pointerout', this.handlePointerUp.bind(this));
 		element.addEventListener('pointerleave', this.handlePointerUp.bind(this));
+
+		element.addEventListener('gesturestart', this.handleGestureStart.bind(this));
+		element.addEventListener('gesturechange', this.handleGestureChange.bind(this));
+		element.addEventListener('gestureend', this.handleGestureEnd.bind(this));
 	}
 
 	/** Set the handler for events of given type.
@@ -155,6 +161,67 @@ export class GestureDecoder {
 
 		if (deferStartDrag) {
 			this.startDrag();
+		}
+	}
+
+	private handleGestureStart(event: any) {
+		event.preventDefault();
+		this.x = event.clientX;
+		this.y = event.clientY;
+
+		if (this.dragStartHandler) {
+			this.dragStartHandler({
+				x: 0,
+				y: 0,
+			})
+		}
+		if (this.zoomStartHandler) {
+			this.zoomStartHandler({
+				x: this.x,
+				y: this.y,
+				scale: 1,
+			})
+		}
+
+		this.lastX = event.clientX;
+		this.lastY = event.clientY;
+	}
+	private handleGestureChange(event: any) {
+		event.preventDefault();
+		this.lastX = event.clientX;
+		this.lastY = event.clientY;
+
+		if (this.dragUpdateHandler && (this.lastX != event.clientX || this.lastY != event.clientY)) {
+			this.dragUpdateHandler({
+				x: event.clientX - this.lastX,
+				y: event.clientY - this.lastY,
+			})
+		}
+		if (this.zoomUpdateHandler) {
+			this.zoomUpdateHandler({
+				x: event.clientX,
+				y: event.clientY,
+				scale: event.scale,
+			})
+		}
+
+		this.lastX = event.clientX;
+		this.lastY = event.clientY;
+	}
+	private handleGestureEnd(event: any) {
+		event.preventDefault();
+		if (this.dragStopHandler) {
+			this.dragStopHandler({
+				x: event.clientX - this.lastX,
+				y: event.clientY - this.lastY,
+			})
+		}
+		if (this.zoomStopHandler) {
+			this.zoomStopHandler({
+				x: event.clientX,
+				y: event.clientY,
+				scale: event.scale,
+			})
 		}
 	}
 
