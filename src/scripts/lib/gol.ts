@@ -5,11 +5,18 @@ import { clientToRect } from "./util";
 
 const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
+const speedInput = document.getElementById("speed-select") as HTMLInputElement;
+const speedText = document.getElementById("speed-indicator") as HTMLElement;
+const pauseResumeButton = document.getElementById("pause-resume") as HTMLButtonElement;
+const pauseResumeIcon = pauseResumeButton.getElementsByTagName("img")[0] as HTMLImageElement;
 
 const CELL_SIZE = 16; // px
+const DELAYS = [2_000, 1_000, 500, 250, 100, 50, 10];
 
 let cellCntX = Math.floor(window.innerWidth / CELL_SIZE);
 let cellCntY = Math.floor(window.innerHeight / CELL_SIZE);
+let delay = DELAYS[0];
+let autostep = true;
 
 const COL_LIVE = '#000000';
 const COL_DEAD = '#FFFFFF';
@@ -27,12 +34,14 @@ window.addEventListener('resize', () => {
 	cellCntY = Math.floor(window.innerHeight / CELL_SIZE);
 	canvas.width = cellCntX * CELL_SIZE;
 	canvas.height = cellCntY * CELL_SIZE;
-
+	
 	universe.free();
 	universe = Universe.random(cellCntX, cellCntY);
-
+	
 	redraw = 'full';
-})
+});
+
+document.getElementById('step')!.onclick = stepSimulation;
 
 canvas.addEventListener('click', event => {
 	const canvasRect = canvas.getBoundingClientRect();
@@ -48,10 +57,41 @@ canvas.addEventListener('click', event => {
 
 window.addEventListener('keypress', event => {
 	if (event.key == ' ') {
-		universe.tick();
-		redraw = 'cells';
+		stepSimulation();
 	}
-})
+});
+
+speedInput.min = "0";
+speedInput.max = `${DELAYS.length - 1}`;
+
+speedInput.oninput = updateDelay;
+updateDelay();
+
+pauseResumeButton.onclick = () => {
+	autostep = !autostep;
+	updatePausePlayIcon();
+}
+updatePausePlayIcon();
+
+function updatePausePlayIcon() {
+	if (autostep) {
+		pauseResumeIcon.src = "images/pause.svg";
+		pauseResumeIcon.alt = "pause";
+	} else {
+		pauseResumeIcon.src = "images/resume.svg";
+		pauseResumeIcon.alt = "resume";
+	}
+}
+
+function stepSimulation() {
+	universe.tick();
+	redraw = 'cells';
+}
+
+function updateDelay() {
+	delay = DELAYS[+speedInput.value];
+	speedText.textContent = `${1000 / delay}x`;
+}
 
 function drawGrid() {
 	ctx.strokeStyle = COL_GRID;
@@ -102,7 +142,7 @@ function drawCells() {
 function drawLoop() {
 	const now = Date.now();
 
-	if (now - lastDraw >= 500) {
+	if (autostep && ((now - lastDraw) >= delay)) {
 		universe.tick();
 		lastDraw = now;
 		if (redraw != 'full') {
