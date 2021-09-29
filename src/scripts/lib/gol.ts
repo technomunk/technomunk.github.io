@@ -18,9 +18,9 @@ let cellCntY = Math.floor(window.innerHeight / CELL_SIZE);
 let delay = DELAYS[0];
 let autostep = true;
 
-const COL_LIVE = '#000000';
-const COL_DEAD = '#FFFFFF';
-const COL_GRID = '#CCCCCC';
+const COL_LIVE = '#47BA00';
+const COL_DEAD = '#D0D0D0';
+const COL_GRID = '#000000';
 
 canvas.width = cellCntX * CELL_SIZE;
 canvas.height = cellCntY * CELL_SIZE;
