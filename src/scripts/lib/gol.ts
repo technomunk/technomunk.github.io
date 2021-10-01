@@ -13,8 +13,8 @@ const pauseResumeIcon = pauseResumeButton.getElementsByTagName("img")[0] as HTML
 const CELL_SIZE = 16; // px
 const DELAYS = [2_000, 1_000, 500, 250, 100, 50, 10];
 
-let cellCntX = Math.floor(window.innerWidth / CELL_SIZE);
-let cellCntY = Math.floor(window.innerHeight / CELL_SIZE);
+let cellCntX = Math.ceil(window.innerWidth / CELL_SIZE);
+let cellCntY = Math.ceil(window.innerHeight / CELL_SIZE);
 let delay = DELAYS[0];
 let autostep = true;
 
@@ -30,8 +30,8 @@ let redraw: 'none' | 'full' | 'cells' = 'full';
 let lastDraw = Date.now();
 
 window.addEventListener('resize', () => {
-	cellCntX = Math.floor(window.innerWidth / CELL_SIZE);
-	cellCntY = Math.floor(window.innerHeight / CELL_SIZE);
+	cellCntX = Math.ceil(window.innerWidth / CELL_SIZE);
+	cellCntY = Math.ceil(window.innerHeight / CELL_SIZE);
 	canvas.width = cellCntX * CELL_SIZE;
 	canvas.height = cellCntY * CELL_SIZE;
 	

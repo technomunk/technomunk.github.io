@@ -1,12 +1,13 @@
 .control.panel {
 	position: absolute;
 	display: flex;
-	bottom: 50px;
+	bottom: 30px;
 	background: whitesmoke;
 	border-radius: 16px;
 	padding: 10px;
 	left: 50%;
 	transform: translateX(-50%);
+	max-width: 80%;
 }
 
 .control.panel>* {
@@ -19,11 +20,18 @@
 	text-align: center;
 }
 
+.control.panel>input[type=range] {
+	min-width: 20px;
+	flex-grow: 1;
+}
+
 button.control,
 .button.control {
 	border-radius: 12px;
 	width: 48px;
 	height: 48px;
+	min-width: 48px;
+	min-height: 48px;
 	padding: 0;
 	border: 2px solid black;
 }
