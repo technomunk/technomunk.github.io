@@ -23,10 +23,10 @@ Instructions for building the website.
 
 ### 🛠 First time setup
 
-- `git submodule init` // initialize dependency submodules
-- `git submodule update` // pull dependencies
-- `wasm-pack build wasm-game-of-life` // build game-of-life dependency
-- `npm install` // install JS dependencies
+- Initialize dependency submodules: `git submodule foreach git submodule init`
+- Update dependency submodules: `git submodule foreach git submodule update`
+- Build wasm dependencies: `git submodule foreach wasm-pack build`
+- Install JS dependencies: `npm install`
 
 ### 📨 Build static content
 
@@ -34,7 +34,7 @@ Instructions for building the website.
 npm run build
 ```
 
-### Local development
+## Local development
 
 ```sh
 npm run serve
