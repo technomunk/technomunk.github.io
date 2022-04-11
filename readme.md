@@ -30,4 +30,14 @@ Instructions for building the website.
 
 ### 📨 Build static content
 
-- `npm run build`.
+```sh
+npm run build
+```
+
+### Local development
+
+```sh
+npm run serve
+```
+
+Goto http://localhost:8080
