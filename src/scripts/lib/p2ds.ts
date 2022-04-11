@@ -1,2 +1,3 @@
-import { game } from "p2ds/p2ds"
+import { game } from "p2ds/p2dslib"
+
 game()
