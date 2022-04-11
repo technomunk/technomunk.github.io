@@ -23,8 +23,8 @@ Instructions for building the website.
 
 ### 🛠 First time setup
 
-- Initialize dependency submodules: `git submodule foreach git submodule init`
-- Update dependency submodules: `git submodule foreach git submodule update`
+- Initialize dependency submodules: `git submodule init`
+- Update dependency submodules: `git submodule update`
 - Build wasm dependencies: `git submodule foreach wasm-pack build`
 - Install JS dependencies: `npm install`
 
