@@ -27,6 +27,7 @@ Instructions for building the website.
 - Update dependency submodules: `git submodule update`
 - Build wasm dependencies: `git submodule foreach wasm-pack build`
 - Install JS dependencies: `npm install`
+- Link p2ds assets folder: `ln -s submodules/p2ds/assets docs/assets`
 
 ### 📨 Build static content
 
