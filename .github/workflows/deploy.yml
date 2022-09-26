@@ -43,7 +43,7 @@ jobs:
           cache: yarn
           cache-dependency-path: yarn.lock
 
-      - name: Instal dependencies
+      - name: Install dependencies
         run: yarn install
 
       - name: Build web-page
