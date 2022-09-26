@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<link rel="stylesheet" href="style/comdyn.css">
+		<link rel="stylesheet" href="style/greyscale.css">
+		<link rel="stylesheet" href="style/side-menu.css">
+		<link rel="stylesheet" href="style/fullscreen.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&family=Sniglet&display=swap" rel="stylesheet">
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi">
+		<meta name="author" content="Grigory 'Technomunk' Glukhov">
+		<meta name="application-name" content="Complex Dynamics Explorer">
+		<meta name="description" content="Interactive complex dynamics exploration tool.">
+	</head>
+	<body>
+		<main>
+			<canvas id="canvas"></canvas>
+			<script type="module" src="scripts/comdyn.ts"></script>
+			<noscript>Sorry, this page is boring without JS!</noscript>
+		</main>
+		<aside id="side-menu" class="flex">
+			<div class="row"><a class="button" href="index.html">Home</a></div>
+			<div id="coord-x", class="row coord">X:</div>
+			<div id="coord-y", class="row coord">Y:</div>
+			<div class="row">
+				<label for="limit">Limit</label>
+				<input id="limit" type="number" min="1" value="32" max="4096">
+			</div>
+			<div class="row">
+				<label for="escaper">Escape R</label>
+				<input id="escaper" type="number" min=".1" value="2" max="100" step=".1">
+			</div>
+			<div class="row">
+				<button id="toggle_fs">Toggle Fullscreen</button>
+			</div>
+			<div class="row">
+				<button id="redraw">Redraw</button>
+				<button id="reset">Reset</button>
+			</div>
+		</aside>
+		<button id="toggle-menu" data-toggle="collapse" data-target="#side-menu">
+			<svg viewBox="0 0 62 62" fill="none">
+				<rect x="7" y="40" width="47" height="7" rx="3.5" fill="black"/>
+				<rect x="7" y="27" width="47" height="7" rx="3.5" fill="black"/>
+				<rect x="7" y="14" width="47" height="7" rx="3.5" fill="black"/>
+			</svg>
+		</button>
+	</body>
+</html>
