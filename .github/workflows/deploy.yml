@@ -48,7 +48,7 @@ jobs:
 
       - name: Build web-page
         run: |
-          yarn build --public-url https://www.technomunk.com
+          yarn build
           echo "www.technomunk.com" > dist/CNAME
 
       - name: Upload GitHub Pages artifact
