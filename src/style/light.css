@@ -1,0 +1,223 @@
+:root {
+	--color-background: ghostwhite;
+	--color-form-background: antiquewhite;
+	--color-invalid: crimson;
+	--color-valid: darkgreen;
+	--color-focus: blue;
+	--color-border: black;
+	--color-text: black;
+	--color-text-placeholder: dimgray;
+	--color-text-link: darkgreen;
+	--color-text-visited-link: darkgreen;
+	--color-shadow: black;
+	--color-button: floralwhite;
+	--color-hover: blanchedalmond;
+	--color-active: burlywood;
+
+	--fs-normal: 23px;
+	--fs-section-head: 30px;
+	--fs-strong: 50px;
+}
+
+@media (forced-colors: active) {
+	:root {
+		--color-form-background: Field;
+		--color-focus: Highlight;
+	}
+}
+
+* {
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+	font-size: var(--fs-normal);
+}
+
+body {
+	margin: 1rem max(1rem, 5%) 0;
+	min-width: 14rem;
+}
+
+body>* {
+	margin: .5rem auto;
+}
+
+section {
+	margin: 1rem auto;
+}
+
+img.avatar {
+	border-radius: 50%;
+	display: block;
+	margin: 0 auto .5rem;
+	min-width: 128px;
+	max-width: 100%;
+	border: 2px solid var(--color-border);
+	box-shadow: 4px 4px 8px 4px var(--color-border);
+}
+
+p {
+	text-indent: clamp(1rem, 5%, 2rem);
+	text-align: justify;
+}
+
+address,
+nav {
+	margin: .5em auto;
+	text-align: center;
+	font-size: var(--fs-section-head);
+	font-style: normal;
+	font-weight: 400;
+}
+
+ul {
+	margin: 0 auto;
+}
+
+a {
+	font-weight: 300;
+	font-size: var(--fs-normal);
+}
+
+address ul,
+nav ul {
+	padding-left: 0;
+	list-style: none;
+}
+
+ul li {
+	margin: .1em auto;
+}
+
+address ul a,
+nav ul a {
+	font-style: italic;
+}
+
+footer {
+	clear: both;
+	bottom: 0;
+	text-align: center;
+	font-style: italic;
+}
+
+footer i {
+	font-style: normal;
+	font-size: larger;
+}
+
+mark {
+	font-style: oblique;
+	background-color: inherit;
+	font-size: inherit;
+}
+
+form {
+	margin: auto;
+	width: 60%;
+	background-color: var(--color-form-background);
+	padding: 1rem;
+	-webkit-box-shadow: 4px 4px 10px 0px var(--color-shadow);
+	box-shadow: 4px 4px 10px 0px var(--color-shadow);
+}
+
+form>header {
+	font-size: xxx-large;
+	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+form>input {
+	display: block;
+	margin: auto;
+	padding: .2rem .3rem;
+}
+
+.field {
+	width: 100%;
+	position: relative;
+	margin: 1rem auto;
+}
+
+.field input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: calc(.3rem + 2px);
+	background-color: transparent;
+	border: 1px solid var(--color-border);
+	outline: 0;
+}
+
+.field input:invalid {
+	padding: .3rem;
+	border: 3px solid var(--color-invalid);
+}
+
+.field:focus-within input {
+	padding: .3rem;
+	border: 3px solid var(--color-focus);
+}
+
+.field input+label {
+	position: absolute;
+	left: .3rem;
+	top: calc(.3rem + 3px);
+	padding: 0 .1rem;
+    transition: transform 200ms ease-in-out;
+	background-color: var(--color-form-background);
+	color: var(--color-text-placeholder);
+	pointer-events: none;
+}
+
+.field:focus-within label,
+input:not(:placeholder-shown)+label {
+	transform: translateY(-1rem);
+}
+
+.field:hover input,
+.field:hover input+label {
+	background-color: var(--color-hover);
+}
+
+label>div.slot {
+	position: relative;
+	top: -50%;
+	width: inherit;
+	height: 3px;
+	background-color: brown;
+}
+
+.strong {
+	font-size: var(--fs-strong);
+}
+.strong mark {
+	font-size: calc(var(--fs-strong) + 4px);
+}
+
+.center {
+	text-align: center;
+}
+
+.justify {
+	text-align: justify;
+}
+
+button, .button {
+	border: 1px solid var(--color-border);
+	color: var(--color-text);
+	background-color: var(--color-button);
+}
+
+button:hover, .button:hover {
+	background-color: var(--color-hover);
+}
+
+button:active, .button:active {
+	background-color: var(--color-active);
+}
+
+@media screen and (max-width: 40em) {
+	form {
+		width: max(300px, 100%);
+		box-sizing: border-box;
+	}
+}

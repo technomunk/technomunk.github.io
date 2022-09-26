@@ -1,6 +1,9 @@
 # Local IDE config
 .vscode/
 
+# output
+docs
+
 # Logs
 logs
 *.log
