@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { compileProgram, setupFullviewQuad } from "./glutil";
-import { ImageType, MandelConfig, Renderer } from "./irenderer";
+import { ImageType, JuliaConfig, Renderer } from "./irenderer";
 
-type MandelUniforms = {
+type JuliaUniforms = {
 	uPos: WebGLUniformLocation,
 	uDims: WebGLUniformLocation,
 	uLim: WebGLUniformLocation,
 	uEscapeD: WebGLUniformLocation,
 	uInsideColor: WebGLUniformLocation,
+	uSeed: WebGLUniformLocation,
 };
 
 /** WebGL-based image renderer. */
@@ -18,8 +19,8 @@ class GpuRenderer implements Renderer {
 	private gl: WebGLRenderingContext;
 	private program: WebGLProgram;
 
-	private uniforms: MandelUniforms;
-	private cachedConfig: MandelConfig | undefined;
+	private uniforms: JuliaUniforms;
+	private cachedConfig: JuliaConfig | undefined;
 
 	constructor(canvas: HTMLCanvasElement, vertex: string, fragment: string) {
 		this.canvas = canvas;
@@ -39,6 +40,7 @@ class GpuRenderer implements Renderer {
 			uLim: this.gl.getUniformLocation(this.program, 'uLim')!,
 			uEscapeD: this.gl.getUniformLocation(this.program, 'uEscapeD')!,
 			uInsideColor: this.gl.getUniformLocation(this.program, 'uInsideColor')!,
+			uSeed: this.gl.getUniformLocation(this.program, 'uSeed')!,
 		};
 	}
 
@@ -78,12 +80,13 @@ class GpuRenderer implements Renderer {
 		}
 	}
 
-	draw(config: MandelConfig): void {
+	draw(config: JuliaConfig): void {
 		this.gl.useProgram(this.program);
 		this.gl.uniform2f(this.uniforms['uPos'], this.rect.x + this.rect.width * .5, this.rect.y + this.rect.height * .5);
 		this.gl.uniform2f(this.uniforms['uDims'], this.rect.width * .5, this.rect.height * .5);
 		this.gl.uniform1i(this.uniforms['uLim'], config.limit);
-		this.gl.uniform1f(this.uniforms['uEscapeD'], config.escapeR * 2)
+		this.gl.uniform1f(this.uniforms['uEscapeD'], config.escapeR * 2);
+		this.gl.uniform2f(this.uniforms['uSeed'], config.seed[0], config.seed[1]);
 		this.gl.uniform4f(this.uniforms['uInsideColor'], 0, 0, 0, 1);
 
 		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);

@@ -23,28 +23,39 @@ vec3 hsv2rgb(vec3 c) {
 	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-int mandel(in float re, in float im) {
-	float x = re;
-	float y = im;
-	float tmp;
-	for (int i = 0; i < MAX_LOOP_COUNT; ++i) {
-		if (i >= uLim || x*x+y*y >= uEscapeD) {
-			return i;
-		}
+vec2 complex_mul(in vec2 a, in vec2 b) {
+    return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+}
 
-		tmp = x;
-		x = x*x - y*y + re;
-		y = 2.*tmp*y + im;
-	}
-	return uLim;
+vec2 complex_sum(in vec2 a, in vec2 b) {
+    return a + b;
+}
+
+float mag2(in vec2 v) {
+    return v.x*v.x + v.y*v.y;
+}
+
+int julia(in vec2 pt) {
+    for (int i = 0; i < MAX_LOOP_COUNT; ++i) {
+        if (i >= uLim || mag2(pt) >= uEscapeD) {
+            return i;
+        }
+
+        pt = complex_mul(pt, pt) + uSeed;
+    }
 }
 
 void main() {
-	int val = mandel(vPos.x, vPos.y);
+	int val = julia(vPos.xy);
 	if (val == uLim) {
 		gl_FragColor = uInsideColor;
 	} else {
-		vec3 hsv = vec3(float(val) / float(uLim), 1, 1);
+        float v = float(val) / float(uLim);
+        float h = v + .65;
+        if (h > 1.0) {
+            h = h - 1.0;
+        }
+		vec3 hsv = vec3(h, 1, .7 + v*.3);
 		gl_FragColor = vec4(hsv2rgb(hsv), 1);
 	}
 }

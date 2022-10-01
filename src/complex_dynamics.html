@@ -22,15 +22,17 @@
 		</main>
 		<aside id="side-menu" class="flex">
 			<div class="row"><a class="button" href="index.html">Home</a></div>
-			<div id="coord-x", class="row coord">X:</div>
-			<div id="coord-y", class="row coord">Y:</div>
 			<div class="row">
 				<label for="limit">Limit</label>
-				<input id="limit" type="number" min="1" value="32" max="4096">
+				<input id="limit" type="number" min="1" value="32" max="1024">
 			</div>
 			<div class="row">
 				<label for="escaper">Escape R</label>
 				<input id="escaper" type="number" min=".1" value="2" max="100" step=".1">
+			</div>
+			<div class="row">
+				<label for="speed">Speed</label>
+				<input id="speed" type="range" min="0" max="3" step=".1" value="1">
 			</div>
 			<div class="row">
 				<button id="toggle_fs">Toggle Fullscreen</button>

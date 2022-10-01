@@ -6,7 +6,7 @@
     "src/index.html",
     "src/browserconfig.xml",
     "src/shaders/identity.vs",
-    "src/shaders/mandel.fs"
+    "src/shaders/julia.fs"
   ],
   "scripts": {
     "start": "rm -rf dist && parcel",

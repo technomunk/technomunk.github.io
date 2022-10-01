@@ -3,20 +3,22 @@ import { displayCoordinates } from "./lib/coordinates";
 import { bindConfig, resetConfigs } from "./lib/draw_config";
 import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "./lib/gesture";
 import { init_gpu_renderer } from "./lib/gpu_renderer";
-import { MandelConfig, Renderer } from "./lib/irenderer";
+import { JuliaConfig, Renderer } from "./lib/irenderer";
 import SideMenu from "./lib/side_menu";
 
 // Constants
 
 const WHEEL_SENSITIVITY = 1e-3;
-
+const LOOPING_PERIOD = 120;
 
 // Local variables
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 let renderer: Renderer | null = null;
 let lastX = 0, lastY = 0, lastScale = 0;
-let drawConfig: MandelConfig | undefined;
+let drawConfig: JuliaConfig | undefined;
+let speed = 1;
+let time = LOOPING_PERIOD / 4, lastAnimationTime = new Date().getTime();
 
 
 // Function definitions
@@ -25,6 +27,26 @@ function draw() {
 	if (renderer && drawConfig) {
 		renderer.draw(drawConfig);
 	}
+}
+
+function animate() {
+	if (!renderer || !drawConfig)
+		return;
+
+	const now = new Date().getTime();
+	let dt = (now - lastAnimationTime) / 1_000;
+	lastAnimationTime = now;
+	time = (time + dt * speed) % LOOPING_PERIOD;
+	const nt = time / LOOPING_PERIOD * 2 * Math.PI;
+	drawConfig.seed = [Math.cos(nt), Math.sin(nt)];
+	draw();
+	if (speed > 0)
+		requestAnimationFrame(animate)
+}
+
+function startAnimation() {
+	lastAnimationTime = new Date().getTime();
+	requestAnimationFrame(animate);
 }
 
 function handleDrag(drag: DragGest) {
@@ -50,10 +72,10 @@ function handleZoom(zoom: ZoomGest) {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 
-	init_gpu_renderer(canvas, 'mandel')
+	init_gpu_renderer(canvas, 'julia')
 		.then(r => {
 			renderer = r;
-			requestAnimationFrame(draw);
+			requestAnimationFrame(animate);
 		});
 
 	const gd = new GestureDecoder(canvas);
@@ -87,20 +109,20 @@ window.onload = () => {
 
 	// Link configs
 	{
-		drawConfig = { limit: 0, escapeR: 0, };
+		drawConfig = { limit: 0, escapeR: 0, seed: [0, 1]};
 
 		const limit = document.getElementById('limit') as HTMLInputElement;
 		drawConfig.limit = Number(limit.value);
 		bindConfig(limit, value => {
 			drawConfig!.limit = value;
-			requestAnimationFrame(draw);
+			requestAnimationFrame(animate);
 		});
 
 		const escapeR = document.getElementById('escaper') as HTMLInputElement;
 		drawConfig.escapeR = Number(escapeR.value);
 		bindConfig(escapeR, value => {
 			drawConfig!.escapeR = value;
-			requestAnimationFrame(draw);
+			requestAnimationFrame(animate);
 		});
 	}
 
@@ -122,7 +144,7 @@ window.onload = () => {
 
 	// Setup redraw and reset buttons
 	{
-		document.getElementById('redraw')!.onclick = draw;
+		document.getElementById('redraw')!.onclick = animate;
 		document.getElementById('reset')!.onclick = () => {
 			resetConfigs();
 			if (renderer) {
@@ -137,6 +159,29 @@ window.onload = () => {
 					renderer.rect.y + renderer.rect.height * .5);
 			}
 		}
+	}
+
+	// Setup pause/resume key
+	{
+		const speedElement = document.getElementById("speed") as HTMLInputElement;
+		speed = Number(speedElement.value);
+		bindConfig(speedElement, value => {
+			const restart = speed == 0;
+			speed = value*value;
+			if (restart && speed != 0)
+				startAnimation();
+		});
+		document.addEventListener("keypress", e => {
+			if (e.key == " ") {
+				if (speed == 0) {
+					const value = Number(speedElement.value);
+					speed = value*value;
+					startAnimation();
+				} else {
+					speed = 0;
+				}
+			}
+		})
 	}
 
 	// Setup coordinates

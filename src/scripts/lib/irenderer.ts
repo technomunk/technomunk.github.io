@@ -1,9 +1,10 @@
 export type ImageType = "mandel" | "julia";
 
-/** Configuration used when rendering the mandelbrot set. */
-export interface MandelConfig {
+/** Configuration used when rendering the julia set. */
+export interface JuliaConfig {
 	limit: number,
 	escapeR: number,
+	seed: [number, number],
 }
 
 /** Procedural image renderer. */
@@ -33,5 +34,5 @@ export interface Renderer {
 	/** Queue the render of the image with provided configuration.
 	 * @param config 
 	 */
-	draw(config: MandelConfig): void;
+	draw(config: JuliaConfig): void;
 }
