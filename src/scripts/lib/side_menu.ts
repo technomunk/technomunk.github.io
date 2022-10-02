@@ -17,17 +17,17 @@ export default class SideMenu {
 
 	/** Open the side menu. */
 	public open(): void {
-		this.menu.style.right = '0';
+		this.menu.style.transform = '';
 	}
 
 	/** Close the side menu. */
 	public close(): void {
-		this.menu.style.right = `-${this.menu.clientWidth}px`;
+		this.menu.style.transform = `translate(100%)`;
 	}
 
 	/** Toggle between open and closed states. */
 	public toggle(): void {
-		if (this.menu.style.right === '0px') {
+		if ( ! this.menu.style.transform) {
 			this.close();
 		} else {
 			this.open();

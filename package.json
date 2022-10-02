@@ -9,7 +9,7 @@
     "src/shaders/julia.fs"
   ],
   "scripts": {
-    "start": "rm -rf dist && parcel",
+    "start": "parcel",
     "build": "rm -rf dist && parcel build --no-source-maps"
   },
   "devDependencies": {
