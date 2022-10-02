@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { compileProgram, setupFullviewQuad } from "./glutil";
-import { ImageType, JuliaConfig, Renderer } from "./irenderer";
+import { JuliaConfig, Renderer } from "./irenderer";
 
 type JuliaUniforms = {
 	uPos: WebGLUniformLocation,
@@ -12,7 +12,7 @@ type JuliaUniforms = {
 };
 
 /** WebGL-based image renderer. */
-class GpuRenderer implements Renderer {
+export class GpuRenderer implements Renderer {
 	rect: DOMRect = new DOMRect(-1, -1, 2, 2);
 
 	private canvas: HTMLCanvasElement;
@@ -20,7 +20,7 @@ class GpuRenderer implements Renderer {
 	private program: WebGLProgram;
 
 	private uniforms: JuliaUniforms;
-	private cachedConfig: JuliaConfig | undefined;
+	private cachedConfig?: JuliaConfig;
 
 	constructor(canvas: HTMLCanvasElement, vertex: string, fragment: string) {
 		this.canvas = canvas;
@@ -53,7 +53,7 @@ class GpuRenderer implements Renderer {
 		this.canvas.width = width;
 		this.canvas.height = height;
 
-		this.gl.viewport(0, 0, width, height);
+		this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
 
 		if (this.cachedConfig) {
 			this.draw(this.cachedConfig);
@@ -94,13 +94,9 @@ class GpuRenderer implements Renderer {
 	}
 }
 
-export function init_gpu_renderer(
-	canvas: HTMLCanvasElement,
-	type: ImageType)
-	: Promise<GpuRenderer>
-{
+export function init_gpu_renderer(canvas: HTMLCanvasElement) : Promise<GpuRenderer> {
 	return Promise.all([
 		fetch('shaders/identity.vs', { mode: "same-origin", }).then(response => response.text()),
-		fetch(`shaders/${type}.fs`, { mode: "same-origin", }).then(response => response.text()),
+		fetch(`shaders/julia.fs`, { mode: "same-origin", }).then(response => response.text()),
 	]).then(([vertex, fragment]) => new GpuRenderer(canvas, vertex, fragment));
 }

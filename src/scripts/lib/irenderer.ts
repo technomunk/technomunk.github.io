@@ -1,5 +1,3 @@
-export type ImageType = "mandel" | "julia";
-
 /** Configuration used when rendering the julia set. */
 export interface JuliaConfig {
 	limit: number,

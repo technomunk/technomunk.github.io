@@ -5,6 +5,7 @@ precision mediump float;
 #endif
 
 const int MAX_LOOP_COUNT = 1024;
+const float HUE_OFFSET = .65;
 
 varying vec2 vPos;
 
@@ -51,7 +52,7 @@ void main() {
 		gl_FragColor = uInsideColor;
 	} else {
         float v = float(val) / float(uLim);
-        float h = v + .65;
+        float h = v + HUE_OFFSET;
         if (h > 1.0) {
             h = h - 1.0;
         }

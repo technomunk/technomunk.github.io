@@ -13,6 +13,7 @@
 		<meta name="author" content="Grigory 'Technomunk' Glukhov">
 		<meta name="application-name" content="Complex Dynamics Explorer">
 		<meta name="description" content="Interactive complex dynamics exploration tool.">
+		<meta content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport">
 	</head>
 	<body>
 		<main>
@@ -22,6 +23,9 @@
 		</main>
 		<aside id="side-menu" class="flex">
 			<div class="row"><a class="button" href="index.html">Home</a></div>
+			<div class="row">
+				<canvas id="map" width="360" height="240"/>
+			</div>
 			<div class="row">
 				<label for="limit">Limit</label>
 				<input id="limit" type="number" min="1" value="32" max="1024">

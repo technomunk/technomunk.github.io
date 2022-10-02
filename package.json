@@ -6,7 +6,8 @@
     "src/index.html",
     "src/browserconfig.xml",
     "src/shaders/identity.vs",
-    "src/shaders/julia.fs"
+    "src/shaders/julia.fs",
+    "src/shaders/mandel.fs"
   ],
   "scripts": {
     "start": "parcel",
