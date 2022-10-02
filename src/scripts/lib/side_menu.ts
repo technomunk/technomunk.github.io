@@ -10,7 +10,7 @@ export default class SideMenu {
 		this.button = button;
 
 		this.button.addEventListener('click', this.toggle.bind(this));
-		this.open();
+		this.close();
 	}
 
 	/** Open the side menu. */
