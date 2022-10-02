@@ -2,8 +2,6 @@ export default class SideMenu {
 	public menu: HTMLElement;
 	public button: HTMLElement;
 
-	private maxWidth?: number;
-
 	public constructor(
 		menu: HTMLElement,
 		button: HTMLElement,
@@ -17,7 +15,7 @@ export default class SideMenu {
 
 	/** Open the side menu. */
 	public open(): void {
-		this.menu.style.transform = '';
+		this.menu.style.transform = 'translate(0)';
 	}
 
 	/** Close the side menu. */
@@ -27,10 +25,10 @@ export default class SideMenu {
 
 	/** Toggle between open and closed states. */
 	public toggle(): void {
-		if ( ! this.menu.style.transform) {
-			this.close();
-		} else {
+		if (this.menu.style.transform == 'translate(100%)') {
 			this.open();
+		} else {
+			this.close();
 		}
 	}
 }

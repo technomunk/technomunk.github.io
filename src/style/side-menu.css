@@ -6,7 +6,7 @@
 	max-width: 100%;
 	top: 0%;
 	right: 0px;
-	overflow: hidden; /* disable scrolling */
+	transform: translate(100%);
 	transition: .5s;
 }
 
