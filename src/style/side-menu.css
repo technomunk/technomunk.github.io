@@ -2,11 +2,19 @@
 	position: fixed;
 	padding-top: 5%;
 	height: 100%;
-	width: 0; /* to be changed by JS */
+	width: 400px;
+	max-width: 100%;
 	top: 0%;
-	right: 0;
+	right: 0px;
 	overflow: hidden; /* disable scrolling */
 	transition: .5s;
+}
+
+/* Small vertical screens */
+@media screen and (max-width: 24em) {
+	#side-menu {
+		width: 100%;
+	}
 }
 
 #side-menu > .column {
@@ -28,6 +36,6 @@
 #toggle-menu>svg {
 	display: block;
 	margin: auto;
-	width: 80px;
+	width: 60px;
 	height: auto;
 }

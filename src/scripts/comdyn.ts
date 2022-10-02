@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { displayCoordinates } from "./lib/coordinates";
 import { bindConfig, resetConfigs } from "./lib/draw_config";
 import { GestureDecoder, DragEvent as DragGest, ZoomEvent as ZoomGest } from "./lib/gesture";
 import { init_gpu_renderer } from "./lib/gpu_renderer";
@@ -105,7 +104,7 @@ window.onload = () => {
 	new SideMenu(
 		document.getElementById('side-menu')!,
 		document.getElementById('toggle-menu')!,
-		{ width: 400, max_rel_width: .6, });
+	);
 
 	// Link configs
 	{
@@ -153,10 +152,6 @@ window.onload = () => {
 				renderer.rect.height = 2;
 				renderer.rect.x = -widthToHeight;
 				renderer.rect.width = widthToHeight * 2;
-
-				displayCoordinates(
-					renderer.rect.x + renderer.rect.width * .5,
-					renderer.rect.y + renderer.rect.height * .5);
 			}
 		}
 	}
@@ -182,29 +177,5 @@ window.onload = () => {
 				}
 			}
 		})
-	}
-
-	// Setup coordinates
-	{
-		canvas.addEventListener('mousemove', event => {
-			if (renderer) {
-				displayCoordinates(
-					renderer.rect.x + event.clientX / canvas.width * renderer.rect.width,
-					renderer.rect.y + event.clientY / canvas.height * renderer.rect.height);
-			}
-		});
-		canvas.addEventListener('mouseleave', () => {
-			if (renderer) {
-				displayCoordinates(
-					renderer.rect.x + renderer.rect.width * .5,
-					renderer.rect.y + renderer.rect.height * .5);
-			}
-		});
-
-		if (renderer) {
-			displayCoordinates(
-				renderer.rect.x + renderer.rect.width * .5,
-				renderer.rect.y + renderer.rect.height * .5);
-		}
 	}
 };
