@@ -1,4 +1,5 @@
 import { compileProgram, setupFullviewQuad } from "./glutil"
+import vertexShader from "bundle-text:/src/shaders/identity.vs"
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
@@ -20,47 +21,53 @@ export type Uniforms = {
     [key: string]: number | [number, number] | [number, number, number] | [number, number, number, number]
 }
 
-export async function generate_image(
-    shader: string,
-    width: number,
-    height: number,
-    uniforms: Uniforms)
-    : Promise<CanvasImageSource>
-{
-    const canvas = document.createElement("canvas")
-    canvas.width = width, canvas.height = height
+export default class ImageGenerator {
+    private canvas: HTMLCanvasElement
+    private gl: WebGLRenderingContext
 
-    const gl = canvas.getContext("webgl", CONTEXT_OPTIONS)
-    if (!gl) {
-        throw "WebGL not supported"
-    }
-
-    const [vertex, fragment] = await Promise.all([
-		fetch('shaders/identity.vs', { mode: "same-origin", }).then(response => response.text()),
-		fetch(`shaders/${shader}.fs`, { mode: "same-origin", }).then(response => response.text()),
-    ])
-    const program = compileProgram(gl, vertex, fragment)
-    setupFullviewQuad(gl, program, "aPos")
-
-    gl.useProgram(program)
-
-    for (const [name, value] of Object.entries(uniforms)) {
-        const location = gl.getUniformLocation(program, name)
-        if (!location) {
-            throw `"${name}" uniform could not be found`
-        }
-        if (value instanceof Array) {
-            switch (value.length) {
-                case 2: gl.uniform2f(location, ...value); break
-                case 3: gl.uniform3f(location, ...value); break
-                case 4: gl.uniform4f(location, ...value); break
-            }
+    constructor() {
+        this.canvas = document.createElement("canvas")
+        const gl = this.canvas.getContext("webgl", CONTEXT_OPTIONS)
+        if (gl) {
+            this.gl = gl 
         } else {
-            gl.uniform1i(location, value)
+            throw "WebGL not supported"
         }
     }
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    draw(shader: string, width: number, height: number, uniforms: Uniforms): CanvasImageSource {
+        if (width != this.canvas.width || height != this.canvas.height) {
+            this.resize(width, height)
+        }
 
-    return canvas
+        const program = compileProgram(this.gl, vertexShader, shader)
+        setupFullviewQuad(this.gl, program, "aPos")
+    
+        this.gl.useProgram(program)
+    
+        for (const [name, value] of Object.entries(uniforms)) {
+            const location = this.gl.getUniformLocation(program, name)
+            if (!location) {
+                throw `"${name}" uniform could not be found`
+            }
+            if (value instanceof Array) {
+                switch (value.length) {
+                    case 2: this.gl.uniform2f(location, ...value); break
+                    case 3: this.gl.uniform3f(location, ...value); break
+                    case 4: this.gl.uniform4f(location, ...value); break
+                }
+            } else {
+                this.gl.uniform1i(location, value)
+            }
+        }
+    
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    
+        return this.canvas
+    }
+
+    private resize(width: number, height: number) {
+        this.canvas.width = width, this.canvas.height = height
+        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight)
+    }
 }

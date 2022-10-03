@@ -1,4 +1,4 @@
-#side-menu {
+#hide-menu {
 	position: fixed;
 	padding-top: 5%;
 	height: 100%;
@@ -17,7 +17,7 @@
 	}
 }
 
-#side-menu > .column {
+#hide-menu > .column {
 	margin-right: 10pt;
 }
 

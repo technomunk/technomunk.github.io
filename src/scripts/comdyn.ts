@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { bindConfig, resetConfigs } from "./lib/draw_config"
 import { DragEvent as DragGest, GestureDecoder, ZoomEvent as ZoomGest } from "./lib/gesture"
-import { init_gpu_renderer } from "./lib/gpu_renderer"
 import { JuliaConfig, Renderer } from "./lib/irenderer"
-import { MandelMap } from "./lib/mandelmap"
-import SideMenu from "./lib/side_menu"
+import GpuRenderer from "./lib/gpu_renderer"
+import HideMenu from "./lib/hidemenu"
+import MandelMap from "./lib/mandelmap"
 
 // Constants
 
@@ -17,7 +16,7 @@ const MANDEL_RADIUS = .7885
 const canvas = document.getElementById('canvas') as HTMLCanvasElement
 const mapCanvas = document.getElementById('map') as HTMLCanvasElement
 const map = new MandelMap(mapCanvas)
-let renderer: Renderer | undefined
+let renderer: Renderer = new GpuRenderer(canvas)
 let lastX = 0, lastY = 0, lastScale = 0
 let drawConfig: JuliaConfig = { limit: 32, escapeR: 2, seed: [0, 1] }
 let speed = 1
@@ -50,6 +49,12 @@ function startAnimation() {
 	requestAnimationFrame(animate)
 }
 
+function selectPoint(coords: [number, number]) {
+	drawConfig.seed = coords
+	speed = 0
+	requestAnimationFrame(draw)
+}
+
 function handleDrag(drag: DragGest) {
 	if ((lastX != drag.x || lastY != drag.y) && renderer) {
 		renderer.pan(drag.x - lastX, drag.y - lastY)
@@ -72,12 +77,8 @@ function handleZoom(zoom: ZoomGest) {
 (() => {
 	canvas.width = window.innerWidth
 	canvas.height = window.innerHeight
-
-	init_gpu_renderer(canvas)
-		.then(r => {
-			renderer = r
-			requestAnimationFrame(animate)
-		});
+	renderer.resize(window.innerWidth, window.innerHeight)
+	requestAnimationFrame(animate)
 
 	const gd = new GestureDecoder(canvas)
 	gd.on('dragstart', drag => {
@@ -95,6 +96,8 @@ function handleZoom(zoom: ZoomGest) {
 	gd.on('zoomupdate', handleZoom)
 	gd.on('zoomstop', handleZoom)
 
+	map.onSelect = selectPoint
+
 	canvas.addEventListener('wheel', event => {
 		renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY);
 		event.preventDefault();
@@ -103,8 +106,8 @@ function handleZoom(zoom: ZoomGest) {
 })();
 
 window.onload = () => {
-	new SideMenu(
-		document.getElementById('side-menu')!,
+	new HideMenu(
+		document.getElementById('hide-menu')!,
 		document.getElementById('toggle-menu')!,
 	);
 

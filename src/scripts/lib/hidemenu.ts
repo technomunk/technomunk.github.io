@@ -1,4 +1,4 @@
-export default class SideMenu {
+export default class HideMenu {
 	public menu: HTMLElement;
 	public button: HTMLElement;
 

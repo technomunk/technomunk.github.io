@@ -1,16 +1,9 @@
 {
 	"compilerOptions": {
-		"module": "esnext",
-		"outDir": "docs",
-		"target": "esnext",
-		"lib": ["WebWorker", "es6", "ScriptHost", "DOM", "ES2017"],
-
-		"alwaysStrict": true,
-		"noImplicitAny": true,
-		"sourceMap": true,
-		"noImplicitThis": true,
-		"strict": true,
-		"moduleResolution": "node"
+		"experimentalDecorators": true,
+		"isolatedModules": true,
+		"target": "es2021",
+		"strict": true
 	},
-	"include": ["src/scripts/**/*",]
+	"include": ["src/**/*",]
 }
