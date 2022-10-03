@@ -1,5 +1,15 @@
 import { compileProgram, setupFullviewQuad } from "./glutil"
 
+const CONTEXT_OPTIONS: WebGLContextAttributes = {
+    alpha: false,
+    depth: false,
+    desynchronized: true,
+    failIfMajorPerformanceCaveat: false,
+    powerPreference: "low-power",
+    preserveDrawingBuffer: true,
+    stencil: false,
+}
+
 export interface ImageOptions {
     width: number,
     height: number,
@@ -20,7 +30,7 @@ export async function generate_image(
     const canvas = document.createElement("canvas")
     canvas.width = width, canvas.height = height
 
-    const gl = canvas.getContext("webgl")
+    const gl = canvas.getContext("webgl", CONTEXT_OPTIONS)
     if (!gl) {
         throw "WebGL not supported"
     }

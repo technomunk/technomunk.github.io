@@ -2,6 +2,17 @@
 import { compileProgram, setupFullviewQuad } from "./glutil";
 import { JuliaConfig, Renderer } from "./irenderer";
 
+const CONTEXT_OPTIONS: WebGLContextAttributes = {
+    alpha: false,
+	antialias: false,
+    depth: false,
+    desynchronized: true,
+    failIfMajorPerformanceCaveat: false,
+    powerPreference: "high-performance",
+    preserveDrawingBuffer: true,
+    stencil: false,
+}
+
 type JuliaUniforms = {
 	uPos: WebGLUniformLocation,
 	uDims: WebGLUniformLocation,
@@ -24,7 +35,7 @@ export class GpuRenderer implements Renderer {
 
 	constructor(canvas: HTMLCanvasElement, vertex: string, fragment: string) {
 		this.canvas = canvas;
-		this.gl = canvas.getContext('webgl')!;
+		this.gl = canvas.getContext('webgl', CONTEXT_OPTIONS)!;
 
 		this.program = compileProgram(this.gl, vertex, fragment);
 		setupFullviewQuad(this.gl, this.program, 'aPos');
