@@ -23,9 +23,9 @@ export default class MandelMap {
         this.generateBackground()
         this.allowSelection = false
 
-        this.canvas.addEventListener("pointerdown", () => this.allowSelection = true)
-        this.canvas.addEventListener("pointermove", event => this.handleMove(event))
-        this.canvas.addEventListener("pointerup", event => { this.handleMove(event); this.allowSelection = false })
+        this.canvas.addEventListener("pointerdown", event => this.handlePointer(event))
+        this.canvas.addEventListener("pointermove", event => this.handlePointer(event))
+        this.canvas.addEventListener("pointerup", event => this.handlePointer(event))
     }
 
     draw(coords?: [number, number]) {
@@ -40,13 +40,13 @@ export default class MandelMap {
             this.drawContext.moveTo(x - this.crossSize, y)
             this.drawContext.lineTo(x + this.crossSize, y)
             this.drawContext.stroke()
+
         }
     }
 
-    private handleMove(event: PointerEvent) {
-        if (!this.allowSelection || !this.onSelect) {
+    private handlePointer(event: PointerEvent) {
+        if (!this.onSelect || event.pressure < .1)
             return
-        }
         const rect = this.canvas.getBoundingClientRect()
         const x = event.clientX - rect.left
         const y = event.clientY - rect.top
