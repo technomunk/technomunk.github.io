@@ -31,7 +31,7 @@ function draw() {
 
 function animate() {
 	if (!renderer)
-		return;
+		return
 
 	const now = new Date().getTime()
 	let dt = (now - lastAnimationTime) / 1_000
@@ -116,15 +116,15 @@ window.onload = () => {
 		const limit = document.getElementById('limit') as HTMLInputElement;
 		drawConfig.limit = Number(limit.value);
 		bindConfig(limit, value => {
-			drawConfig!.limit = value;
-			requestAnimationFrame(animate);
+			drawConfig.limit = value;
+			requestAnimationFrame(draw);
 		});
 
 		const escapeR = document.getElementById('escaper') as HTMLInputElement;
 		drawConfig.escapeR = Number(escapeR.value);
 		bindConfig(escapeR, value => {
-			drawConfig!.escapeR = value;
-			requestAnimationFrame(animate);
+			drawConfig.escapeR = value;
+			requestAnimationFrame(draw);
 		});
 	}
 
