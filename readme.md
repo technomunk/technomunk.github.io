@@ -17,28 +17,29 @@ Instructions for building the website.
 ### 🔗 Requirements
 
 - [npm](https://www.npmjs.com/)
-- [Rust](https://www.rust-lang.org/tools/install)
-- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
-- cargo-generate: `cargo install cargo-generate`
+- [yarn](https://yarnpkg.com/)
+<!-- - [Rust](https://www.rust-lang.org/tools/install) -->
+<!-- - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) -->
+<!-- - cargo-generate: `cargo install cargo-generate` -->
 
 ### 🛠 First time setup
 
-- Initialize dependency submodules: `git submodule init`
-- Update dependency submodules: `git submodule update`
-- Build wasm dependencies: `git submodule foreach wasm-pack build`
-- Install JS dependencies: `npm install`
-- Link p2ds assets folder: `ln -s submodules/p2ds/assets docs/assets`
+<!-- - Initialize dependency submodules: `git submodule init` -->
+<!-- - Update dependency submodules: `git submodule update` -->
+<!-- - Build wasm dependencies: `git submodule foreach wasm-pack build` -->
+- Install JS dependencies: `yarn install`
+<!-- - Link p2ds assets folder: `ln -s submodules/p2ds/assets docs/assets` -->
 
 ### 📨 Build static content
 
 ```sh
-npm run build
+yarn build
 ```
 
 ## Local development
 
 ```sh
-npm run serve
+yarn serve
 ```
 
-Goto http://localhost:8080
+Goto http://localhost:1234
