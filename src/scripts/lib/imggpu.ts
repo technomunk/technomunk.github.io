@@ -1,5 +1,5 @@
 import { compileProgram, setupFullviewQuad } from "./glutil"
-import vertexShader from "bundle-text:/src/shaders/identity.vs"
+import vertexShader from "bundle-text:/src/shaders/fullscreen.vs"
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
@@ -27,7 +27,7 @@ export default class ImageGenerator {
 
     constructor() {
         this.canvas = document.createElement("canvas")
-        const gl = this.canvas.getContext("webgl", CONTEXT_OPTIONS)
+        const gl = this.canvas.getContext("webgl2", CONTEXT_OPTIONS)
         if (gl) {
             this.gl = gl 
         } else {
@@ -40,9 +40,7 @@ export default class ImageGenerator {
             this.resize(width, height)
         }
 
-        const program = compileProgram(this.gl, vertexShader, shader)
-        setupFullviewQuad(this.gl, program, "aPos")
-    
+        const program = compileProgram(this.gl, vertexShader, shader)    
         this.gl.useProgram(program)
     
         for (const [name, value] of Object.entries(uniforms)) {
@@ -61,7 +59,7 @@ export default class ImageGenerator {
             }
         }
     
-        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 3);
     
         return this.canvas
     }

@@ -4,10 +4,7 @@
   "version": "1.0.0",
   "source": [
     "src/index.html",
-    "src/browserconfig.xml",
-    "src/shaders/identity.vs",
-    "src/shaders/julia.fs",
-    "src/shaders/mandel.fs"
+    "src/browserconfig.xml"
   ],
   "scripts": {
     "serve": "parcel",

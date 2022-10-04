@@ -17,11 +17,11 @@
 	</head>
 	<body>
 		<main>
-			<canvas id="canvas"></canvas>
 			<script type="module" src="scripts/comdyn.ts"></script>
-			<noscript>Sorry, this page is boring without JS!</noscript>
+			<canvas id="view-julia" is="julia-view"></canvas>
+			<noscript>Sorry, this page is very boring without JS!</noscript>
 		</main>
-		<aside id="hide-menu" class="flex">
+		<aside id="hide-menu" class="flex hidden" is="hide-menu">
 			<div class="row"><a class="button" href="index.html">Home</a></div>
 			<div class="row">
 				<canvas id="map" width="360" height="240"/>
@@ -29,10 +29,6 @@
 			<div class="row">
 				<label for="limit">Limit</label>
 				<input id="limit" type="number" min="1" value="32" max="1024">
-			</div>
-			<div class="row">
-				<label for="escaper">Escape R</label>
-				<input id="escaper" type="number" min=".1" value="2" max="100" step=".1">
 			</div>
 			<div class="row">
 				<label for="speed">Speed</label>

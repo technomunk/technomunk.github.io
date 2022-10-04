@@ -8,7 +8,7 @@ export interface JuliaConfig {
 /** Procedural image renderer. */
 export interface Renderer {
 	/** The region of the complex plane being rendered. */
-	rect: DOMRect;
+	viewRect: DOMRect;
 
 	/** Resize the renderer and the canvas to provided pixel counts.
 	 * @param width of the resulting canvas.

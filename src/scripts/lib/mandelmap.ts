@@ -1,27 +1,27 @@
 import ImageGenerator from "./imggpu";
 import mandelShader from "bundle-text:/src/shaders/mandel.fs"
-import { GestureDecoder } from "./gesture";
 
 export default class MandelMap {
     background?: CanvasImageSource
     onSelect?: (coord: [number, number]) => void
     crossSize: number = 12
+    viewRect: DOMRect = new DOMRect(-1.3, -1.1, 2.2, 2.2)
 
     private canvas: HTMLCanvasElement
     private drawContext: CanvasRenderingContext2D
-    private scale: number
     private generator: ImageGenerator
-    private allowSelection: boolean
 
-    constructor(canvas: HTMLCanvasElement, scale: number = 1.2) {
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
         this.drawContext = canvas.getContext("2d", { alpha: false, desynchronized: true, willReadFrequently: true })!
-        this.scale = scale
         this.drawContext.strokeStyle = 'blue'
         this.drawContext.lineWidth = 1.5
+
+        this.viewRect.x *= canvas.width / canvas.height
+        this.viewRect.width *= canvas.width / canvas.height
+
         this.generator = new ImageGenerator()
         this.generateBackground()
-        this.allowSelection = false
 
         this.canvas.addEventListener("pointerdown", event => this.handlePointer(event))
         this.canvas.addEventListener("pointermove", event => this.handlePointer(event))
@@ -54,34 +54,27 @@ export default class MandelMap {
     }
 
     private complexToCanvas(coords: [number, number]): [number, number] {
-        const ratio = this.canvas.width / this.canvas.height
-        const left = -ratio * this.scale, width = ratio * 2 * this.scale
-        const top = this.scale, height = 2 * this.scale
-        const nx = (coords[0] - left) / width
-        const ny = (top - coords[1]) / height
+        const nx = (coords[0] - this.viewRect.left) / this.viewRect.width
+        const ny = (this.viewRect.bottom - coords[1]) / this.viewRect.height
         return [nx * this.canvas.width, ny * this.canvas.height]
     }
 
     private canvasToComplex(coords: [number, number]): [number, number] {
         const nx = coords[0] / this.canvas.width
         const ny = coords[1] / this.canvas.height
-        const ratio = this.canvas.width / this.canvas.height
-        const left = -ratio * this.scale, width = ratio * 2 * this.scale
-        const top = this.scale, height = 2 * this.scale
 
-        return [left + nx * width, top - ny * height]
+        return [this.viewRect.left + nx * this.viewRect.width, this.viewRect.bottom - ny * this.viewRect.height]
     }
 
     private generateBackground() {
-        const ratio = this.canvas.width / this.canvas.height
         this.background = this.generator.draw(
             mandelShader,
             this.canvas.width,
             this.canvas.height,
             {
                 uLim: 64,
-                uPos: [0, 0],
-                uDims: [ratio * this.scale, this.scale],
+                uPos: [this.viewRect.left, this.viewRect.top],
+                uStep: [this.viewRect.width / this.canvas.width, this.viewRect.height / this.canvas.height],
             },
         )
     }

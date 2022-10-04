@@ -1,9 +1,13 @@
 import { bindConfig, resetConfigs } from "./lib/draw_config"
 import { DragEvent as DragGest, GestureDecoder, ZoomEvent as ZoomGest } from "./lib/gesture"
-import { JuliaConfig, Renderer } from "./lib/irenderer"
-import GpuRenderer from "./lib/gpu_renderer"
+import JuliaView from "./lib/juliaview"
 import HideMenu from "./lib/hidemenu"
 import MandelMap from "./lib/mandelmap"
+import ViewRect from "./lib/viewrect"
+
+
+customElements.define("julia-view", JuliaView, { extends: "canvas" })
+customElements.define("hide-menu", HideMenu)
 
 // Constants
 
@@ -13,51 +17,46 @@ const MANDEL_RADIUS = .7885
 
 // Local variables
 
-const canvas = document.getElementById('canvas') as HTMLCanvasElement
-const mapCanvas = document.getElementById('map') as HTMLCanvasElement
+const canvas = document.getElementById("canvas") as HTMLCanvasElement
+const mapCanvas = document.getElementById("map") as HTMLCanvasElement
+const julia = document.getElementById("view-julia") as JuliaView
 const map = new MandelMap(mapCanvas)
-let renderer: Renderer = new GpuRenderer(canvas)
 let lastX = 0, lastY = 0, lastScale = 0
-let drawConfig: JuliaConfig = { limit: 32, escapeR: 2, seed: [0, 1] }
 let speed = 1
-let time = LOOPING_PERIOD / 4, lastAnimationTime = new Date().getTime()
+let time = LOOPING_PERIOD / 4, lastAnimationTime: DOMHighResTimeStamp = performance.now()
 
 // Function definitions
 
 function draw() {
-	renderer?.draw(drawConfig)
-	map.draw(drawConfig.seed)
+	julia.draw()
+	map.draw(julia.config.seed)
 }
 
-function animate() {
-	if (!renderer)
-		return
-
-	const now = new Date().getTime()
+function animate(now: DOMHighResTimeStamp) {
 	let dt = (now - lastAnimationTime) / 1_000
 	lastAnimationTime = now
 	time = (time + dt * speed) % LOOPING_PERIOD
 	const nt = time / LOOPING_PERIOD * 2 * Math.PI
-	drawConfig.seed = [MANDEL_RADIUS * Math.cos(nt), MANDEL_RADIUS * Math.sin(nt)]
+	julia.config.seed = [MANDEL_RADIUS * Math.cos(nt), MANDEL_RADIUS * Math.sin(nt)]
 	draw()
 	if (speed > 0)
 		requestAnimationFrame(animate)
 }
 
 function startAnimation() {
-	lastAnimationTime = new Date().getTime()
+	lastAnimationTime = performance.now()
 	requestAnimationFrame(animate)
 }
 
 function selectPoint(coords: [number, number]) {
-	drawConfig.seed = coords
+	julia.config.seed = coords
 	speed = 0
 	requestAnimationFrame(draw)
 }
 
 function handleDrag(drag: DragGest) {
-	if ((lastX != drag.x || lastY != drag.y) && renderer) {
-		renderer.pan(drag.x - lastX, drag.y - lastY)
+	if (lastX != drag.x || lastY != drag.y) {
+		julia.pan(drag.x - lastX, drag.y - lastY)
 	}
 	lastX = drag.x
 	lastY = drag.y
@@ -65,8 +64,9 @@ function handleDrag(drag: DragGest) {
 
 function handleZoom(zoom: ZoomGest) {
 	handleDrag(zoom)
-	if (zoom.scale != lastScale && renderer) {
-		renderer.zoom(zoom.x, zoom.y, lastScale / zoom.scale)
+	if (zoom.scale != lastScale) {
+		const rect = julia.getBoundingClientRect()
+		julia.zoom(zoom.x - rect.left, zoom.y - rect.top, lastScale / zoom.scale)
 	}
 	lastScale = zoom.scale
 }
@@ -74,18 +74,16 @@ function handleZoom(zoom: ZoomGest) {
 
 // Script logic
 
-(() => {
+window.onload = () => {
 	// resize canvas
 	{
-		canvas.width = window.innerWidth
-		canvas.height = window.innerHeight
+		julia.resize(window.innerWidth, window.innerHeight)
 		const ratio = window.innerWidth / window.innerHeight
-		renderer.resize(window.innerWidth, window.innerHeight)
-		renderer.rect = new DOMRect(-ratio, -1, ratio * 2, 2)
+		julia.view = new ViewRect(0, 0, ratio * 2, 2)
 		requestAnimationFrame(animate)
 	}
 
-	const gd = new GestureDecoder(canvas)
+	const gd = new GestureDecoder(julia)
 	gd.on('dragstart', drag => {
 		lastX = drag.x
 		lastY = drag.y
@@ -103,30 +101,21 @@ function handleZoom(zoom: ZoomGest) {
 
 	map.onSelect = selectPoint
 
-	canvas.addEventListener('wheel', event => {
-		renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY)
+	julia.addEventListener('wheel', event => {
+		const rect = julia.getBoundingClientRect()
+		const x = event.clientX - rect.left
+		const y = event.clientY - rect.top
+		julia.zoom(x, y, 1 + event.deltaY * WHEEL_SENSITIVITY)
 		event.preventDefault()
 	})
-	window.addEventListener('resize', () => renderer?.resize(window.innerWidth, window.innerHeight))
-
-	new HideMenu(
-		document.getElementById('hide-menu')!,
-		document.getElementById('toggle-menu')!,
-	)
+	window.addEventListener('resize', () => julia.resize(window.innerWidth, window.innerHeight))
 
 	// Link configs
 	{
 		const limit = document.getElementById('limit') as HTMLInputElement
-		drawConfig.limit = Number(limit.value)
+		julia.config.limit = Number(limit.value)
 		bindConfig(limit, value => {
-			drawConfig.limit = value
-			requestAnimationFrame(draw)
-		})
-
-		const escapeR = document.getElementById('escaper') as HTMLInputElement
-		drawConfig.escapeR = Number(escapeR.value)
-		bindConfig(escapeR, value => {
-			drawConfig.escapeR = value
+			julia.config.limit = value
 			requestAnimationFrame(draw)
 		})
 	}
@@ -149,16 +138,14 @@ function handleZoom(zoom: ZoomGest) {
 
 	// Setup redraw and reset buttons
 	{
-		document.getElementById('redraw')!.onclick = animate
+		document.getElementById('redraw')!.onclick = draw
 		document.getElementById('reset')!.onclick = () => {
 			resetConfigs()
-			if (renderer) {
-				const widthToHeight = canvas.width / canvas.height
-				renderer.rect.y = -1
-				renderer.rect.height = 2
-				renderer.rect.x = -widthToHeight
-				renderer.rect.width = widthToHeight * 2
-			}
+			const widthToHeight = julia.width / julia.height
+			julia.view.y = -1
+			julia.view.height = 2
+			julia.view.x = -widthToHeight
+			julia.view.width = widthToHeight * 2
 		}
 	}
 
@@ -184,4 +171,4 @@ function handleZoom(zoom: ZoomGest) {
 			}
 		})
 	}
-})()
+}

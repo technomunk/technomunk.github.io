@@ -6,8 +6,12 @@
 	max-width: 100%;
 	top: 0%;
 	right: 0px;
-	transform: translate(100%);
 	transition: .5s;
+}
+
+#hide-menu.hidden {
+	transform: translate(100%);
+	opacity: 0;
 }
 
 /* Small vertical screens */

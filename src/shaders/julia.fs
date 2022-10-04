@@ -1,3 +1,5 @@
+#version 300 es
+
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -7,12 +9,12 @@ precision mediump float;
 const int MAX_LOOP_COUNT = 1024;
 const float HUE_OFFSET = .65;
 
-varying vec2 vPos;
-
 uniform int uLim;
-uniform float uEscapeD;
-uniform lowp vec4 uInsideColor;
+uniform vec2 uPos;
+uniform vec2 uStep;
 uniform vec2 uSeed;
+
+out lowp vec4 oColor;
 
 const float SIXTH = 1. / 6.;
 
@@ -38,7 +40,7 @@ float mag2(in vec2 v) {
 
 int julia(in vec2 pt) {
     for (int i = 0; i < MAX_LOOP_COUNT; ++i) {
-        if (i >= uLim || mag2(pt) >= uEscapeD) {
+        if (i >= uLim || mag2(pt) >= 4.) {
             return i;
         }
 
@@ -47,9 +49,10 @@ int julia(in vec2 pt) {
 }
 
 void main() {
-	int val = julia(vPos.xy);
+    vec2 pos = uPos + gl_FragCoord.xy * uStep;
+	int val = julia(pos);
 	if (val == uLim) {
-		gl_FragColor = uInsideColor;
+        oColor = vec4(0, 0, 0, 1);
 	} else {
         float v = float(val) / float(uLim);
         float h = v + HUE_OFFSET;
@@ -57,6 +60,6 @@ void main() {
             h = h - 1.0;
         }
 		vec3 hsv = vec3(h, 1, .7 + v*.3);
-		gl_FragColor = vec4(hsv2rgb(hsv), 1);
+		oColor = vec4(hsv2rgb(hsv), 1);
 	}
 }

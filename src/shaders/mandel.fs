@@ -1,3 +1,5 @@
+#version 300 es
+
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -6,32 +8,35 @@ precision mediump float;
 
 const int MAX_LOOP_COUNT = 256;
 
-varying vec2 vPos;
-
+uniform vec2 uPos;
+uniform vec2 uStep;
 uniform int uLim;
 
-int mandel(in float re, in float im) {
-	float x = re;
-	float y = im;
-	float tmp;
+out lowp vec4 oColor;
+
+int mandel(in vec2 pt) {
+	float re = pt.x;
+	float im = pt.y;
+	float sqX, sqY;
 	for (int i = 0; i < MAX_LOOP_COUNT; ++i) {
-		if (i >= uLim || x*x+y*y >= 4.) {
+		sqX = pt.x*pt.x;
+		sqY = pt.y*pt.y;
+		if (i >= uLim || sqX + sqY >= 4.) {
 			return i;
 		}
 
-		tmp = x;
-		x = x*x - y*y + re;
-		y = 2.*tmp*y + im;
+		pt = vec2(sqX - sqY + re, 2.*pt.x*pt.y + im);
 	}
 	return uLim;
 }
 
 void main() {
-	int val = mandel(vPos.x, vPos.y);
+	vec2 pos = uPos + vec2(gl_FragCoord) * uStep;
+	int val = mandel(pos);
 	if (val == uLim) {
-		gl_FragColor = vec4(1);
+		oColor = vec4(1);
 	} else {
 		float v = 1. - float(val) / float(uLim);
-		gl_FragColor = vec4(vec3(v), 1);
+		oColor = vec4(vec3(v), 1);
 	}
 }
