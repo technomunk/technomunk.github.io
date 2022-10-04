@@ -75,16 +75,21 @@ function handleZoom(zoom: ZoomGest) {
 // Script logic
 
 (() => {
-	canvas.width = window.innerWidth
-	canvas.height = window.innerHeight
-	renderer.resize(window.innerWidth, window.innerHeight)
-	requestAnimationFrame(animate)
+	// resize canvas
+	{
+		canvas.width = window.innerWidth
+		canvas.height = window.innerHeight
+		const ratio = window.innerWidth / window.innerHeight
+		renderer.resize(window.innerWidth, window.innerHeight)
+		renderer.rect = new DOMRect(-ratio, -1, ratio * 2, 2)
+		requestAnimationFrame(animate)
+	}
 
 	const gd = new GestureDecoder(canvas)
 	gd.on('dragstart', drag => {
 		lastX = drag.x
 		lastY = drag.y
-	});
+	})
 	gd.on('dragupdate', handleDrag)
 	gd.on('dragstop', handleDrag)
 
@@ -99,86 +104,84 @@ function handleZoom(zoom: ZoomGest) {
 	map.onSelect = selectPoint
 
 	canvas.addEventListener('wheel', event => {
-		renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY);
-		event.preventDefault();
-	});
-	window.addEventListener('resize', () => renderer?.resize(window.innerWidth, window.innerHeight));
-})();
+		renderer?.zoom(event.clientX, event.clientY, 1 + event.deltaY * WHEEL_SENSITIVITY)
+		event.preventDefault()
+	})
+	window.addEventListener('resize', () => renderer?.resize(window.innerWidth, window.innerHeight))
 
-window.onload = () => {
 	new HideMenu(
 		document.getElementById('hide-menu')!,
 		document.getElementById('toggle-menu')!,
-	);
+	)
 
 	// Link configs
 	{
-		const limit = document.getElementById('limit') as HTMLInputElement;
-		drawConfig.limit = Number(limit.value);
+		const limit = document.getElementById('limit') as HTMLInputElement
+		drawConfig.limit = Number(limit.value)
 		bindConfig(limit, value => {
-			drawConfig.limit = value;
-			requestAnimationFrame(draw);
-		});
+			drawConfig.limit = value
+			requestAnimationFrame(draw)
+		})
 
-		const escapeR = document.getElementById('escaper') as HTMLInputElement;
-		drawConfig.escapeR = Number(escapeR.value);
+		const escapeR = document.getElementById('escaper') as HTMLInputElement
+		drawConfig.escapeR = Number(escapeR.value)
 		bindConfig(escapeR, value => {
-			drawConfig.escapeR = value;
-			requestAnimationFrame(draw);
-		});
+			drawConfig.escapeR = value
+			requestAnimationFrame(draw)
+		})
 	}
 
 	// Setup fullscreen toggle button
 	{
-		const button = document.getElementById("toggle_fs") as HTMLButtonElement;
+		const button = document.getElementById("toggle_fs") as HTMLButtonElement
 		if (document.fullscreenEnabled) {
 			button.onclick = () => {
 				if (document.fullscreenElement) {
-					document.exitFullscreen();
+					document.exitFullscreen()
 				} else {
-					document.documentElement.requestFullscreen();
+					document.documentElement.requestFullscreen()
 				}
-			};
+			}
 		} else {
-			button.remove();
+			button.remove()
 		}
 	}
 
 	// Setup redraw and reset buttons
 	{
-		document.getElementById('redraw')!.onclick = animate;
+		document.getElementById('redraw')!.onclick = animate
 		document.getElementById('reset')!.onclick = () => {
-			resetConfigs();
+			resetConfigs()
 			if (renderer) {
-				const widthToHeight = canvas.width / canvas.height;
-				renderer.rect.y = -1;
-				renderer.rect.height = 2;
-				renderer.rect.x = -widthToHeight;
-				renderer.rect.width = widthToHeight * 2;
+				const widthToHeight = canvas.width / canvas.height
+				renderer.rect.y = -1
+				renderer.rect.height = 2
+				renderer.rect.x = -widthToHeight
+				renderer.rect.width = widthToHeight * 2
 			}
 		}
 	}
 
 	// Setup pause/resume key
 	{
-		const speedElement = document.getElementById("speed") as HTMLInputElement;
-		speed = Number(speedElement.value);
+		const speedElement = document.getElementById("speed") as HTMLInputElement
+		speed = Number(speedElement.value)
 		bindConfig(speedElement, value => {
-			const restart = speed == 0;
-			speed = value * value;
+			const restart = speed == 0
+			speed = value * value
 			if (restart && speed != 0)
-				startAnimation();
-		});
+				startAnimation()
+		})
 		document.addEventListener("keypress", e => {
 			if (e.key == " ") {
 				if (speed == 0) {
-					const value = Number(speedElement.value);
-					speed = value * value;
-					startAnimation();
+					const value = Number(speedElement.value)
+					speed = value * value
+					startAnimation()
 				} else {
-					speed = 0;
+					speed = 0
 				}
 			}
 		})
 	}
-};
+})()
