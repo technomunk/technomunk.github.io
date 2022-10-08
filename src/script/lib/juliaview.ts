@@ -1,7 +1,8 @@
-import { compileProgram, setupFullviewQuad } from "./glutil"
-import vertexShader from "bundle-text:/src/shaders/fullscreen.vs"
-import fragmentShader from "bundle-text:/src/shaders/julia.fs"
+import { compileProgram } from "./glutil"
 import ComplexPlaneView from "./complexview"
+
+import vertexShader from "bundle-text:/src/shader/fullscreen.vs"
+import fragmentShader from "bundle-text:/src/shader/julia.fs"
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
 	alpha: false,

@@ -4,8 +4,9 @@
 	<head>
 		<link rel="stylesheet" href="style/comdyn.css">
 		<link rel="stylesheet" href="style/greyscale.css">
-		<link rel="stylesheet" href="style/hide-menu.css">
 		<link rel="stylesheet" href="style/fullscreen.css">
+		<link rel="stylesheet" href="style/hide.css">
+		<link rel="stylesheet" href="style/slide-menu.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&family=Sniglet&display=swap" rel="stylesheet">
@@ -17,11 +18,11 @@
 	</head>
 	<body>
 		<main>
-			<script type="module" src="scripts/comdyn.ts"></script>
 			<canvas id="view-julia" is="julia-view"></canvas>
+			<script type="module" src="script/comdyn.ts"></script>
 			<noscript>Sorry, this page is very boring without JS!</noscript>
 		</main>
-		<aside id="hide-menu" class="flex hidden" is="hide-menu">
+		<aside id="menu" class="flex" is="slide-menu">
 			<div class="row"><a class="button" href="index.html">Home</a></div>
 			<div class="row">
 				<canvas id="map" width="360" height="240"/>
@@ -32,7 +33,7 @@
 			</div>
 			<div class="row">
 				<label for="speed">Speed</label>
-				<input id="speed" type="range" min="0" max="3" step=".1" value="1">
+				<input id="speed" type="range" min="0" max="3" step=".1" value=".5">
 			</div>
 			<div class="row">
 				<button id="toggle_fs">Toggle Fullscreen</button>
@@ -42,12 +43,8 @@
 				<button id="reset">Reset</button>
 			</div>
 		</aside>
-		<button id="toggle-menu" data-toggle="collapse" data-target="#side-menu">
-			<svg viewBox="0 0 64 64" fill="none">
-				<rect x="8" y="42" width="46" height="8" rx="3.5" fill="black"/>
-				<rect x="8" y="28" width="46" height="8" rx="3.5" fill="black"/>
-				<rect x="8" y="14" width="46" height="8" rx="3.5" fill="black"/>
-			</svg>
+		<button id="menu-flap" class="slide-flap">
+
 		</button>
 	</body>
 </html>

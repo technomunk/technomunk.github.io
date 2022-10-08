@@ -1,13 +1,14 @@
+import SlideMenu from "./lib/component/slidemenu"
 import { bindConfig, resetConfigs } from "./lib/draw_config"
 import { DragEvent as DragGest, GestureDecoder, ZoomEvent as ZoomGest } from "./lib/gesture"
+import { toggle } from "./lib/hide"
 import JuliaView from "./lib/juliaview"
-import HideMenu from "./lib/hidemenu"
 import MandelMap from "./lib/mandelmap"
 import ViewRect from "./lib/viewrect"
 
 
 customElements.define("julia-view", JuliaView, { extends: "canvas" })
-customElements.define("hide-menu", HideMenu)
+customElements.define("slide-menu", SlideMenu, { extends: "aside" })
 
 // Constants
 
@@ -17,7 +18,6 @@ const MANDEL_RADIUS = .7885
 
 // Local variables
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement
 const mapCanvas = document.getElementById("map") as HTMLCanvasElement
 const julia = document.getElementById("view-julia") as JuliaView
 const map = new MandelMap(mapCanvas)
@@ -83,6 +83,14 @@ window.onload = () => {
 		requestAnimationFrame(animate)
 	}
 
+	{
+		const menuToggle = document.getElementById("toggle-menu")
+		const menu = document.getElementById("menu")
+		if (menuToggle && menu) {
+			menuToggle.addEventListener("click", () => toggle(menu))
+		}
+	}
+
 	const gd = new GestureDecoder(julia)
 	gd.on('dragstart', drag => {
 		lastX = drag.x
@@ -98,6 +106,7 @@ window.onload = () => {
 	})
 	gd.on('zoomupdate', handleZoom)
 	gd.on('zoomstop', handleZoom)
+	// gd.on('tap', () => speed = 0)
 
 	map.onSelect = selectPoint
 
@@ -142,9 +151,9 @@ window.onload = () => {
 		document.getElementById('reset')!.onclick = () => {
 			resetConfigs()
 			const widthToHeight = julia.width / julia.height
-			julia.view.y = -1
+			julia.view.y = 0
+			julia.view.x = 0
 			julia.view.height = 2
-			julia.view.x = -widthToHeight
 			julia.view.width = widthToHeight * 2
 		}
 	}
