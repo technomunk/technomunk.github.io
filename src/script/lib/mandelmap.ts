@@ -1,5 +1,5 @@
 import ImageGenerator from "./imggpu";
-import mandelShader from "bundle-text:/src/shaders/mandel.fs"
+import mandelShader from "bundle-text:/src/shader/mandel.fs"
 
 export default class MandelMap {
     background?: CanvasImageSource

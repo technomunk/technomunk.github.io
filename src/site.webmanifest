@@ -3,7 +3,7 @@
     "short_name": "Technomunk",
     "icons": [
         {
-            "src": "images/android-chrome-96x96.png",
+            "src": "img/android-chrome-96x96.png",
             "sizes": "96x96",
             "type": "image/png"
         }
