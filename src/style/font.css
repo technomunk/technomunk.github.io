@@ -1,0 +1,20 @@
+:root {
+	--fs-h1: 48px;
+	--fs-h2: 36px;
+	--fs-normal: 20px;
+	--fs-small: 16px;
+	--fs-focus: 24px;
+    --fs-large: 30px;
+}
+
+label,.label,button,.button,input,.input {
+    font-size: var(--fs-large);
+}
+
+input[type="range"] {
+    font-size: var(--fs-normal);
+}
+
+* {
+	font: var(--fs-normal) 'Roboto';
+}
