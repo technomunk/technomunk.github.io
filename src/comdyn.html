@@ -3,10 +3,6 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="style/comdyn.css">
-		<link rel="stylesheet" href="style/greyscale.css">
-		<link rel="stylesheet" href="style/fullscreen.css">
-		<link rel="stylesheet" href="style/hide.css">
-		<link rel="stylesheet" href="style/slide-menu.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital@0;1&family=Sniglet&display=swap" rel="stylesheet">
@@ -22,7 +18,7 @@
 			<script type="module" src="script/comdyn.ts"></script>
 			<noscript>Sorry, this page is very boring without JS!</noscript>
 		</main>
-		<aside id="menu" class="flex" is="slide-menu">
+		<aside id="menu" class="flex glass container" is="slide-menu">
 			<div class="row"><a class="button" href="index.html">Home</a></div>
 			<div class="row">
 				<canvas id="map" width="360" height="240"/>
@@ -43,8 +39,8 @@
 				<button id="reset">Reset</button>
 			</div>
 		</aside>
-		<button id="menu-flap" class="slide-flap">
-
+		<button id="menu-flap" class="slide-flap glass">
+			<img src="img/flap.svg">
 		</button>
 	</body>
 </html>
