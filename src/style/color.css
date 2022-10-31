@@ -7,11 +7,22 @@
 }
 
 .glass {
-    background-color: transparent;
-    backdrop-filter: grayscale(85%) brightness(60%) blur(8px);
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: grayscale(85%) brightness(300%) blur(8px);
+}
+
+button,.button,input,.input,.container {
+    border: 3px solid var(--color-edge);
 }
 
 @media (prefers-color-scheme: dark) {
+    .glass {
+        background-color: transparent;
+        backdrop-filter: grayscale(85%) brightness(60%) blur(8px);
+    }
+    button,.button,input,.input,.container {
+        border-width: 2px;
+    }
     :root {
         --color-background: #3c3c3ca9;
         --color-hover: #7f674d;
@@ -23,10 +34,6 @@
 
 div,button,input,a {
     color: var(--color-text);
-}
-
-button,.button,input,.input,.container {
-    border: 2px solid var(--color-edge);
 }
 
 button,.button,input,.input {

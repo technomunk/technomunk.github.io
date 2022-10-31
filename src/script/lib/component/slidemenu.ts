@@ -43,7 +43,7 @@ export default class SlideMenu extends HTMLElement {
 
     private positionFlap() {
         if (this.isVertical) {
-            const rotationAdjustment = this.flap.clientHeight - 2 * this.flap.clientWidth
+            const rotationAdjustment = this.flap.offsetHeight - 2 * this.flap.offsetWidth
             this.flap.style.right = ""
             this.flap.style.bottom = `${this.clientHeight - this.hiddenPixels - rotationAdjustment}px`
         } else {
