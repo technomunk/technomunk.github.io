@@ -71,7 +71,7 @@ export class GestureDecoder {
 	 * @param element The element which events to decode. It is recommended to add
 	 * `touch-action: none` css to this element.
 	 */
-	public constructor(element: HTMLElement,) {
+	public constructor(element: HTMLElement) {
 		element.addEventListener('pointerdown', this.handlePointerDown.bind(this))
 		element.addEventListener('pointermove', this.handlePointerMove.bind(this))
 		element.addEventListener('pointerup', this.handlePointerUp.bind(this))

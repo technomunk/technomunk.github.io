@@ -1,9 +1,9 @@
-import SlideMenu from "./lib/component/slidemenu"
 import { bindConfig, resetConfigs } from "./lib/draw_config"
 import { DragEvent as DragGest, GestureDecoder, ZoomEvent as ZoomGest } from "./lib/gesture"
 import { toggle } from "./lib/hide"
 import JuliaView from "./lib/juliaview"
 import MandelMap from "./lib/mandelmap"
+import SlideMenu from "./lib/component/slidemenu"
 import ViewRect from "./lib/viewrect"
 
 
