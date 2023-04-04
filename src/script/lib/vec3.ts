@@ -28,6 +28,26 @@ export class Vec3 implements Iterable<number> {
         return vec3(randRange(min.x, max.x), randRange(min.y, max.y), randRange(min.z, max.z))
     }
 
+    static dot(a: Vec3, b: Vec3): number {
+        return a.x * b.x + a.y * b.y + a.z * b.z
+    }
+
+    static cross(a: Vec3, b: Vec3): Vec3 {
+        return vec3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x)
+    }
+
+    copy(): Vec3 {
+        return vec3(this.x, this.y, this.z)
+    }
+
+    compMul(v: number): Vec3 {
+        return vec3(this.x * v, this.y * v, this.z * v)
+    }
+
+    neg(o: Vec3): Vec3 {
+        return vec3(this.x - o.x, this.y - o.y, this.z - o.z)
+    }
+
     norm2(): number {
         return this.x*this.x + this.y*this.y + this.z*this.z
     }

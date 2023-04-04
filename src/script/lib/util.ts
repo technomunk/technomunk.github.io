@@ -14,6 +14,10 @@ export function clientToRect(client: Position, rect: DOMRect): Position {
 	return { x, y };
 }
 
+export function throwExpr(message: string): never {
+	throw new Error(message)
+}
+
 export type Bounds<T> = [T, T]
 
 export function randRange(min: number, max: number) {

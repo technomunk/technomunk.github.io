@@ -1,5 +1,8 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
+import { throwExpr } from "./util"
+import { Vec3, vec3 } from "./vec3"
+
 /** Compile a shader from the provided source.
  * @param gl The rendering context to compile the shader with.
  * @param type The type of the shader to compile.
@@ -20,7 +23,7 @@ export function compileShader(
 	gl.shaderSource(shader, source)
 	gl.compileShader(shader)
 
-	if ( ! gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
 		const message = "Failed to compile shader:\n" + gl.getShaderInfoLog(shader)
 		gl.deleteShader(shader)
 		throw new Error(message)
@@ -47,13 +50,13 @@ export function compileProgram(
 	}
 
 	const vertexShader = gl.createShader(gl.VERTEX_SHADER)
-	if ( ! vertexShader) {
+	if (!vertexShader) {
 		gl.deleteProgram(program)
 		throw new Error("Failed to create vertex shader!")
 	}
 
 	const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
-	if ( ! fragmentShader) {
+	if (!fragmentShader) {
 		gl.deleteProgram(program)
 		gl.deleteShader(vertexShader)
 		throw new Error("Failed to create fragment shader!")
@@ -69,8 +72,8 @@ export function compileProgram(
 
 	gl.linkProgram(program)
 
-	
-	if ( ! gl.getProgramParameter(program, gl.LINK_STATUS)) {
+
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 		let message = "Failed to link shader program:"
 		const programInfo = gl.getProgramInfoLog(program)
 		if (programInfo) {
@@ -88,7 +91,7 @@ export function compileProgram(
 		gl.deleteShader(vertexShader)
 		gl.deleteShader(fragmentShader)
 		gl.deleteProgram(program)
-		
+
 		throw new Error(message)
 	}
 
@@ -97,4 +100,70 @@ export function compileProgram(
 	gl.deleteShader(fragmentShader)
 
 	return program
+}
+
+export type UniformSetters = {
+	[key: string]: (value: any) => void
+}
+export type UniformValues = {
+	[key: string]: number | Iterable<number>
+}
+
+export function composeUniformSetters(gl: WebGLRenderingContext, program: WebGLProgram): UniformSetters {
+	const uniformCount: number = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)
+	const uniformSetters: UniformSetters = {}
+
+	for (let i = 0; i < uniformCount; ++i) {
+		const uniformInfo = gl.getActiveUniform(program, i) ?? throwExpr(`Inactive uniform at ${i}`)
+		let name = uniformInfo.name
+		if (name.endsWith("[0]")) {
+			name = name.substring(0, name.length - 3)
+		}
+		uniformSetters[name] = createUniformSetter(gl, program, uniformInfo)
+	}
+
+	return uniformSetters
+}
+
+export function setUniforms(setters: UniformSetters, ...values: Array<UniformValues>): void {
+	for (const uniforms of values) {
+		for (const name of Object.keys(uniforms)) {
+			setters[name]?.(uniforms[name])
+		}
+	}
+}
+
+export function lookAtMat3(eye: Vec3, point: Vec3): number[] {
+	const zAxis = point.neg(eye).normalized()
+	const xAxis = Vec3.cross(vec3(0, 1, 0), zAxis).normalized()
+	const yAxis = Vec3.cross(zAxis, xAxis)
+	return [
+		...xAxis,
+		...yAxis,
+		...zAxis,
+	]
+}
+
+function createUniformSetter(
+	gl: WebGLRenderingContext,
+	program: WebGLProgram,
+	uniformInfo: WebGLActiveInfo
+): (v: any) => void {
+	const loc = gl.getUniformLocation(program, uniformInfo.name)
+	switch (uniformInfo.type) {
+		case gl.FLOAT:
+			return (v) => gl.uniform1f(loc, v)
+		case gl.INT:
+			return (v) => gl.uniform1i(loc, v)
+		case gl.FLOAT_VEC2:
+			return (v) => gl.uniform2fv(loc, v)
+		case gl.FLOAT_VEC3:
+			return (v) => gl.uniform3fv(loc, v)
+		case gl.FLOAT_VEC4:
+			return (v) => gl.uniform4fv(loc, v)
+		case gl.FLOAT_MAT3:
+			return (v) => gl.uniformMatrix3fv(loc, false, v)
+		default:
+			throwExpr(`Unknown uniform type: 0x${uniformInfo.type.toString(16)}, (${uniformInfo.name})`)
+	}
 }
