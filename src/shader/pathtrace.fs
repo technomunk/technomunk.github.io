@@ -144,7 +144,7 @@ vec3 trace(in Ray ray, inout uint rngState) {
 	for(int i = 0; i <= uBounces; ++i) {
 		RayHit hit = intersectScene(ray);
 		if(hit.dist == c_MAX_DIST) {
-			if(i > 0)
+			// if(i > 0)
 				light += uLightColor * color * -dot(ray.dir, uLightDir);
 			break;
 		}

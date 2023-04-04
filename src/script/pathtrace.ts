@@ -122,7 +122,7 @@ class Scene {
             scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.compMul(Math.random())
         }
 
-        scene.light.dir = Vec3.random(Vec3.ONE.compMul(-1), Vec3.ONE).normalized()
+        scene.light.dir = Vec3.random(Vec3.ONE.compMul(-1), vec3(1, 0, 1)).normalized()
         const brightness = Math.random()
         scene.light.color = vec3(brightness, brightness, brightness)
 
@@ -221,9 +221,6 @@ class Renderer {
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null)
         setUniforms(this.uniformSetters, { uSphereCount: spheres.length })
     }
-}
-
-function randomScene(): Scene {
 }
 
 const TEST_SCENE = new Scene(
