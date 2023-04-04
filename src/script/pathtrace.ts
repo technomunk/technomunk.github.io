@@ -38,7 +38,7 @@ class Material {
     smoothness: number
     emissive: Vec3
 
-    constructor(albedo: Vec3 = Vec3.ONE, smoothness: number = 0.5, emissive: Vec3 = Vec3.ZERO) {
+    constructor(albedo: Vec3 = Vec3.ONE, smoothness = 0.5, emissive: Vec3 = Vec3.ZERO) {
         this.albedo = albedo
         this.smoothness = smoothness
         this.emissive = emissive
@@ -99,6 +99,8 @@ class Renderer {
     dataBuffer: WebGLBuffer
     dataOffset: number
 
+    raysPerPixel: number
+
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
         this.gl = canvas.getContext("webgl2", CONTEXT_OPTIONS)!
@@ -115,6 +117,11 @@ class Renderer {
         this.dataBuffer = this.gl.createBuffer()!;
         this.dataOffset = -1
         this.setupDataUniformBuffer()
+        if (isMobile()) {
+            this.raysPerPixel = 1 << 4
+        } else {
+            this.raysPerPixel = 1 << 10
+        }
         console.log(this)
     }
 
@@ -136,7 +143,7 @@ class Renderer {
         this.gl.uniform3f(this.uniforms["uLightColor"], 0.3, 0.3, 0.3)
         this.gl.uniform3fv(this.uniforms["uLightDir"], vec3(2.5, -2, -1).normalized())
         this.gl.uniform1i(this.uniforms["uBounces"], 3)
-        this.gl.uniform1i(this.uniforms["uRaysPerPixel"], 1<<10)
+        this.gl.uniform1i(this.uniforms["uRaysPerPixel"], this.raysPerPixel)
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 3)
     }
 
@@ -172,11 +179,11 @@ function randomScene(): Scene {
     const r = window.innerWidth / window.innerHeight;
     let w, h;
     if (r > 1) {
-        w = r*0.6;
+        w = r * 0.6;
         h = 0.6;
     } else {
         w = 0.6;
-        h = 0.6/r;
+        h = 0.6 / r;
     }
     const scene: Scene = { spheres: [] }
     for (let i = 0; i < 32; ++i) {
@@ -184,9 +191,10 @@ function randomScene(): Scene {
             Sphere.random({
                 pos: [vec3(-w, -h, 1), vec3(w, h, 4)],
                 material: {
-                smoothness: [0.5, 1],
-                emissive: [Vec3.ZERO, vec3(0.8, 0.8, 0.8)],
-            }}))
+                    smoothness: [0.5, 1],
+                    emissive: [Vec3.ZERO, vec3(0.8, 0.8, 0.8)],
+                }
+            }))
     }
     return scene
 }
@@ -203,9 +211,23 @@ const TEST_SCENE: Scene = {
 
 function main() {
     const view = new Renderer(document.getElementById("main-canvas") as HTMLCanvasElement)
-    window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight))
+    const scene = randomScene()
+    window.addEventListener('resize', () => { view.resize(window.innerWidth, window.innerHeight); view.draw(scene) })
     view.resize(window.innerWidth, window.innerHeight)
-    view.draw(randomScene())
+    requestAnimationFrame(() => view.draw(randomScene()))
+}
+
+function isMobile(): boolean {
+    const POSSIBLE_MATCHES = [
+        /Android/i,
+        /webOS/i,
+        /iPhone/i,
+        /iPad/i,
+        /iPod/i,
+        /BlackBerry/i,
+        /Windows Phone/i
+    ];
+    return POSSIBLE_MATCHES.some((m) => navigator.userAgent.match(m))
 }
 
 window.onload = main
