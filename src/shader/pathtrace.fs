@@ -1,7 +1,6 @@
 #version 300 es
 
-#define MAX_DIST 1e999
-#define DATA_SIZE 4
+#define DATA_SIZE 12*128
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -10,9 +9,14 @@ precision mediump float;
 #endif
 layout(std140) uniform;
 
+struct Material {
+	vec4 albedo; // w is how specular it is
+	vec4 emissive;
+};
+
 struct Sphere {
 	vec4 pos; // includes radius at w
-	vec4 color;
+	Material material;
 };
 
 uniform vec2 uResolution;
@@ -20,6 +24,8 @@ uniform float uCamFov;
 uniform lowp vec3 uLightColor;
 uniform vec3 uLightDir;
 uniform int uSphereCount;
+uniform int uBounces;
+uniform int uRaysPerPixel;
 
 uniform Data {
 	vec4 uData[DATA_SIZE];
@@ -27,28 +33,61 @@ uniform Data {
 
 out lowp vec4 oColor;
 
+const float c_PI = 3.14159265359;
+const float c_PI2 = 2.0 * c_PI;
+const float c_MAX_DIST = 1e999;
+const float c_NUDGE = 1e-4;
+
 struct Ray {
-	vec3 origin;
+	vec3 pos;
 	vec3 dir;
 };
 
 struct RayHit {
 	float dist;
+	vec3 point;
 	vec3 normal;
+	Material material;
 };
 
-const vec3 c_RayOrigin = vec3(0, 0, 0);
+uint wangHash(inout uint seed) {
+	// shamelessly stolen from https://www.shadertoy.com/view/tsBBWW
+    seed = uint(seed ^ uint(61)) ^ uint(seed >> uint(16));
+    seed *= uint(9);
+    seed = seed ^ (seed >> 4);
+    seed *= uint(0x27d4eb2d);
+    seed = seed ^ (seed >> 15);
+    return seed;
+}
+
+float randomFloat(inout uint state) {
+	return float(wangHash(state)) / 4294967296.0;
+}
+
+vec3 randomDir(inout uint state) {
+    float z = randomFloat(state) * 2.0 - 1.0;
+    float a = randomFloat(state) * c_PI2;
+    float r = sqrt(1.0 - z * z);
+    float x = r * cos(a);
+    float y = r * sin(a);
+    return vec3(x, y, z);
+}
+
+vec3 randomBounce(in vec3 normal, inout uint rngState) {
+	vec3 dir = randomDir(rngState);
+	return dir * sign(dot(normal, dir));
+}
 
 Ray ray() {
 	float fx = tan(uCamFov * 0.5) / uResolution.x;
 	vec2 d = fx * (gl_FragCoord.xy * 2.0 - uResolution);
 
-	return Ray(c_RayOrigin, normalize(vec3(d, 1)));
+	return Ray(vec3(0), normalize(vec3(d, 1)));
 }
 
-RayHit intersectRaySphere(Ray ray, Sphere sphere) {
+bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 	// https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
-	vec3 nOrigin = ray.origin - sphere.pos.xyz;
+	vec3 nOrigin = ray.pos - sphere.pos.xyz;
 	float b = 2.0 * dot(ray.dir, nOrigin);
 	float c = dot(nOrigin, nOrigin) - sphere.pos.w*sphere.pos.w;
 
@@ -56,25 +95,61 @@ RayHit intersectRaySphere(Ray ray, Sphere sphere) {
 
 	if (discr > 0.0) {
 		float hitDist = (-b - sqrt(discr))*0.5;
-		vec3 hitPt = ray.origin + ray.dir * hitDist;
-		return RayHit(hitDist, normalize(hitPt - sphere.pos.xyz));
-	}
-
-	return RayHit(-1.0, vec3(0));
-}
-
-void raycast(Ray ray) {
-	float minDist = MAX_DIST;
-	for (int i = 0; i < uSphereCount; ++i) {
-		Sphere sphere = Sphere(uData[i * 2], uData[i * 2 + 1]);
-		RayHit hit = intersectRaySphere(ray, sphere);
-		if (hit.dist > 0.0 && hit.dist < minDist) {
-			minDist = hit.dist;
-			oColor = vec4(uLightColor * sphere.color.xyz * -dot(uLightDir, hit.normal), 1);
+		if (hitDist < hit.dist && hitDist > c_NUDGE) {
+			hit.dist = hitDist;
+			hit.point = ray.pos + ray.dir * hitDist;
+			hit.normal = normalize(hit.point - sphere.pos.xyz);
+			hit.material = sphere.material;
+			return true;
 		}
 	}
+
+	return false;
+}
+
+RayHit intersectScene(in Ray ray) {
+	RayHit hit;
+	hit.dist = c_MAX_DIST;
+
+	for (int i = 0; i < uSphereCount; ++i) {
+		Sphere sphere = Sphere(uData[i * 3], Material(uData[i * 3 + 1], uData[i * 3 + 2]));
+		intersectRaySphere(ray, sphere, hit);
+	}
+
+	return hit;
+}
+
+vec3 trace(in Ray ray, inout uint rngState) {
+	vec3 light = vec3(0);
+	vec3 color = vec3(1);
+
+	for (int i = 0; i <= uBounces; ++i) {
+		RayHit hit = intersectScene(ray);
+		if (hit.dist == c_MAX_DIST) {
+			if (i > 0) {
+				return light + uLightColor * color * -dot(ray.dir, uLightDir);
+			}
+			return light;
+		}
+
+		ray.pos = hit.point;
+		ray.dir = normalize(mix(
+			randomBounce(hit.normal, rngState),
+			reflect(ray.dir, hit.normal),
+			hit.material.albedo.w));
+
+		light += hit.material.emissive.xyz * color;
+		color *= hit.material.albedo.xyz;
+	}
+	return light;
 }
 
 void main() {
-	raycast(ray());
+	uint rngState = uint(uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277)) | uint(1);
+	vec3 color = vec3(0);
+	for (int i = 0; i <= uRaysPerPixel; ++i) {
+		Ray ray = ray();
+		color += trace(ray, rngState) / float(uRaysPerPixel);
+	}
+	oColor = vec4(color, 1);
 }

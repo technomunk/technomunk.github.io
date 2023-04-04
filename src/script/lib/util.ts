@@ -13,3 +13,9 @@ export function clientToRect(client: Position, rect: DOMRect): Position {
 	const y = (client.y - rect.y) / rect.height;
 	return { x, y };
 }
+
+export type Bounds<T> = [T, T]
+
+export function randRange(min: number, max: number) {
+	return min + Math.random() * (max - min)
+}
