@@ -11,15 +11,15 @@
     "build": "rm -rf dist && parcel build --no-source-maps"
   },
   "devDependencies": {
-    "@parcel/packager-raw-url": "2.7.0",
-    "@parcel/packager-xml": "2.7.0",
-    "@parcel/transformer-glsl": "2.7.0",
-    "@parcel/transformer-inline-string": "2.7.0",
-    "@parcel/transformer-webmanifest": "2.7.0",
-    "@parcel/transformer-xml": "2.7.0",
+    "@parcel/packager-raw-url": "2.8.3",
+    "@parcel/packager-xml": "2.8.3",
+    "@parcel/transformer-glsl": "2.8.3",
+    "@parcel/transformer-inline-string": "2.8.3",
+    "@parcel/transformer-webmanifest": "2.8.3",
+    "@parcel/transformer-xml": "2.8.3",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
-    "parcel": "^2.7.0"
+    "parcel": "^2.8.3"
   },
   "private": true,
   "repository": "git+https://github.com/technomunk/technomunk.github.io.git",
@@ -29,5 +29,6 @@
   "bugs": {
     "url": "https://github.com/technomunk/technomunk.github.io/issues"
   },
-  "homepage": "https://github.com/technomunk/technomunk.github.io#readme"
+  "homepage": "https://github.com/technomunk/technomunk.github.io#readme",
+  "packageManager": "yarn@3.5.0"
 }
