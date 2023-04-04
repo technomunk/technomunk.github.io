@@ -3,7 +3,7 @@ import { compileProgram } from "./lib/glutil"
 import vertexShader from "bundle-text:/src/shader/fullscreen.vs"
 import fragmentShader from "bundle-text:/src/shader/pathtrace.fs"
 import { Vec3, vec3 } from "./lib/vec3";
-import { Bounds, randRange } from "./lib/util";
+import { Bounds, randRange } from "./lib/util"
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
@@ -15,7 +15,11 @@ const CONTEXT_OPTIONS: WebGLContextAttributes = {
     preserveDrawingBuffer: true,
     stencil: false,
 }
-const DATA_UBO_INDEX = 0;
+const DATA_UBO_INDEX = 0
+const MAX_BOUNCES = 8
+const MAX_RAYS_PER_PIXEL = 1 << 10
+const DEFAULT_RAYS_PER_PIXEL = 1 << 8
+const DEFAULT_BOUNCES = 2
 
 type UniformLocations = {
     uResolution: WebGLUniformLocation
@@ -28,7 +32,7 @@ type UniformLocations = {
 }
 
 interface MaterialBounds {
-    albedo?: Bounds<Vec3>,
+    albedo?: Bounds<vec3>,
     smoothness?: Bounds<number>,
     emissive?: Bounds<Vec3>,
 }
@@ -97,13 +101,22 @@ class Renderer {
     program: WebGLProgram
     uniforms: UniformLocations
     dataBuffer: WebGLBuffer
-    dataOffset: number
-
-    raysPerPixel: number
+    dataOffset = -1
+    
+    bounces = DEFAULT_BOUNCES
+    raysPerPixel = DEFAULT_RAYS_PER_PIXEL
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
         this.gl = canvas.getContext("webgl2", CONTEXT_OPTIONS)!
+        const dbgRenderInfo = this.gl.getExtension("WEBGL_debug_renderer_info")
+        if (dbgRenderInfo) {
+            console.log(this.gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL))
+            console.log(this.gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL))
+        }
+        console.log(this.gl.getParameter(this.gl.SHADING_LANGUAGE_VERSION))
+        console.log(this.gl.getParameter(this.gl.VENDOR))
+        console.log(this.gl.getParameter(this.gl.VERSION))
         this.program = compileProgram(this.gl, vertexShader, fragmentShader)
         this.uniforms = {
             uResolution: this.gl.getUniformLocation(this.program, "uResolution")!,
@@ -115,13 +128,7 @@ class Renderer {
             uRaysPerPixel: this.gl.getUniformLocation(this.program, "uRaysPerPixel")!,
         }
         this.dataBuffer = this.gl.createBuffer()!;
-        this.dataOffset = -1
         this.setupDataUniformBuffer()
-        if (isMobile()) {
-            this.raysPerPixel = 1 << 4
-        } else {
-            this.raysPerPixel = 1 << 10
-        }
         console.log(this)
     }
 
@@ -137,14 +144,30 @@ class Renderer {
         const h = this.gl.drawingBufferHeight
 
         this.updateDataBuffer(scene.spheres)
+        this.bounces = DEFAULT_BOUNCES
+        this.raysPerPixel = DEFAULT_RAYS_PER_PIXEL
 
         this.gl.uniform2f(this.uniforms["uResolution"], w, h)
         this.gl.uniform1f(this.uniforms["uCamFov"], 90 * Math.PI / 180)
         this.gl.uniform3f(this.uniforms["uLightColor"], 0.3, 0.3, 0.3)
         this.gl.uniform3fv(this.uniforms["uLightDir"], vec3(2.5, -2, -1).normalized())
-        this.gl.uniform1i(this.uniforms["uBounces"], 3)
+        this.redraw()
+    }
+
+    redraw() {
+        this.gl.uniform1i(this.uniforms["uBounces"], this.bounces)
         this.gl.uniform1i(this.uniforms["uRaysPerPixel"], this.raysPerPixel)
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 3)
+        console.log({bounces: this.bounces, rpp: this.raysPerPixel})
+
+        if ((this.raysPerPixel << 1) <= MAX_RAYS_PER_PIXEL) {
+            this.raysPerPixel <<= 1
+        } else if (this.bounces + 1 <= MAX_BOUNCES) {
+            this.bounces += 1
+        } else {
+            this.raysPerPixel = 1
+            this.bounces = 1
+        }
     }
 
     private setupDataUniformBuffer() {
@@ -214,7 +237,13 @@ function main() {
     const scene = randomScene()
     window.addEventListener('resize', () => { view.resize(window.innerWidth, window.innerHeight); view.draw(scene) })
     view.resize(window.innerWidth, window.innerHeight)
-    requestAnimationFrame(() => view.draw(randomScene()))
+    window.addEventListener("keyup", (e) => {
+        if (e.key == " " || e.code == "Space") {
+            requestAnimationFrame(() => view.redraw())
+        }
+    })
+    // setTimeout(() => requestAnimationFrame(() => view.draw(scene)), 2000)
+    requestAnimationFrame(() => view.draw(scene))
 }
 
 function isMobile(): boolean {
