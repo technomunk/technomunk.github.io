@@ -82,9 +82,52 @@ class Sphere {
     }
 }
 
-type Scene = {
-    camera: Camera,
+interface Light {
+    dir: Vec3
+    color: Vec3
+}
+
+class Scene {
+    camera: Camera
     spheres: Sphere[]
+    light: Light
+
+    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = {dir: Vec3.ZERO, color: Vec3.ZERO}) {
+        this.camera = camera
+        this.spheres = spheres
+        this.light = light
+    }
+
+    static random(): Scene {
+        const r = window.innerWidth / window.innerHeight;
+        let w, h;
+        if (r > 1) {
+            w = r * 0.6;
+            h = 0.6;
+        } else {
+            w = 0.6;
+            h = 0.6 / r;
+        }
+        const scene = new Scene()
+        for (let i = 0; i < 32; ++i) {
+            scene.spheres.push(
+                Sphere.random({
+                    pos: [vec3(-w, -h, -1), vec3(w, h, 1)],
+                    material: {
+                        smoothness: [0.5, 1],
+                        albedo: [Vec3.ONE.compMul(0.1), Vec3.ONE]
+                        // emissive: [Vec3.ZERO, vec3(0.8, 0.8, 0.8)],
+                    }
+                }))
+            scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.compMul(Math.random())
+        }
+
+        scene.light.dir = Vec3.random(Vec3.ONE.compMul(-1), Vec3.ONE).normalized()
+        const brightness = Math.random()
+        scene.light.color = vec3(brightness, brightness, brightness)
+
+        return scene
+    }
 }
 
 class Renderer {
@@ -129,8 +172,8 @@ class Renderer {
         this.updateDataBuffer(scene.spheres)
 
         setUniforms(this.uniformSetters, {
-            // uLightColor: vec3(0.7, 0.7, 0.7),
-            uLightDir: vec3(2.5, -2, -1).normalized(),
+            uLightColor: scene.light.color,
+            uLightDir: scene.light.dir,
             uCamPos: scene.camera.pos,
             uView: lookAtMat3(scene.camera.pos, scene.camera.target),
             uCamFov: scene.camera.fov,
@@ -181,37 +224,11 @@ class Renderer {
 }
 
 function randomScene(): Scene {
-    const r = window.innerWidth / window.innerHeight;
-    let w, h;
-    if (r > 1) {
-        w = r * 0.6;
-        h = 0.6;
-    } else {
-        w = 0.6;
-        h = 0.6 / r;
-    }
-    const scene: Scene = {
-        camera: new Camera(vec3(0, 0, -8), Vec3.ZERO, 20 * Math.PI / 180),
-        spheres: [],
-    }
-    for (let i = 0; i < 32; ++i) {
-        scene.spheres.push(
-            Sphere.random({
-                pos: [vec3(-w, -h, -1), vec3(w, h, 1)],
-                material: {
-                    smoothness: [0.5, 1],
-                    albedo: [Vec3.ONE.compMul(0.1), Vec3.ONE]
-                    // emissive: [Vec3.ZERO, vec3(0.8, 0.8, 0.8)],
-                }
-            }))
-        scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.compMul(Math.random())
-    }
-    return scene
 }
 
-const TEST_SCENE: Scene = {
-    camera: new Camera(vec3(0, 0, -8), Vec3.ZERO, 20 * Math.PI / 180),
-    spheres: [
+const TEST_SCENE = new Scene(
+    new Camera(),
+    [
         new Sphere(vec3(0.25, 0.25, 1), 0.25, new Material(vec3(1, 0.4, 0.4), 0)),
         new Sphere(vec3(-0.25, 0.0, 4), 1, new Material(vec3(0.4, 1, 0.4), 0.5)),
         new Sphere(vec3(0.0, -0.5, 2), 0.5, new Material(vec3(0.4, 0.4, 1), 0.98)),
@@ -219,7 +236,7 @@ const TEST_SCENE: Scene = {
         new Sphere(vec3(-4, 4, 4), 4, new Material(Vec3.ONE, 0.1, Vec3.ONE.compMul(0.9))),
         new Sphere(vec3(4, 4, 4), 1, new Material(Vec3.ONE, 0.1, vec3(0.9, 0.9, 0))),
     ]
-}
+)
 
 function setupCameraControls(scene: Scene, view: Renderer) {
     const gd = new GestureDecoder(view.canvas)
@@ -242,8 +259,7 @@ function setupCameraControls(scene: Scene, view: Renderer) {
 function main() {
     const canvas = document.getElementById("main-canvas") as HTMLCanvasElement
     const view = new Renderer(canvas)
-    const scene = randomScene()
-    // const scene = TEST_SCENE
+    const scene = Scene.random()
     window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight))
     view.resize(window.innerWidth, window.innerHeight)
     setupCameraControls(scene, view)
