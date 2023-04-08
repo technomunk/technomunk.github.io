@@ -1,10 +1,10 @@
-import { UniformSetters, compileProgram, composeUniformSetters, lookAtMat3, setUniforms } from "./lib/glutil"
+import { UniformSetters, compileProgram, composeUniformSetters, setUniforms } from "./lib/glutil"
 import vertexShader from "bundle-text:/src/shader/fullscreen.vs"
 import fragmentShader from "bundle-text:/src/shader/pathtrace.fs"
-import { Vec3, vec3 } from "./lib/vec3";
 import { Bounds, throwExpr, randRange } from "./lib/util"
 import { Camera } from "./lib/camera";
 import { GestureDecoder } from "./lib/gesture";
+import { Mat3, Vec3 } from "./lib/math";
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
@@ -42,7 +42,7 @@ class Material {
     static random(bounds: MaterialBounds = {}) {
         return new Material(
             Vec3.random(bounds.albedo?.[0] || Vec3.ZERO, bounds.albedo?.[1] || Vec3.ONE),
-            randRange(bounds.smoothness?.[0] || 0, bounds.smoothness?.[1] || 1),
+            Math.sin(randRange(bounds.smoothness?.[0] || 0, bounds.smoothness?.[1] || 1)),
             Vec3.random(bounds.emissive?.[0] || Vec3.ZERO, bounds.emissive?.[1] || Vec3.ONE),
         )
     }
@@ -67,7 +67,7 @@ class Sphere {
 
     static random(bounds: SphereBounds = {}): Sphere {
         return new Sphere(
-            Vec3.random(bounds.pos?.[0] || vec3(-1, -1, -1), bounds.pos?.[1] || Vec3.ONE),
+            Vec3.random(bounds.pos?.[0] || Vec3.ONE.mul(-1), bounds.pos?.[1] || Vec3.ONE),
             randRange(bounds.radius?.[0] || 0.1, bounds.radius?.[1] || 0.3),
             Material.random(bounds.material)
         )
@@ -112,19 +112,19 @@ class Scene {
         for (let i = 0; i < 32; ++i) {
             scene.spheres.push(
                 Sphere.random({
-                    pos: [vec3(-w, -h, -1), vec3(w, h, 1)],
+                    pos: [new Vec3(-w, -h, -1), new Vec3(w, h, 1)],
                     material: {
                         smoothness: [0.5, 1],
-                        albedo: [Vec3.ONE.compMul(0.1), Vec3.ONE]
+                        albedo: [Vec3.ONE.mul(0.1), Vec3.ONE]
                         // emissive: [Vec3.ZERO, vec3(0.8, 0.8, 0.8)],
                     }
                 }))
-            scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.compMul(Math.random())
+            scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.mul(Math.random())
         }
 
-        scene.light.dir = Vec3.random(Vec3.ONE.compMul(-1), vec3(1, 0, 1)).normalized()
+        scene.light.dir = Vec3.random(Vec3.ONE.mul(-1), new Vec3(1, 0, 1)).normalized()
         const brightness = Math.random()
-        scene.light.color = vec3(brightness, brightness, brightness)
+        scene.light.color = new Vec3(brightness, brightness, brightness)
 
         return scene
     }
@@ -175,7 +175,7 @@ class Renderer {
             uLightColor: scene.light.color,
             uLightDir: scene.light.dir,
             uCamPos: scene.camera.pos,
-            uView: lookAtMat3(scene.camera.pos, scene.camera.target),
+            uView: Mat3.lookIn(scene.camera.dir),
             uCamFov: scene.camera.fov,
         })
 
@@ -226,12 +226,12 @@ class Renderer {
 const TEST_SCENE = new Scene(
     new Camera(),
     [
-        new Sphere(vec3(0.25, 0.25, 1), 0.25, new Material(vec3(1, 0.4, 0.4), 0)),
-        new Sphere(vec3(-0.25, 0.0, 4), 1, new Material(vec3(0.4, 1, 0.4), 0.5)),
-        new Sphere(vec3(0.0, -0.5, 2), 0.5, new Material(vec3(0.4, 0.4, 1), 0.98)),
-        new Sphere(vec3(0, -80, 80), 100),
-        new Sphere(vec3(-4, 4, 4), 4, new Material(Vec3.ONE, 0.1, Vec3.ONE.compMul(0.9))),
-        new Sphere(vec3(4, 4, 4), 1, new Material(Vec3.ONE, 0.1, vec3(0.9, 0.9, 0))),
+        new Sphere(new Vec3(0.25, 0.25, 1), 0.25, new Material(new Vec3(1, 0.4, 0.4), 0)),
+        new Sphere(new Vec3(-0.25, 0.0, 4), 1, new Material(new Vec3(0.4, 1, 0.4), 0.5)),
+        new Sphere(new Vec3(0.0, -0.5, 2), 0.5, new Material(new Vec3(0.4, 0.4, 1), 0.98)),
+        new Sphere(new Vec3(0, -80, 80), 100),
+        new Sphere(new Vec3(-4, 4, 4), 4, new Material(Vec3.ONE, 0.1, Vec3.ONE.mul(0.9))),
+        new Sphere(new Vec3(4, 4, 4), 1, new Material(Vec3.ONE, 0.1, new Vec3(0.9, 0.9, 0))),
     ]
 )
 
@@ -256,7 +256,7 @@ function setupCameraControls(scene: Scene, view: Renderer) {
 function main() {
     const canvas = document.getElementById("main-canvas") as HTMLCanvasElement
     const view = new Renderer(canvas)
-    const scene = Scene.random()
+    const scene = TEST_SCENE
     window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight))
     view.resize(window.innerWidth, window.innerHeight)
     setupCameraControls(scene, view)

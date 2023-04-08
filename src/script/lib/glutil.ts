@@ -133,17 +133,6 @@ export function setUniforms(setters: UniformSetters, ...values: Array<UniformVal
 	}
 }
 
-export function lookAtMat3(eye: Vec3, point: Vec3): number[] {
-	const zAxis = point.neg(eye).normalized()
-	const xAxis = Vec3.cross(vec3(0, 1, 0), zAxis).normalized()
-	const yAxis = Vec3.cross(zAxis, xAxis)
-	return [
-		...xAxis,
-		...yAxis,
-		...zAxis,
-	]
-}
-
 function createUniformSetter(
 	gl: WebGLRenderingContext,
 	program: WebGLProgram,
