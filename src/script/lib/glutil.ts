@@ -106,7 +106,7 @@ export type UniformSetters = {
 	[key: string]: (value: any) => void
 }
 export type UniformValues = {
-	[key: string]: number | Iterable<number>
+	[key: string]: number | Iterable<number> | WebGLTexture
 }
 
 export function composeUniformSetters(gl: WebGLRenderingContext, program: WebGLProgram): UniformSetters {
@@ -128,7 +128,12 @@ export function composeUniformSetters(gl: WebGLRenderingContext, program: WebGLP
 export function setUniforms(setters: UniformSetters, ...values: Array<UniformValues>): void {
 	for (const uniforms of values) {
 		for (const name of Object.keys(uniforms)) {
-			setters[name]?.(uniforms[name])
+			const setter = setters[name]
+			if (setter) {
+				setter(uniforms[name])
+			} else {
+				console.warn("Unknown uniform:", name)
+			}
 		}
 	}
 }
@@ -152,6 +157,11 @@ function createUniformSetter(
 			return (v) => gl.uniform4fv(loc, v)
 		case gl.FLOAT_MAT3:
 			return (v) => gl.uniformMatrix3fv(loc, false, v)
+		case gl.SAMPLER_2D:
+			return (v) => {
+				gl.activeTexture(gl.TEXTURE0)
+				gl.bindTexture(gl.TEXTURE_2D, v)
+			}
 		default:
 			throwExpr(`Unknown uniform type: 0x${uniformInfo.type.toString(16)}, (${uniformInfo.name})`)
 	}

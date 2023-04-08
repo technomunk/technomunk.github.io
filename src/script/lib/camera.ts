@@ -12,20 +12,17 @@ export class Camera {
     }
 
     rotate(x: number, y: number): void {
-        this.rotateX(x)
         this.rotateY(y)
+        this.rotateX(x)
     }
 
     rotateX(x: number): void {
-        const d = this.pos.copy()
-        this.pos.y = d.y * Math.cos(x) + d.z * Math.sin(x)
-        this.pos.z = d.z * Math.cos(x) - d.y * Math.sin(x)
+        const axis = Vec3.cross(this.pos, Vec3.Y).normalize()
+        this.pos = this.pos.rotate(axis, x)
         this.dir = Vec3.ZERO.sub(this.pos).normalize()
     }
     rotateY(y: number): void {
-        const d = this.pos.copy()
-        this.pos.z = d.z * Math.cos(y) + d.x * Math.sin(y)
-        this.pos.x = d.x * Math.cos(y) - d.z * Math.sin(y)
+        this.pos = this.pos.rotate(Vec3.Y, y)
         this.dir = Vec3.ZERO.sub(this.pos).normalize()
     }
 }

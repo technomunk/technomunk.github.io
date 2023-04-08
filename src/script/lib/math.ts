@@ -94,6 +94,16 @@ export class Vec3 extends Float32Array {
             a[0] * b[1] - a[1] * b[0],
         )
     }
+
+    rotate(axis: Vec3, angle: number): Vec3 {
+        // https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+        const cosAngle = Math.cos(angle)
+        return Vec3
+            .cross(axis, this)
+            .mul(Math.sin(angle))
+            .addi(this.mul(cosAngle))
+            .addi(axis.mul(Vec3.dot(axis, this) * (1 - cosAngle)))
+    }
 }
 
 export class Mat3 extends Float32Array {

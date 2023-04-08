@@ -10,7 +10,7 @@ precision mediump float;
 layout(std140) uniform;
 
 struct Material {
-	vec4 albedo; // w is how specular it is
+	vec4 albedo; // w is how smooth it is
 	vec4 emissive;
 };
 
@@ -27,7 +27,8 @@ uniform lowp vec3 uLightColor;
 uniform vec3 uLightDir;
 uniform int uSphereCount;
 uniform int uBounces;
-uniform int uRaysPerPixel;
+uniform int uFrameIndex;
+uniform sampler2D uLastFrame;
 
 uniform Data {
 	vec4 uData[DATA_SIZE];
@@ -96,7 +97,7 @@ vec3 randomBounce(in vec3 normal, inout uint rngState) {
 
 Ray ray() {
 	float pixelAngle = tan(uCamFov * 0.5) / uResolution.x;
-	vec2 xy = pixelAngle * (gl_FragCoord.xy * 2.0 - uResolution);
+	vec2 xy = pixelAngle * ((gl_FragCoord.xy * 2.0 - uResolution));
 
 	vec3 dir = uView * normalize(vec3(xy, 1));
 
@@ -113,7 +114,7 @@ bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 
 	if(discr > 0.0) {
 		float hitDist = (-b - sqrt(discr)) * 0.5;
-		if (hitDist < hit.dist && hitDist > c_NUDGE) {
+		if(hitDist < hit.dist && hitDist > c_NUDGE) {
 			hit.dist = hitDist;
 			hit.point = ray.pos + ray.dir * hitDist;
 			hit.normal = normalize(hit.point - sphere.pos.xyz);
@@ -145,7 +146,7 @@ vec3 trace(in Ray ray, inout uint rngState) {
 		RayHit hit = intersectScene(ray);
 		if(hit.dist == c_MAX_DIST) {
 			// if(i > 0)
-				light += uLightColor * color * -dot(ray.dir, uLightDir);
+			light += uLightColor * color * -dot(ray.dir, uLightDir);
 			break;
 		}
 
@@ -159,11 +160,13 @@ vec3 trace(in Ray ray, inout uint rngState) {
 }
 
 void main() {
-	uint rngState = uint(uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277)) | uint(1);
-	vec3 color = vec3(0);
-	for(int i = 0; i <= uRaysPerPixel; ++i) {
-		Ray ray = ray();
-		color += trace(ray, rngState) / float(uRaysPerPixel);
+	uint rngState = uint(uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277)) + uint(uFrameIndex) * uint(26699) | uint(1);
+	Ray ray = ray();
+	vec3 color = trace(ray, rngState);
+
+	if(uFrameIndex > 0) {
+		vec3 lastFrameColor = texture(uLastFrame, gl_FragCoord.xy / uResolution).rgb;
+		color = mix(lastFrameColor, color, 1.0 / float(uFrameIndex + 1));
 	}
 	oColor = vec4(color, 1);
 }

@@ -18,9 +18,8 @@ const CONTEXT_OPTIONS: WebGLContextAttributes = {
 }
 const DATA_UBO_INDEX = 0
 const MAX_BOUNCES = 8
-const MAX_RAYS_PER_PIXEL = 1 << 10
-const DEFAULT_RAYS_PER_PIXEL = 1 << 8
-const DEFAULT_BOUNCES = 2
+const DEFAULT_BOUNCES = 4
+const SCROLL_SENSITIVITY = 4e-4
 
 interface MaterialBounds {
     albedo?: Bounds<Vec3>,
@@ -92,7 +91,7 @@ class Scene {
     spheres: Sphere[]
     light: Light
 
-    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = {dir: Vec3.ZERO, color: Vec3.ZERO}) {
+    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = { dir: Vec3.ZERO, color: Vec3.ZERO }) {
         this.camera = camera
         this.spheres = spheres
         this.light = light
@@ -132,7 +131,6 @@ class Scene {
 
 class Renderer {
     bounces = DEFAULT_BOUNCES
-    raysPerPixel = DEFAULT_RAYS_PER_PIXEL
 
     canvas: HTMLCanvasElement
     protected gl: WebGL2RenderingContext
@@ -140,6 +138,10 @@ class Renderer {
     protected uniformSetters: UniformSetters
     protected dataBuffer: WebGLBuffer
     protected dataOffset = -1
+    protected targetTextures: [WebGLTexture, WebGLTexture]
+    protected framebuffer: WebGLFramebuffer
+    protected frameIndex = 0
+    protected animationRequest = -1
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
@@ -158,16 +160,24 @@ class Renderer {
         this.uniformSetters = composeUniformSetters(this.gl, this.program)
         this.dataBuffer = this.gl.createBuffer() ?? throwExpr("Could not allocate data buffer");
         this.setupDataUniformBuffer()
+
+        this.framebuffer = this.gl.createFramebuffer() ?? throwExpr("Could not allocate framebuffer")
+        this.targetTextures = [this.createTargetTexture(), this.createTargetTexture()]
     }
 
     resize(width: number, height: number) {
         this.canvas.width = width
         this.canvas.height = height
+        this.gl.deleteTexture(this.targetTextures[0])
+        this.gl.deleteTexture(this.targetTextures[1])
+        this.targetTextures = [this.createTargetTexture(), this.createTargetTexture()]
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight)
+        this.frameIndex = 0
         this.redraw()
     }
 
     draw(scene: Scene) {
+        this.frameIndex = 0
         this.gl.useProgram(this.program)
         this.updateDataBuffer(scene.spheres)
 
@@ -182,19 +192,61 @@ class Renderer {
         this.redraw()
     }
 
-    redraw() {
+    protected redraw() {
+        cancelAnimationFrame(this.animationRequest)
         const w = this.gl.drawingBufferWidth
         const h = this.gl.drawingBufferHeight
 
         setUniforms(this.uniformSetters, {
             uResolution: [w, h],
             uBounces: this.bounces,
-            uRaysPerPixel: this.raysPerPixel,
+            uFrameIndex: this.frameIndex,
+            uLastFrame: this.targetTextures[this.frameIndex % 2],
         })
 
+        this.setupFramebuffer()
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 3)
+
+        this.frameIndex += 1
+        this.present()
+
+        if (this.frameIndex < 1<<10) {
+            this.animationRequest = requestAnimationFrame(() => {
+                this.gl.finish()
+                this.redraw()
+            })
+        } else {
+            console.log("Image is final")
+        }
     }
 
+    protected createTargetTexture(): WebGLTexture {
+        const texture = this.gl.createTexture() ?? throwExpr("Could not create framebuffer texture")
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture)
+        this.gl.texImage2D(
+            this.gl.TEXTURE_2D,
+            0,
+            this.gl.RGB8,
+            this.canvas.width,
+            this.canvas.height,
+            0,
+            this.gl.RGB,
+            this.gl.UNSIGNED_BYTE,
+            null)
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
+        return texture
+    }
+
+    protected setupFramebuffer() {
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
+        this.gl.framebufferTexture2D(
+            this.gl.DRAW_FRAMEBUFFER,
+            this.gl.COLOR_ATTACHMENT0,
+            this.gl.TEXTURE_2D,
+            this.targetTextures[(this.frameIndex + 1) % 2],
+            0
+        )
+    }
     protected setupDataUniformBuffer() {
         const blockIndex = this.gl.getUniformBlockIndex(this.program, "Data")
         const blockSize = this.gl.getActiveUniformBlockParameter(this.program, blockIndex, this.gl.UNIFORM_BLOCK_DATA_SIZE)
@@ -221,6 +273,14 @@ class Renderer {
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null)
         setUniforms(this.uniformSetters, { uSphereCount: spheres.length })
     }
+
+    protected present() {
+        const w = this.gl.drawingBufferWidth
+        const h = this.gl.drawingBufferHeight
+        this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer)
+        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null)
+        this.gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, this.gl.COLOR_BUFFER_BIT, this.gl.NEAREST)
+    }
 }
 
 const TEST_SCENE = new Scene(
@@ -240,43 +300,38 @@ function setupCameraControls(scene: Scene, view: Renderer) {
     let lx = 0, ly = 0;
     gd.on("dragstart", (e) => { lx = e.x, ly = e.y })
     gd.on("dragupdate", (e) => {
-        const dx = lx - e.x, dy = ly - e.y
+        const dx = e.x - lx, dy = e.y - ly
         lx = e.x, ly = e.y
         scene.camera.rotate(dy / view.canvas.height, dx / view.canvas.width)
         requestAnimationFrame(() => view.draw(scene))
     })
-    // let startFov = scene.camera.fov
-    // gd.on("zoomstart", () => startFov = scene.camera.fov)
-    // gd.on("zoomupdate", (e) => {
-    //     scene.camera.fov = startFov * e.scale
-    //     requestAnimationFrame(() => view.draw(scene))
-    // })
+    let startFov = scene.camera.fov
+    gd.on("zoomstart", () => startFov = scene.camera.fov)
+    gd.on("zoomupdate", (e) => {
+        scene.camera.fov = startFov / e.scale
+        requestAnimationFrame(() => view.draw(scene))
+    })
+    view.canvas.addEventListener("wheel", (e) => {
+        scene.camera.fov *= 1 + e.deltaY * SCROLL_SENSITIVITY
+        requestAnimationFrame(() => view.draw(scene))
+    })
 }
 
 function main() {
     const canvas = document.getElementById("main-canvas") as HTMLCanvasElement
     const view = new Renderer(canvas)
-    const scene = TEST_SCENE
+    const scene = Scene.random()
+    // const scene = TEST_SCENE
     window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight))
     view.resize(window.innerWidth, window.innerHeight)
     setupCameraControls(scene, view)
     document.addEventListener("keypress", (e) => {
         switch (e.key) {
             case "1":
-                view.raysPerPixel = Math.max(1, view.raysPerPixel >> 1)
-                requestAnimationFrame(() => view.redraw())
+                view.bounces = Math.max(0, view.bounces - 1)
                 break
             case "2":
-                view.raysPerPixel = Math.min(view.raysPerPixel << 1, MAX_RAYS_PER_PIXEL)
-                requestAnimationFrame(() => view.redraw())
-                break
-            case "3":
-                view.bounces = Math.max(0, view.bounces - 1)
-                requestAnimationFrame(() => view.redraw())
-                break
-            case "4":
                 view.bounces = Math.min(view.bounces + 1, MAX_BOUNCES)
-                requestAnimationFrame(() => view.redraw())
                 break
         }
     })
