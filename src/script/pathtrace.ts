@@ -1,5 +1,5 @@
 import { UniformSetters, compileProgram, composeUniformSetters, setUniforms } from "./lib/glutil"
-import vertexShader from "bundle-text:/src/shader/fullscreen.vs"
+import vertexShader from "bundle-text:/src/shader/pathtrace.vs"
 import fragmentShader from "bundle-text:/src/shader/pathtrace.fs"
 import { Bounds, throwExpr, randRange } from "./lib/util"
 import { Camera } from "./lib/camera";
@@ -205,16 +205,14 @@ class Renderer {
         })
 
         this.setupFramebuffer()
-        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 3)
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4)
 
         this.frameIndex += 1
         this.present()
 
-        if (this.frameIndex < 1<<10) {
-            this.animationRequest = requestAnimationFrame(() => {
-                this.gl.finish()
-                this.redraw()
-            })
+        if (this.frameIndex < 1 << 10) {
+            this.animationRequest = requestAnimationFrame(() => this.redraw()
+            )
         } else {
             console.log("Image is final")
         }
@@ -329,9 +327,11 @@ function main() {
         switch (e.key) {
             case "1":
                 view.bounces = Math.max(0, view.bounces - 1)
+                requestAnimationFrame(() => view.draw(scene))
                 break
             case "2":
                 view.bounces = Math.min(view.bounces + 1, MAX_BOUNCES)
+                requestAnimationFrame(() => view.draw(scene))
                 break
         }
     })

@@ -2,11 +2,7 @@
 
 #define DATA_SIZE 12*128
 
-#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
-#else
-precision mediump float;
-#endif
 layout(std140) uniform;
 
 struct Material {
@@ -19,16 +15,16 @@ struct Sphere {
 	Material material;
 };
 
-uniform vec2 uResolution;
 uniform vec3 uCamPos;
-uniform mat3 uView;
-uniform float uCamFov;
 uniform lowp vec3 uLightColor;
 uniform vec3 uLightDir;
 uniform int uSphereCount;
 uniform int uBounces;
 uniform int uFrameIndex;
 uniform sampler2D uLastFrame;
+
+in vec2 vUV;
+in vec3 vRayDir;
 
 uniform Data {
 	vec4 uData[DATA_SIZE];
@@ -39,7 +35,7 @@ out lowp vec4 oColor;
 const float c_PI = 3.14159265359;
 const float c_PI2 = 2.0 * c_PI;
 const float c_MAX_DIST = 1e9999;
-const float c_NUDGE = 1e-6;
+const float c_NUDGE = 1e-10;
 const float c_ALMOST_ONE = 0.99999;
 
 struct Ray {
@@ -77,13 +73,13 @@ uint wangHash(inout uint seed) {
 	return seed;
 }
 
-float randomFloat(inout uint state) {
+float rand(inout uint state) {
 	return float(wangHash(state)) / 4294967296.0;
 }
 
 vec3 randomDir(inout uint state) {
-	float z = randomFloat(state) * 2.0 - 1.0;
-	float a = randomFloat(state) * c_PI2;
+	float z = rand(state) * 2.0 - 1.0;
+	float a = rand(state) * c_PI2;
 	float r = sqrt(1.0 - z * z);
 	float x = r * cos(a);
 	float y = r * sin(a);
@@ -93,15 +89,6 @@ vec3 randomDir(inout uint state) {
 vec3 randomBounce(in vec3 normal, inout uint rngState) {
 	vec3 dir = randomDir(rngState);
 	return dir * sign(dot(normal, dir));
-}
-
-Ray ray() {
-	float pixelAngle = tan(uCamFov * 0.5) / uResolution.x;
-	vec2 xy = pixelAngle * ((gl_FragCoord.xy * 2.0 - uResolution));
-
-	vec3 dir = uView * normalize(vec3(xy, 1));
-
-	return Ray(uCamPos, dir);
 }
 
 bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
@@ -126,8 +113,7 @@ bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 	return false;
 }
 
-RayHit intersectScene(in Ray ray) {
-	RayHit hit;
+bool intersectScene(in Ray ray, inout RayHit hit) {
 	hit.dist = c_MAX_DIST;
 
 	for(int i = 0; i < uSphereCount; ++i) {
@@ -135,17 +121,16 @@ RayHit intersectScene(in Ray ray) {
 		intersectRaySphere(ray, sphere, hit);
 	}
 
-	return hit;
+	return hit.dist != c_MAX_DIST;
 }
 
 vec3 trace(in Ray ray, inout uint rngState) {
 	vec3 light = vec3(0);
 	vec3 color = vec3(1);
+	RayHit hit;
 
 	for(int i = 0; i <= uBounces; ++i) {
-		RayHit hit = intersectScene(ray);
-		if(hit.dist == c_MAX_DIST) {
-			// if(i > 0)
+		if (!intersectScene(ray, hit)) {
 			light += uLightColor * color * -dot(ray.dir, uLightDir);
 			break;
 		}
@@ -160,12 +145,12 @@ vec3 trace(in Ray ray, inout uint rngState) {
 }
 
 void main() {
-	uint rngState = uint(uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277)) + uint(uFrameIndex) * uint(26699) | uint(1);
-	Ray ray = ray();
+	uint rngState = (uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277) + uint(uFrameIndex) * uint(26699)) | uint(1);
+	Ray ray = Ray(uCamPos, normalize(vRayDir + randomDir(rngState) * 1e-4));
 	vec3 color = trace(ray, rngState);
 
 	if(uFrameIndex > 0) {
-		vec3 lastFrameColor = texture(uLastFrame, gl_FragCoord.xy / uResolution).rgb;
+		vec3 lastFrameColor = texture(uLastFrame, vUV).rgb;
 		color = mix(lastFrameColor, color, 1.0 / float(uFrameIndex + 1));
 	}
 	oColor = vec4(color, 1);
