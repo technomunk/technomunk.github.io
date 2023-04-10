@@ -1,7 +1,7 @@
 import { UniformSetters, compileProgram, composeUniformSetters, logDebugInfo, setUniforms } from "./lib/glutil"
 import vertexShader from "/src/shader/pathtrace.vs"
 import fragmentShader from "/src/shader/pathtrace.fs"
-import { Bounds, clamp, error, isMobile, randRange } from "./lib/util"
+import { Bounds, Choice, clamp, error, isMobile, randRange } from "./lib/util"
 import { Camera } from "./lib/camera";
 import { GestureDecoder } from "./lib/gesture";
 import { Mat3, Vec3 } from "./lib/math";
@@ -22,9 +22,9 @@ const DEFAULT_BOUNCES = 4
 const SCROLL_SENSITIVITY = 4e-4
 
 interface MaterialBounds {
-    albedo?: Bounds<Vec3>,
-    smoothness?: Bounds<number>,
-    emissive?: Bounds<Vec3>,
+    albedo?: Bounds<Vec3> | Choice<Vec3>,
+    smoothness?: Bounds<number> | Choice<number>,
+    emissive?: Bounds<Vec3> | Choice<Vec3>,
 }
 
 class Material {
@@ -40,9 +40,9 @@ class Material {
 
     static random(bounds: MaterialBounds = {}) {
         return new Material(
-            Vec3.random(bounds.albedo?.[0] || Vec3.ZERO, bounds.albedo?.[1] || Vec3.ONE),
-            Math.sin(randRange(bounds.smoothness?.[0] || 0, bounds.smoothness?.[1] || 1)),
-            Vec3.random(bounds.emissive?.[0] || Vec3.ZERO, bounds.emissive?.[1] || Vec3.ONE),
+            bounds.albedo instanceof Choice ? bounds.albedo.random() : Vec3.random(bounds.albedo?.[0] || Vec3.ZERO, bounds.albedo?.[1] || Vec3.ONE),
+            bounds.smoothness instanceof Choice ? bounds.smoothness.random() : randRange(bounds.smoothness?.[0] || 0, bounds.smoothness?.[1] || 1),
+            bounds.emissive instanceof Choice ? bounds.emissive.random() : Vec3.random(bounds.emissive?.[0] || Vec3.ZERO, bounds.emissive?.[1] || Vec3.ONE),
         )
     }
 }
@@ -115,18 +115,17 @@ class Scene {
                 Sphere.random({
                     pos: [new Vec3(-w, -h, -1), new Vec3(w, h, 1)],
                     material: {
-                        smoothness: [0.5, 1],
                         albedo: [Vec3.ONE.mul(0.1), Vec3.ONE],
                         emissive: [Vec3.ZERO, Vec3.ZERO],
+                        smoothness: new Choice(.1, .5, .8, .9, .99, .999),
                     }
                 }))
-            scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.mul(Math.random())
         }
 
         scene.light.dir = Vec3.random(Vec3.ONE.mul(-1), new Vec3(1, 0, 1)).normalized()
         const brightness = randRange(1, 2)
         scene.light.color = new Vec3(brightness, brightness, brightness)
-        scene.ambient = Vec3.random(Vec3.ONE.mul(0.1), Vec3.ONE.mul(0.4))
+        scene.ambient = Vec3.random(Vec3.ZERO, Vec3.ONE.mul(0.2))
 
         return scene
     }

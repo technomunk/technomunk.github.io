@@ -19,6 +19,15 @@ export function error(message: string): never {
 	throw new Error(message)
 }
 
+export class Choice<T> extends Array<T> {
+	constructor(...items: T[]) {
+		super(...items)
+	}
+	random(): T {
+		return this[Math.floor(Math.random() * this.length)]
+	}
+}
+
 export type Bounds<T> = [T, T]
 export function randRange(min: number, max: number): number {
 	return min + Math.random() * (max - min)
