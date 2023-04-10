@@ -114,7 +114,7 @@ bool intersectScene(in Ray ray, inout RayHit hit) {
 }
 
 float spread(vec3 rayDir, vec3 normal) {
-	return -(dot(rayDir, normal));
+	return max(-(dot(rayDir, normal)), 0.);
 }
 
 vec3 trace(in Ray ray, inout uint rngState) {
