@@ -3,6 +3,7 @@
 #define DATA_SIZE 12*128
 
 precision highp float;
+precision highp int;
 layout(std140) uniform;
 
 struct Material {
@@ -16,8 +17,9 @@ struct Sphere {
 };
 
 uniform vec3 uCamPos;
-uniform lowp vec3 uLightColor;
+uniform vec3 uLightColor;
 uniform vec3 uLightDir;
+uniform vec3 uAmbientColor;
 uniform int uSphereCount;
 uniform int uBounces;
 uniform int uFrameIndex;
@@ -35,8 +37,8 @@ out lowp vec4 oColor;
 const float c_PI = 3.14159265359;
 const float c_PI2 = 2.0 * c_PI;
 const float c_MAX_DIST = 1e9999;
-const float c_NUDGE = 1e-10;
-const float c_ALMOST_ONE = 0.99999;
+const float c_MIN_DIST = 0.;
+const int c_RAYS_PER_PIXEL = 4;
 
 struct Ray {
 	vec3 pos;
@@ -49,19 +51,6 @@ struct RayHit {
 	vec3 normal;
 	Material material;
 };
-
-vec3 slerp(vec3 a, vec3 b, float t) {
-	float p = dot(a, b);
-	if((p > c_ALMOST_ONE) || (p < -c_ALMOST_ONE)) {
-		if(t < 0.5) {
-			return a;
-		}
-		return b;
-	}
-
-	float theta = acos(p);
-	return (a * sin((1.0 - t) * theta) + b * sin((t * theta))) / sin(theta);
-}
 
 uint wangHash(inout uint seed) {
 	// shamelessly stolen from https://www.shadertoy.com/view/tsBBWW
@@ -101,7 +90,7 @@ bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 
 	if(discr > 0.0) {
 		float hitDist = (-b - sqrt(discr)) * 0.5;
-		if(hitDist < hit.dist && hitDist > c_NUDGE) {
+		if(hitDist < hit.dist && hitDist > c_MIN_DIST) {
 			hit.dist = hitDist;
 			hit.point = ray.pos + ray.dir * hitDist;
 			hit.normal = normalize(hit.point - sphere.pos.xyz);
@@ -124,34 +113,40 @@ bool intersectScene(in Ray ray, inout RayHit hit) {
 	return hit.dist != c_MAX_DIST;
 }
 
+float spread(vec3 rayDir, vec3 normal) {
+	return -(dot(rayDir, normal));
+}
+
 vec3 trace(in Ray ray, inout uint rngState) {
 	vec3 light = vec3(0);
 	vec3 color = vec3(1);
 	RayHit hit;
 
 	for(int i = 0; i <= uBounces; ++i) {
-		if (!intersectScene(ray, hit)) {
-			light += uLightColor * color * -dot(ray.dir, uLightDir);
+		if(!intersectScene(ray, hit)) {
+			light += uLightColor * color * spread(ray.dir, uLightDir);
 			break;
 		}
 
+		light += hit.material.emissive.rgb * color * spread(ray.dir, hit.normal);
+		color *= hit.material.albedo.rgb;
+
 		ray.pos = hit.point;
 		ray.dir = normalize(mix(randomBounce(hit.normal, rngState), reflect(ray.dir, hit.normal), hit.material.albedo.w));
-
-		light += hit.material.emissive.xyz * color;
-		color *= hit.material.albedo.xyz;
 	}
-	return light;
+	return light  + uAmbientColor * color;
 }
 
 void main() {
 	uint rngState = (uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277) + uint(uFrameIndex) * uint(26699)) | uint(1);
-	Ray ray = Ray(uCamPos, normalize(vRayDir + randomDir(rngState) * 1e-4));
-	vec3 color = trace(ray, rngState);
-
-	if(uFrameIndex > 0) {
-		vec3 lastFrameColor = texture(uLastFrame, vUV).rgb;
-		color = mix(lastFrameColor, color, 1.0 / float(uFrameIndex + 1));
+	vec3 color = vec3(0);
+	Ray ray;
+	for (int i = 0; i < c_RAYS_PER_PIXEL; ++i) {
+		ray = Ray(uCamPos, normalize(vRayDir));
+		color += trace(ray, rngState) / float(c_RAYS_PER_PIXEL);
 	}
+
+	vec3 lastFrameColor = texture(uLastFrame, vUV).rgb;
+	color = mix(lastFrameColor, color, 1. / float(uFrameIndex + 1));
 	oColor = vec4(color, 1);
 }

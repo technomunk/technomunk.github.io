@@ -14,12 +14,20 @@ export function clientToRect(client: Position, rect: DOMRect): Position {
 	return { x, y };
 }
 
-export function throwExpr(message: string): never {
+export function error(message: string): never {
+	alert(message)
 	throw new Error(message)
 }
 
 export type Bounds<T> = [T, T]
-
-export function randRange(min: number, max: number) {
+export function randRange(min: number, max: number): number {
 	return min + Math.random() * (max - min)
+}
+
+export function clamp(v: number, min: number, max: number): number {
+	return Math.max(Math.min(v, max), min)
+}
+
+export function isMobile(): boolean {
+	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }

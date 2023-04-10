@@ -1,7 +1,7 @@
-import { UniformSetters, compileProgram, composeUniformSetters, setUniforms } from "./lib/glutil"
-import vertexShader from "bundle-text:/src/shader/pathtrace.vs"
-import fragmentShader from "bundle-text:/src/shader/pathtrace.fs"
-import { Bounds, throwExpr, randRange } from "./lib/util"
+import { UniformSetters, compileProgram, composeUniformSetters, logDebugInfo, setUniforms } from "./lib/glutil"
+import vertexShader from "/src/shader/pathtrace.vs"
+import fragmentShader from "/src/shader/pathtrace.fs"
+import { Bounds, clamp, error, isMobile, randRange } from "./lib/util"
 import { Camera } from "./lib/camera";
 import { GestureDecoder } from "./lib/gesture";
 import { Mat3, Vec3 } from "./lib/math";
@@ -90,11 +90,13 @@ class Scene {
     camera: Camera
     spheres: Sphere[]
     light: Light
+    ambient: Vec3
 
-    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = { dir: Vec3.ZERO, color: Vec3.ZERO }) {
+    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = { dir: Vec3.ZERO, color: Vec3.ZERO }, ambient = Vec3.ZERO) {
         this.camera = camera
         this.spheres = spheres
         this.light = light
+        this.ambient = ambient
     }
 
     static random(): Scene {
@@ -114,16 +116,17 @@ class Scene {
                     pos: [new Vec3(-w, -h, -1), new Vec3(w, h, 1)],
                     material: {
                         smoothness: [0.5, 1],
-                        albedo: [Vec3.ONE.mul(0.1), Vec3.ONE]
-                        // emissive: [Vec3.ZERO, vec3(0.8, 0.8, 0.8)],
+                        albedo: [Vec3.ONE.mul(0.1), Vec3.ONE],
+                        emissive: [Vec3.ZERO, Vec3.ZERO],
                     }
                 }))
             scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.mul(Math.random())
         }
 
         scene.light.dir = Vec3.random(Vec3.ONE.mul(-1), new Vec3(1, 0, 1)).normalized()
-        const brightness = Math.random()
+        const brightness = randRange(1, 2)
         scene.light.color = new Vec3(brightness, brightness, brightness)
+        scene.ambient = Vec3.random(Vec3.ONE.mul(0.1), Vec3.ONE.mul(0.4))
 
         return scene
     }
@@ -131,8 +134,9 @@ class Scene {
 
 class Renderer {
     bounces = DEFAULT_BOUNCES
+    readonly canvas: HTMLCanvasElement
 
-    canvas: HTMLCanvasElement
+    protected scaling
     protected gl: WebGL2RenderingContext
     protected program: WebGLProgram
     protected uniformSetters: UniformSetters
@@ -142,36 +146,42 @@ class Renderer {
     protected framebuffer: WebGLFramebuffer
     protected frameIndex = 0
     protected animationRequest = -1
+    protected resolution: [number, number]
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, renderScale = 1) {
         this.canvas = canvas
-        this.gl = canvas.getContext("webgl2", CONTEXT_OPTIONS) ?? throwExpr("Could not get WebGL2 context")
-        const dbgRenderInfo = this.gl.getExtension("WEBGL_debug_renderer_info")
-        if (dbgRenderInfo) {
-            console.log(this.gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL))
-            console.log(this.gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL))
-        }
-        console.log(this.gl.getParameter(this.gl.SHADING_LANGUAGE_VERSION))
-        console.log(this.gl.getParameter(this.gl.VENDOR))
-        console.log(this.gl.getParameter(this.gl.VERSION))
+        this.scaling = renderScale
+        this.gl = canvas.getContext("webgl2", CONTEXT_OPTIONS) ?? error("Could not get WebGL2 context")
+
+        this.resolution = [this.gl.drawingBufferWidth * this.scaling, this.gl.drawingBufferHeight * this.scaling]
+        logDebugInfo(this.gl)
 
         this.program = compileProgram(this.gl, vertexShader, fragmentShader)
         this.gl.useProgram(this.program)
         this.uniformSetters = composeUniformSetters(this.gl, this.program)
-        this.dataBuffer = this.gl.createBuffer() ?? throwExpr("Could not allocate data buffer");
+        this.dataBuffer = this.gl.createBuffer() ?? error("Could not allocate data buffer");
         this.setupDataUniformBuffer()
 
-        this.framebuffer = this.gl.createFramebuffer() ?? throwExpr("Could not allocate framebuffer")
+        this.framebuffer = this.gl.createFramebuffer() ?? error("Could not allocate framebuffer")
         this.targetTextures = [this.createTargetTexture(), this.createTargetTexture()]
+    }
+
+    get renderScale(): number {
+        return this.scaling
+    }
+    set renderScale(v: number) {
+        this.scaling = v
+        this.resize(this.canvas.width, this.canvas.height)
     }
 
     resize(width: number, height: number) {
         this.canvas.width = width
         this.canvas.height = height
+        this.resolution = [width * this.scaling, height * this.scaling]
         this.gl.deleteTexture(this.targetTextures[0])
         this.gl.deleteTexture(this.targetTextures[1])
         this.targetTextures = [this.createTargetTexture(), this.createTargetTexture()]
-        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight)
+        this.gl.viewport(0, 0, ...this.resolution)
         this.frameIndex = 0
         this.redraw()
     }
@@ -184,6 +194,7 @@ class Renderer {
         setUniforms(this.uniformSetters, {
             uLightColor: scene.light.color,
             uLightDir: scene.light.dir,
+            uAmbientColor: scene.ambient,
             uCamPos: scene.camera.pos,
             uView: Mat3.lookIn(scene.camera.dir),
             uCamFov: scene.camera.fov,
@@ -194,11 +205,9 @@ class Renderer {
 
     protected redraw() {
         cancelAnimationFrame(this.animationRequest)
-        const w = this.gl.drawingBufferWidth
-        const h = this.gl.drawingBufferHeight
 
         setUniforms(this.uniformSetters, {
-            uResolution: [w, h],
+            uResolution: this.resolution,
             uBounces: this.bounces,
             uFrameIndex: this.frameIndex,
             uLastFrame: this.targetTextures[this.frameIndex % 2],
@@ -210,28 +219,27 @@ class Renderer {
         this.frameIndex += 1
         this.present()
 
-        if (this.frameIndex < 1 << 10) {
-            this.animationRequest = requestAnimationFrame(() => this.redraw()
-            )
+        if (this.frameIndex < 1<<9) {
+            this.animationRequest = requestAnimationFrame(() => this.redraw())
         } else {
             console.log("Image is final")
         }
     }
 
     protected createTargetTexture(): WebGLTexture {
-        const texture = this.gl.createTexture() ?? throwExpr("Could not create framebuffer texture")
+        const texture = this.gl.createTexture() ?? error("Could not create framebuffer texture")
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture)
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
             0,
             this.gl.RGB8,
-            this.canvas.width,
-            this.canvas.height,
+            ...this.resolution,
             0,
             this.gl.RGB,
             this.gl.UNSIGNED_BYTE,
             null)
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
         return texture
     }
 
@@ -254,7 +262,7 @@ class Renderer {
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, DATA_UBO_INDEX, this.dataBuffer)
         this.gl.uniformBlockBinding(this.program, blockIndex, DATA_UBO_INDEX)
 
-        const dataIndices = this.gl.getUniformIndices(this.program, ["uData"]) ?? throwExpr("uData uniform not found")
+        const dataIndices = this.gl.getUniformIndices(this.program, ["uData"]) ?? error("uData uniform not found")
         this.dataOffset = this.gl.getActiveUniforms(this.program, dataIndices, this.gl.UNIFORM_OFFSET)[0]
     }
 
@@ -273,16 +281,15 @@ class Renderer {
     }
 
     protected present() {
-        const w = this.gl.drawingBufferWidth
-        const h = this.gl.drawingBufferHeight
+        const w = this.gl.drawingBufferWidth, h = this.gl.drawingBufferHeight
         this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer)
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null)
-        this.gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, this.gl.COLOR_BUFFER_BIT, this.gl.NEAREST)
+        this.gl.blitFramebuffer(0, 0, ...this.resolution, 0, 0, w, h, this.gl.COLOR_BUFFER_BIT, this.gl.LINEAR)
     }
 }
 
 const TEST_SCENE = new Scene(
-    new Camera(),
+    new Camera(undefined, undefined, 0.2),
     [
         new Sphere(new Vec3(0.25, 0.25, 1), 0.25, new Material(new Vec3(1, 0.4, 0.4), 0)),
         new Sphere(new Vec3(-0.25, 0.0, 4), 1, new Material(new Vec3(0.4, 1, 0.4), 0.5)),
@@ -310,14 +317,14 @@ function setupCameraControls(scene: Scene, view: Renderer) {
         requestAnimationFrame(() => view.draw(scene))
     })
     view.canvas.addEventListener("wheel", (e) => {
-        scene.camera.fov *= 1 + e.deltaY * SCROLL_SENSITIVITY
+        scene.camera.fov = clamp(scene.camera.fov * (1 + e.deltaY * SCROLL_SENSITIVITY), .1, 3)
         requestAnimationFrame(() => view.draw(scene))
     })
 }
 
 function main() {
     const canvas = document.getElementById("main-canvas") as HTMLCanvasElement
-    const view = new Renderer(canvas)
+    const view = new Renderer(canvas, isMobile() ? .5 : 1)
     const scene = Scene.random()
     // const scene = TEST_SCENE
     window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight))

@@ -1,6 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import { throwExpr } from "./util"
+import { error } from "./util"
 import { Vec3, vec3 } from "./vec3"
 
 /** Compile a shader from the provided source.
@@ -102,6 +102,30 @@ export function compileProgram(
 	return program
 }
 
+export function logDebugInfo(gl: WebGLRenderingContext): void {
+	console.dir({
+		language: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+		vendor: gl.getParameter(gl.VENDOR),
+		version: gl.getParameter(gl.VERSION),
+		renderer: gl.getParameter(gl.RENDERER),
+		extensions: gl.getSupportedExtensions(),
+		precision: {
+			vertex_float_low: gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.LOW_FLOAT),
+			vertex_float_medium: gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.MEDIUM_FLOAT),
+			vertex_float_high: gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT),
+			vertex_int_low: gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.LOW_INT),
+			vertex_int_medium: gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.MEDIUM_INT),
+			vertex_int_high: gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_INT),
+			fragment_float_low: gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.LOW_FLOAT),
+			fragment_float_medium: gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT),
+			fragment_float_high: gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT),
+			fragment_int_low: gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.LOW_INT),
+			fragment_int_medium: gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.MEDIUM_INT),
+			fragment_int_high: gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_INT),
+		}
+	})
+}
+
 export type UniformSetters = {
 	[key: string]: (value: any) => void
 }
@@ -114,7 +138,7 @@ export function composeUniformSetters(gl: WebGLRenderingContext, program: WebGLP
 	const uniformSetters: UniformSetters = {}
 
 	for (let i = 0; i < uniformCount; ++i) {
-		const uniformInfo = gl.getActiveUniform(program, i) ?? throwExpr(`Inactive uniform at ${i}`)
+		const uniformInfo = gl.getActiveUniform(program, i) ?? error(`Inactive uniform at ${i}`)
 		let name = uniformInfo.name
 		if (name.endsWith("[0]")) {
 			name = name.substring(0, name.length - 3)
@@ -163,6 +187,6 @@ function createUniformSetter(
 				gl.bindTexture(gl.TEXTURE_2D, v)
 			}
 		default:
-			throwExpr(`Unknown uniform type: 0x${uniformInfo.type.toString(16)}, (${uniformInfo.name})`)
+			error(`Unknown uniform type: 0x${uniformInfo.type.toString(16)}, (${uniformInfo.name})`)
 	}
 }

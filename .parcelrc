@@ -1,7 +1,7 @@
 {
   "extends": "@parcel/config-default",
   "transformers": {
-    "*.{vs,fs}": ["@parcel/transformer-raw"],
+    "*.{vs,fs}": ["@parcel/transformer-glsl"],
     "CNAME": ["@parcel/transformer-raw"]
   }
 }
