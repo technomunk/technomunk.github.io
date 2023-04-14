@@ -1,10 +1,6 @@
 #version 300 es
 
-#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
-#else
-precision mediump float;
-#endif
 
 const int MAX_LOOP_COUNT = 1024;
 const float HUE_OFFSET = .65;
@@ -16,8 +12,6 @@ uniform vec2 uSeed;
 
 out lowp vec4 oColor;
 
-const float SIXTH = 1. / 6.;
-
 // Copied from https://github.com/hughsk/glsl-hsv2rgb/blob/master/index.glsl
 // Which in tern was sourced from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
 vec3 hsv2rgb(vec3 c) {
@@ -28,10 +22,6 @@ vec3 hsv2rgb(vec3 c) {
 
 vec2 complex_mul(in vec2 a, in vec2 b) {
     return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
-}
-
-vec2 complex_sum(in vec2 a, in vec2 b) {
-    return a + b;
 }
 
 float mag2(in vec2 v) {

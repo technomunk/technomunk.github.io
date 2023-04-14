@@ -1,10 +1,11 @@
 import ImageGenerator from "./imggpu";
-import mandelShader from "bundle-text:/src/shader/mandel.fs"
+import { error } from "./util";
+import mandelShader from "/src/shader/mandel.fs"
 
 export default class MandelMap {
     background?: CanvasImageSource
     onSelect?: (coord: [number, number]) => void
-    crossSize: number = 12
+    crossSize = 12
     viewRect: DOMRect = new DOMRect(-1.3, -1.1, 2.2, 2.2)
 
     private canvas: HTMLCanvasElement
@@ -13,7 +14,7 @@ export default class MandelMap {
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
-        this.drawContext = canvas.getContext("2d", { alpha: false, desynchronized: true, willReadFrequently: true })!
+        this.drawContext = canvas.getContext("2d", { alpha: false, desynchronized: true, willReadFrequently: true }) ?? error("Could not get draw context")
         this.drawContext.strokeStyle = 'blue'
         this.drawContext.lineWidth = 1.5
 
@@ -28,7 +29,7 @@ export default class MandelMap {
         this.canvas.addEventListener("pointerup", event => this.handlePointer(event))
     }
 
-    draw(coords?: [number, number]) {
+    draw(coords?: [number, number]): void {
         if (this.background) {
             this.drawContext.drawImage(this.background, 0, 0)
         }

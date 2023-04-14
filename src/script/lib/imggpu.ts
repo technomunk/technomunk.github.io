@@ -1,5 +1,5 @@
 import { compileProgram } from "./glutil"
-import vertexShader from "bundle-text:/src/shader/fullscreen.vs"
+import vertexShader from "/src/shader/fullscreen.vs"
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
