@@ -103,14 +103,15 @@ bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 }
 
 bool intersectScene(in Ray ray, inout RayHit hit) {
+	bool hitSomething = false;
 	hit.dist = c_MAX_DIST;
 
 	for(int i = 0; i < uSphereCount; ++i) {
 		Sphere sphere = Sphere(uData[i * 3], Material(uData[i * 3 + 1], uData[i * 3 + 2]));
-		intersectRaySphere(ray, sphere, hit);
+		hitSomething = intersectRaySphere(ray, sphere, hit) || hitSomething;
 	}
 
-	return hit.dist != c_MAX_DIST;
+	return hitSomething;
 }
 
 float spread(vec3 rayDir, vec3 normal) {
