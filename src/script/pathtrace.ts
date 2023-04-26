@@ -123,9 +123,10 @@ class Scene {
         }
 
         scene.light.dir = Vec3.random(Vec3.ONE.mul(-1), new Vec3(1, 0, 1)).normalized()
-        const brightness = randRange(1, 2)
-        scene.light.color = new Vec3(brightness, brightness, brightness)
-        scene.ambient = Vec3.random(Vec3.ZERO, Vec3.ONE.mul(0.2))
+        let brightness = randRange(1, 2)
+        scene.light.color = Vec3.ONE.mul(brightness)
+        brightness = randRange(0.0, 0.3)
+        scene.ambient = Vec3.ONE.mul(brightness)
 
         return scene
     }
@@ -298,27 +299,27 @@ class Renderer {
         const faces = [
             {
                 target: this.gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-                url: new URL(`/src/img/negx.jpg`, import.meta.url),
+                url: new URL(`/src/img/x-.png`, import.meta.url),
             },
             {
                 target: this.gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-                url: new URL(`/src/img/posx.jpg`, import.meta.url),
+                url: new URL(`/src/img/x+.png`, import.meta.url),
             },
             {
                 target: this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-                url: new URL(`/src/img/negy.jpg`, import.meta.url),
+                url: new URL(`/src/img/y-.png`, import.meta.url),
             },
             {
                 target: this.gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-                url: new URL(`/src/img/posy.jpg`, import.meta.url),
+                url: new URL(`/src/img/y+.png`, import.meta.url),
             },
             {
                 target: this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-                url: new URL(`/src/img/negz.jpg`, import.meta.url),
+                url: new URL(`/src/img/z-.png`, import.meta.url),
             },
             {
                 target: this.gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-                url: new URL(`/src/img/posz.jpg`, import.meta.url),
+                url: new URL(`/src/img/z+.png`, import.meta.url),
             },
         ]
         for (const {target, url} of faces) {

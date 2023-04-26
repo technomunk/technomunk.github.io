@@ -24,6 +24,7 @@ uniform int uSphereCount;
 uniform int uBounces;
 uniform int uFrameIndex;
 uniform sampler2D uLastFrame;
+uniform samplerCube uSkybox;
 
 in vec2 vUV;
 in vec3 vRayDir;
@@ -125,7 +126,8 @@ vec3 trace(in Ray ray, inout uint rngState) {
 
 	for(int i = 0; i <= uBounces; ++i) {
 		if(!intersectScene(ray, hit)) {
-			light += uLightColor * color * spread(ray.dir, uLightDir);
+			light += color * texture(uSkybox, ray.dir).rgb;
+			// light += uLightColor * color * spread(ray.dir, uLightDir);
 			break;
 		}
 
