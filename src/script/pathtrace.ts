@@ -20,6 +20,7 @@ const DATA_UBO_INDEX = 0
 const MAX_BOUNCES = 8
 const DEFAULT_BOUNCES = 4
 const SCROLL_SENSITIVITY = 4e-4
+const SPHERE_SPREAD = .8
 
 interface MaterialBounds {
     albedo?: Bounds<Vec3> | Choice<Vec3>,
@@ -91,35 +92,40 @@ class Scene {
     spheres: Sphere[]
     light: Light
     ambient: Vec3
+    skyBrightness: number
 
-    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = { dir: Vec3.ZERO, color: Vec3.ZERO }, ambient = Vec3.ZERO) {
+    constructor(camera = new Camera(), spheres: Sphere[] = [], light: Light = { dir: Vec3.ZERO, color: Vec3.ZERO }, ambient = Vec3.ZERO, skyBrightness = 1) {
         this.camera = camera
         this.spheres = spheres
         this.light = light
         this.ambient = ambient
+        this.skyBrightness = skyBrightness
     }
 
     static random(): Scene {
         const r = window.innerWidth / window.innerHeight;
         let w, h;
         if (r > 1) {
-            w = r * 0.6;
-            h = 0.6;
+            w = r * SPHERE_SPREAD;
+            h = SPHERE_SPREAD;
         } else {
-            w = 0.6;
-            h = 0.6 / r;
+            w = SPHERE_SPREAD;
+            h = SPHERE_SPREAD / r;
         }
         const scene = new Scene()
         for (let i = 0; i < 32; ++i) {
             scene.spheres.push(
                 Sphere.random({
-                    pos: [new Vec3(-w, -h, -1), new Vec3(w, h, 1)],
+                    pos: [new Vec3(-w, -h, -w), new Vec3(w, h, w)],
                     material: {
                         albedo: [Vec3.ONE.mul(0.1), Vec3.ONE],
                         emissive: [Vec3.ZERO, Vec3.ZERO],
                         smoothness: new Choice(.1, .5, .8, .9, .99, .999),
                     }
                 }))
+            if (Math.random() > 0.85) {
+                scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.mul(randRange(1, 10))
+            }
         }
 
         scene.light.dir = Vec3.random(Vec3.ONE.mul(-1), new Vec3(1, 0, 1)).normalized()
@@ -127,6 +133,8 @@ class Scene {
         scene.light.color = Vec3.ONE.mul(brightness)
         brightness = randRange(0.0, 0.3)
         scene.ambient = Vec3.ONE.mul(brightness)
+
+        scene.skyBrightness = randRange(1, 3)
 
         return scene
     }
@@ -200,6 +208,7 @@ class Renderer {
             uCamPos: scene.camera.pos,
             uView: Mat3.lookIn(scene.camera.dir),
             uCamFov: scene.camera.fov,
+            uSkyBrightness: scene.skyBrightness,
         })
 
         this.redraw()

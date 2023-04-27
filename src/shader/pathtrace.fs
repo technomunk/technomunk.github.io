@@ -19,6 +19,7 @@ struct Sphere {
 uniform vec3 uCamPos;
 uniform vec3 uLightColor;
 uniform vec3 uLightDir;
+uniform float uSkyBrightness;
 uniform vec3 uAmbientColor;
 uniform int uSphereCount;
 uniform int uBounces;
@@ -126,7 +127,7 @@ vec3 trace(in Ray ray, inout uint rngState) {
 
 	for(int i = 0; i <= uBounces; ++i) {
 		if(!intersectScene(ray, hit)) {
-			light += color * texture(uSkybox, ray.dir).rgb;
+			light += color * texture(uSkybox, ray.dir).rgb * uSkyBrightness;
 			// light += uLightColor * color * spread(ray.dir, uLightDir);
 			break;
 		}
