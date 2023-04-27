@@ -183,8 +183,15 @@ function createUniformSetter(
 			return (v) => gl.uniformMatrix3fv(loc, false, v)
 		case gl.SAMPLER_2D:
 			return (v) => {
+				gl.uniform1i(loc, 0)
 				gl.activeTexture(gl.TEXTURE0)
 				gl.bindTexture(gl.TEXTURE_2D, v)
+			}
+		case gl.SAMPLER_CUBE:
+			return (v) => {
+				gl.uniform1i(loc, 1)
+				gl.activeTexture(gl.TEXTURE1)
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, v)
 			}
 		default:
 			error(`Unknown uniform type: 0x${uniformInfo.type.toString(16)}, (${uniformInfo.name})`)

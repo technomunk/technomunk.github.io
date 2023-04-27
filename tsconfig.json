@@ -2,8 +2,13 @@
 	"compilerOptions": {
 		"experimentalDecorators": true,
 		"isolatedModules": true,
-		"target": "es2021",
+		"target": "es2022",
+		"module": "es2022",
 		"strict": true
 	},
+    "baseUrl": ".",
+    "paths": {
+      "~*": ["./*"]
+    },
 	"include": ["src/**/*",]
 }

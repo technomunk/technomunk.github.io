@@ -123,9 +123,10 @@ class Scene {
         }
 
         scene.light.dir = Vec3.random(Vec3.ONE.mul(-1), new Vec3(1, 0, 1)).normalized()
-        const brightness = randRange(1, 2)
-        scene.light.color = new Vec3(brightness, brightness, brightness)
-        scene.ambient = Vec3.random(Vec3.ZERO, Vec3.ONE.mul(0.2))
+        let brightness = randRange(1, 2)
+        scene.light.color = Vec3.ONE.mul(brightness)
+        brightness = randRange(0.0, 0.3)
+        scene.ambient = Vec3.ONE.mul(brightness)
 
         return scene
     }
@@ -142,6 +143,7 @@ class Renderer {
     protected dataBuffer: WebGLBuffer
     protected dataOffset = -1
     protected targetTextures: [WebGLTexture, WebGLTexture]
+    protected skyboxTexture: WebGLTexture
     protected framebuffer: WebGLFramebuffer
     protected frameIndex = 0
     protected animationRequest = -1
@@ -163,6 +165,7 @@ class Renderer {
 
         this.framebuffer = this.gl.createFramebuffer() ?? error("Could not allocate framebuffer")
         this.targetTextures = [this.createTargetTexture(), this.createTargetTexture()]
+        this.skyboxTexture = this.setupSkyboxTexture()
     }
 
     get renderScale(): number {
@@ -210,6 +213,7 @@ class Renderer {
             uBounces: this.bounces,
             uFrameIndex: this.frameIndex,
             uLastFrame: this.targetTextures[this.frameIndex % 2],
+            uSkybox: this.skyboxTexture,
         })
 
         this.setupFramebuffer()
@@ -243,6 +247,7 @@ class Renderer {
     }
 
     protected setupFramebuffer() {
+        this.gl.activeTexture(this.gl.TEXTURE0)
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
         this.gl.framebufferTexture2D(
             this.gl.DRAW_FRAMEBUFFER,
@@ -252,6 +257,7 @@ class Renderer {
             0
         )
     }
+
     protected setupDataUniformBuffer() {
         const blockIndex = this.gl.getUniformBlockIndex(this.program, "Data")
         const blockSize = this.gl.getActiveUniformBlockParameter(this.program, blockIndex, this.gl.UNIFORM_BLOCK_DATA_SIZE)
@@ -284,6 +290,50 @@ class Renderer {
         this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer)
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null)
         this.gl.blitFramebuffer(0, 0, ...this.resolution, 0, 0, w, h, this.gl.COLOR_BUFFER_BIT, this.gl.LINEAR)
+    }
+
+    protected setupSkyboxTexture(): WebGLTexture {
+        const texture = this.gl.createTexture() ?? error("Could not allocate cubemap texture")
+        this.gl.activeTexture(this.gl.TEXTURE1)
+        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, texture)
+        const faces = [
+            {
+                target: this.gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+                url: new URL(`/src/img/x-.png`, import.meta.url),
+            },
+            {
+                target: this.gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+                url: new URL(`/src/img/x+.png`, import.meta.url),
+            },
+            {
+                target: this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                url: new URL(`/src/img/y-.png`, import.meta.url),
+            },
+            {
+                target: this.gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+                url: new URL(`/src/img/y+.png`, import.meta.url),
+            },
+            {
+                target: this.gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+                url: new URL(`/src/img/z-.png`, import.meta.url),
+            },
+            {
+                target: this.gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+                url: new URL(`/src/img/z+.png`, import.meta.url),
+            },
+        ]
+        for (const {target, url} of faces) {
+            this.gl.texImage2D(target, 0, this.gl.RGB, 2048, 2048, 0, this.gl.RGB, this.gl.UNSIGNED_BYTE, null)
+            const image = new Image()
+            image.src = url.toString()
+            image.addEventListener("load", () => {
+                this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, texture)
+                this.gl.texImage2D(target, 0, this.gl.RGB, this.gl.RGB, this.gl.UNSIGNED_BYTE, image)
+            })
+        }
+        this.gl.texParameteri(this.gl.TEXTURE_CUBE_MAP, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
+        this.gl.texParameteri(this.gl.TEXTURE_CUBE_MAP, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
+        return texture
     }
 }
 
