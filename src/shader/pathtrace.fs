@@ -1,20 +1,11 @@
 #version 300 es
 
-#define DATA_SIZE 12*128
+#define DATA_STRIDE 3
+#define DATA_SIZE DATA_STRIDE*128
 
 precision highp float;
 precision highp int;
 layout(std140) uniform;
-
-struct Material {
-	vec4 albedo; // w is how smooth it is
-	vec4 emissive;
-};
-
-struct Sphere {
-	vec4 pos; // includes radius at w
-	Material material;
-};
 
 uniform vec3 uCamPos;
 uniform vec3 uLightColor;
@@ -38,7 +29,7 @@ out lowp vec4 oColor;
 
 const float c_PI = 3.14159265359;
 const float c_PI2 = 2.0 * c_PI;
-const float c_MAX_DIST = 1e9999;
+const float c_MAX_DIST = 1e20;
 const float c_MIN_DIST = 0.;
 const int c_RAYS_PER_PIXEL = 4;
 
@@ -51,7 +42,6 @@ struct RayHit {
 	float dist;
 	vec3 point;
 	vec3 normal;
-	Material material;
 };
 
 uint wangHash(inout uint seed) {
@@ -77,16 +67,41 @@ vec3 randomDir(inout uint state) {
 	return vec3(x, y, z);
 }
 
+vec3 centerOf(in int index) {
+	return uData[index * DATA_STRIDE].xyz;
+}
+
+float radiusOf(in int index) {
+	return uData[index * DATA_STRIDE].w;
+}
+
+vec3 albedoOf(in int index) {
+	return vec3(uData[index * DATA_STRIDE + 1]).rgb;
+}
+
+vec3 emissiveof(in int index) {
+	vec4 dataBlock = uData[index * DATA_STRIDE + 1];
+	return dataBlock.rgb * dataBlock.w;
+}
+
+float smoothnessOf(in int index) {
+	return uData[index * DATA_STRIDE + 2].x;
+}
+
+
 vec3 randomBounce(in vec3 normal, inout uint rngState) {
 	vec3 dir = randomDir(rngState);
 	return dir * sign(dot(normal, dir));
 }
 
-bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
+bool intersectRaySphere(in Ray ray, in int sphereIndex, inout RayHit hit) {
 	// https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
-	vec3 nOrigin = ray.pos - sphere.pos.xyz;
+	vec3 sphereCenter = centerOf(sphereIndex);
+	float radius = radiusOf(sphereIndex);
+
+	vec3 nOrigin = ray.pos - sphereCenter;
 	float b = 2.0 * dot(ray.dir, nOrigin);
-	float c = dot(nOrigin, nOrigin) - sphere.pos.w * sphere.pos.w;
+	float c = dot(nOrigin, nOrigin) - radius * radius;
 
 	float discr = b * b - 4.0 * c;
 
@@ -95,8 +110,7 @@ bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 		if(hitDist < hit.dist && hitDist > c_MIN_DIST) {
 			hit.dist = hitDist;
 			hit.point = ray.pos + ray.dir * hitDist;
-			hit.normal = normalize(hit.point - sphere.pos.xyz);
-			hit.material = sphere.material;
+			hit.normal = normalize(hit.point - sphereCenter);
 			return true;
 		}
 	}
@@ -104,16 +118,21 @@ bool intersectRaySphere(in Ray ray, Sphere sphere, inout RayHit hit) {
 	return false;
 }
 
-bool intersectScene(in Ray ray, inout RayHit hit) {
-	bool hitSomething = false;
+void surfaceInteraction(in int sphereIndex, inout Ray ray, inout vec3 light, inout vec3 color) {
+
+}
+
+int intersectScene(in Ray ray, inout RayHit hit) {
+	int hitIndex = -1;
 	hit.dist = c_MAX_DIST;
 
 	for(int i = 0; i < uSphereCount; ++i) {
-		Sphere sphere = Sphere(uData[i * 3], Material(uData[i * 3 + 1], uData[i * 3 + 2]));
-		hitSomething = intersectRaySphere(ray, sphere, hit) || hitSomething;
+		if (intersectRaySphere(ray, i, hit)) {
+			hitIndex = i;
+		}
 	}
 
-	return hitSomething;
+	return hitIndex;
 }
 
 float spread(vec3 rayDir, vec3 normal) {
@@ -126,17 +145,18 @@ vec3 trace(in Ray ray, inout uint rngState) {
 	RayHit hit;
 
 	for(int i = 0; i <= uBounces; ++i) {
-		if(!intersectScene(ray, hit)) {
+		int hitIndex = intersectScene(ray, hit);
+		if (hitIndex == -1) {
 			light += color * texture(uSkybox, ray.dir).rgb * uSkyBrightness;
 			// light += uLightColor * color * spread(ray.dir, uLightDir);
 			break;
 		}
 
-		light += hit.material.emissive.rgb * color * spread(ray.dir, hit.normal);
-		color *= hit.material.albedo.rgb;
+		light += emissiveof(hitIndex) * color * spread(ray.dir, hit.normal);
+		color *= albedoOf(hitIndex);
 
 		ray.pos = hit.point;
-		ray.dir = normalize(mix(randomBounce(hit.normal, rngState), reflect(ray.dir, hit.normal), hit.material.albedo.w));
+		ray.dir = normalize(mix(randomBounce(hit.normal, rngState), reflect(ray.dir, hit.normal), smoothnessOf(hitIndex)));
 	}
 	return light  + uAmbientColor * color;
 }

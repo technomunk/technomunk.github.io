@@ -25,25 +25,31 @@ const SPHERE_SPREAD = .8
 interface MaterialBounds {
     albedo?: Bounds<Vec3> | Choice<Vec3>,
     smoothness?: Bounds<number> | Choice<number>,
-    emissive?: Bounds<Vec3> | Choice<Vec3>,
+    emissiveness?: Bounds<number> | Choice<number>,
 }
 
 class Material {
     albedo: Vec3
     smoothness: number
-    emissive: Vec3
+    emissiveness: number  // multiplier for the albedo
 
-    constructor(albedo: Vec3 = Vec3.ONE, smoothness = 0.5, emissive: Vec3 = Vec3.ZERO) {
+    constructor(albedo: Vec3 = Vec3.ONE, smoothness = 0.5, emissiveness = 0) {
         this.albedo = albedo
         this.smoothness = smoothness
-        this.emissive = emissive
+        this.emissiveness = emissiveness
+    }
+
+    *data(): Iterable<number> {
+        yield* this.albedo
+        yield this.emissiveness
+        yield this.smoothness
     }
 
     static random(bounds: MaterialBounds = {}) {
         return new Material(
             bounds.albedo instanceof Choice ? bounds.albedo.random() : Vec3.random(bounds.albedo?.[0] || Vec3.ZERO, bounds.albedo?.[1] || Vec3.ONE),
             bounds.smoothness instanceof Choice ? bounds.smoothness.random() : randRange(bounds.smoothness?.[0] || 0, bounds.smoothness?.[1] || 1),
-            bounds.emissive instanceof Choice ? bounds.emissive.random() : Vec3.random(bounds.emissive?.[0] || Vec3.ZERO, bounds.emissive?.[1] || Vec3.ONE),
+            bounds.emissiveness instanceof Choice ? bounds.emissiveness.random() : randRange(bounds.emissiveness?.[0] || 0, bounds.emissiveness?.[1] || 1),
         )
     }
 }
@@ -58,6 +64,8 @@ class Sphere {
     pos: Vec3
     radius: number
     material: Material
+
+    static STRIDE = 12
 
     constructor(pos: Vec3, radius: number, material: Material = new Material()) {
         this.pos = pos
@@ -76,8 +84,7 @@ class Sphere {
     data(): Array<number> {
         return [
             ...this.pos, this.radius,
-            ...this.material.albedo, this.material.smoothness,
-            ...this.material.emissive, 0,
+            ...this.material.data()
         ]
     }
 }
@@ -119,12 +126,12 @@ class Scene {
                     pos: [new Vec3(-w, -h, -w), new Vec3(w, h, w)],
                     material: {
                         albedo: [Vec3.ONE.mul(0.1), Vec3.ONE],
-                        emissive: [Vec3.ZERO, Vec3.ZERO],
+                        emissiveness: [0, 0],
                         smoothness: new Choice(.1, .5, .8, .9, .99, .999),
                     }
                 }))
             if (Math.random() > 0.85) {
-                scene.spheres[i].material.emissive = scene.spheres[i].material.albedo.mul(randRange(1, 10))
+                scene.spheres[i].material.emissiveness = randRange(1, 10)
             }
         }
 
@@ -137,6 +144,19 @@ class Scene {
         scene.skyBrightness = randRange(1, 3)
 
         return scene
+    }
+
+    static test(): Scene {
+        return new Scene(
+            new Camera(Vec3.Z.mul(-5), Vec3.Z, 0.5),
+            [
+                new Sphere(Vec3.ZERO, .5, new Material(Vec3.ONE, 1, 0)),
+            ]
+        )
+    }
+
+    static benchmark(spheresPerSide = 16) {
+        return new Scene()
     }
 }
 
@@ -281,11 +301,11 @@ class Renderer {
     }
 
     protected updateDataBuffer(spheres: Sphere[]) {
-        const data = new Float32Array(spheres.length * 12)
+        const data = new Float32Array(spheres.length * Sphere.STRIDE)
         let offset = 0;
         for (const sphere of spheres) {
             data.set(sphere.data(), offset)
-            offset += 12
+            offset += Sphere.STRIDE
         }
 
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.dataBuffer)
@@ -346,18 +366,6 @@ class Renderer {
     }
 }
 
-const TEST_SCENE = new Scene(
-    new Camera(undefined, undefined, 0.2),
-    [
-        new Sphere(new Vec3(0.25, 0.25, 1), 0.25, new Material(new Vec3(1, 0.4, 0.4), 0)),
-        new Sphere(new Vec3(-0.25, 0.0, 4), 1, new Material(new Vec3(0.4, 1, 0.4), 0.5)),
-        new Sphere(new Vec3(0.0, -0.5, 2), 0.5, new Material(new Vec3(0.4, 0.4, 1), 0.98)),
-        new Sphere(new Vec3(0, -80, 80), 100),
-        new Sphere(new Vec3(-4, 4, 4), 4, new Material(Vec3.ONE, 0.1, Vec3.ONE.mul(0.9))),
-        new Sphere(new Vec3(4, 4, 4), 1, new Material(Vec3.ONE, 0.1, new Vec3(0.9, 0.9, 0))),
-    ]
-)
-
 function setupCameraControls(scene: Scene, view: Renderer) {
     const gd = new GestureDecoder(view.canvas)
     let lx = 0, ly = 0;
@@ -384,7 +392,6 @@ function main() {
     const canvas = document.getElementById("main-canvas") as HTMLCanvasElement
     const view = new Renderer(canvas, isMobile() ? .5 : 1)
     const scene = Scene.random()
-    // const scene = TEST_SCENE
     window.addEventListener('resize', () => view.resize(window.innerWidth, window.innerHeight))
     view.resize(window.innerWidth, window.innerHeight)
     setupCameraControls(scene, view)
