@@ -42,6 +42,6 @@ export default class ViewRect {
      * @returns normalized coordinates relative to top left corner of the view
      */
     public actualToRelative(x: number, y: number): [number, number] {
-        return [(x - this.x) / this.width - .5, .5 - (y - this.y) / this.height]
+        return [(x - this.x) / this.width + .5, .5 + (y - this.y) / this.height]
     }
 }
