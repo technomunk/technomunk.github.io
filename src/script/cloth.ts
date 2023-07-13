@@ -2,19 +2,22 @@ import { error } from "./lib/util"
 import ViewRect from "./lib/viewrect"
 
 class Vertex {
-    public static DATA_SIZE = 5
+    public static readonly DATA_SIZE = 7
+    public static readonly PINNED_OFFSET = 6
 
     public readonly index: number
 
     protected readonly _data: Array<number>
-    protected readonly _newOffset: number
     protected readonly _oldOffset: number
+    protected readonly _curOffset: number
+    protected readonly _newOffset: number
 
     constructor(data: Array<number>, index: number, oldOffset: number) {
         this.index = index
         this._data = data
         this._oldOffset = oldOffset * 2
-        this._newOffset = ((oldOffset + 1) & 1) * 2
+        this._curOffset = ((oldOffset + 1) % 3) * 2
+        this._newOffset = ((oldOffset + 2) % 3) * 2
     }
 
     public get oldX(): number {
@@ -22,6 +25,13 @@ class Vertex {
     }
     public get oldY(): number {
         return this._data[this._dataIndex + this._oldOffset + 1]
+    }
+
+    public get curX(): number {
+        return this._data[this._dataIndex + this._curOffset + 0]
+    }
+    public get curY(): number {
+        return this._data[this._dataIndex + this._curOffset + 1]
     }
 
     public get newX(): number {
@@ -38,10 +48,10 @@ class Vertex {
     }
 
     public get pinned(): boolean {
-        return this._data[this._dataIndex + 4] == 1
+        return this._data[this._dataIndex + 6] == 1
     }
     public set pinned(value: boolean) {
-        this._data[this._dataIndex + 4] = value ? 1 : 0
+        this._data[this._dataIndex + Vertex.PINNED_OFFSET] = value ? 1 : 0
     }
 
     protected get _dataIndex(): number {
@@ -77,8 +87,6 @@ class Edge {
     }
 }
 
-const MILLISECONDS_PER_SECOND = 1_000
-
 class ClothData {
     protected _vertices: Array<number> = []
     protected _oldOffset = 0
@@ -87,11 +95,11 @@ class ClothData {
     protected _edges: Array<number> = []
 
     public get vertexCount(): number {
-        return this._vertices.length / 5
+        return this._vertices.length / Vertex.DATA_SIZE
     }
 
-    public addVertex(x: number, y: number) {
-        this._vertices.push(x, y, x, y, 0)
+    public addVertex(x: number, y: number, pinned = false) {
+        this._vertices.push(x, y, x, y, x, y, pinned ? 1 : 0)
     }
 
     public getVertex(index: number): Vertex {
@@ -189,6 +197,10 @@ class ClothData {
             const [a, b] = this._edges.slice(i, i + 2)
             yield new Edge(this._edges, i / Edge.DATA_SIZE, this.getVertex(a), this.getVertex(b))
         }
+    }
+
+    public updatePositions() {
+        this._oldOffset = (this._oldOffset + 1) % 3
     }
 
     protected _getPos(vertexIndex: number): [number, number] {
@@ -304,7 +316,7 @@ class ClothView {
         return null
     }
 
-    protected onUpdate() {}
+    protected onUpdate() { }
 }
 
 class ClothRenderer extends ClothView {
@@ -369,14 +381,137 @@ class ClothRenderer extends ClothView {
     }
 }
 
+class ClothSim {
+    public dampeningFactor = 0.9
+    public gravity = -.2 
+
+    public simulate(timeStep: number, data: ClothData) {
+        for (const vertex of data.vertices()) {
+            this._simVertex(vertex, timeStep)
+        }
+
+        for (const edge of data.edges()) {
+            this._simEdge(edge, timeStep)
+        }
+
+        data.updatePositions()
+    }
+
+    protected _simVertex(vertex: Vertex, timeStep: number) {
+        if (vertex.pinned) {
+            vertex.newX = vertex.curX
+            vertex.newY = vertex.curY
+            return
+        }
+
+        let velX = vertex.curX - vertex.oldX
+        let velY = vertex.curY - vertex.oldY
+
+        velY += this.gravity * timeStep
+        velX *= this.dampeningFactor
+        velY *= this.dampeningFactor
+
+        vertex.newX = vertex.curX + velX
+        vertex.newY = vertex.curY + velY
+    }
+
+    protected _simEdge(edge: Edge, timeStep: number) {
+        if (edge.a.pinned && edge.b.pinned) {
+            return
+        }
+
+        let [dx, dy] = diff(edge.a.curX, edge.a.curY, edge.b.curX, edge.b.curY)
+        const dist = Math.sqrt(len2(dx, dy))
+        if (dist < edge.distance) {
+            return
+        }
+
+        dx /= dist
+        dy /= dist
+        let delta = dist - edge.distance
+        if (!edge.a.pinned && !edge.b.pinned) {
+            delta *= .5
+        }
+
+        if (!edge.a.pinned) {
+            edge.a.newX -= dx * delta
+            edge.a.newY -= dy * delta
+        }
+        if (!edge.b.pinned) {
+            edge.b.newX += dx * delta
+            edge.b.newY += dy * delta
+        }
+    }
+
+}
+
 class ClothScene {
     public readonly data: ClothData
     public readonly renderer: ClothRenderer
+    public readonly simulator: ClothSim
 
     constructor(canvas: HTMLCanvasElement) {
-        this.data = new ClothData()
+        this.data = ClothScene.generateExampleScene(13, 13)
         this.renderer = new ClothRenderer(canvas, this.data)
+        this.simulator = new ClothSim()
+
+        this._setupSimControls()
+
         requestAnimationFrame(() => this.renderer.draw())
+    }
+
+    protected static generateExampleScene(columns: number, rows: number, width = 8, height = 8): ClothData {
+        const minX = -width * .5
+        const minY = -height * .5
+
+        const data = new ClothData()
+        for (let y = 0; y < rows; ++y) {
+            for (let x = 0; x < columns; ++x) {
+                const xOffset = (y + 1 < rows) ? (Math.random() - .5) * .2 : 0
+                const yOffset = (y + 1 < rows) ? (Math.random() - .5) * .2 : 0
+                data.addVertex(
+                    minX + (x / columns) * width + xOffset,
+                    minY + (y / rows) * height + yOffset,
+                    y == (rows - 1) && (x & 3) == 0,
+                )
+            }
+        }
+
+        for (let y = 0; y < rows; ++y) {
+            for (let x = 0; x < columns; ++x) {
+                const index = (y * columns) + x
+                const left = index - 1
+                const right = index + 1
+                const top = ((y - 1) * columns) + x
+                const bottom = ((y + 1) * columns) + x
+
+                if (x > 0) {
+                    data.addEdge(index, left)
+                }
+                if (x + 1 < columns) {
+                    data.addEdge(index, right)
+                }
+                if (y > 0) {
+                    data.addEdge(index, top)
+                }
+                if (y + 1 < rows) {
+                    data.addEdge(index, bottom)
+                }
+            }
+        }
+
+        return data
+    }
+
+    protected _setupSimControls() {
+        document.addEventListener("keypress", (e) => this._handleKeyPress(e))
+    }
+
+    protected _handleKeyPress(e: KeyboardEvent) {
+        if (e.key == " ") {
+            this.simulator.simulate(.05, this.data)
+            requestAnimationFrame(() => this.renderer.draw())
+        }
     }
 }
 
