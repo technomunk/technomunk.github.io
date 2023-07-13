@@ -382,8 +382,10 @@ class ClothRenderer extends ClothView {
 }
 
 class ClothSim {
-    public dampeningFactor = 0.9
-    public gravity = -.2 
+    public dampeningFactor = 0.95
+    public gravity = -.3
+    public windStrength = .5
+    public windPeriod = 1_000 * Math.PI
 
     public simulate(timeStep: number, data: ClothData) {
         for (const vertex of data.vertices()) {
@@ -407,7 +409,9 @@ class ClothSim {
         let velX = vertex.curX - vertex.oldX
         let velY = vertex.curY - vertex.oldY
 
+        velX += Math.sin(performance.now() / this.windPeriod + vertex.curY) * this.windStrength * timeStep
         velY += this.gravity * timeStep
+
         velX *= this.dampeningFactor
         velY *= this.dampeningFactor
 
@@ -450,6 +454,8 @@ class ClothScene {
     public readonly renderer: ClothRenderer
     public readonly simulator: ClothSim
 
+    public simTimeStep = .01
+
     constructor(canvas: HTMLCanvasElement) {
         this.data = ClothScene.generateExampleScene(13, 13)
         this.renderer = new ClothRenderer(canvas, this.data)
@@ -457,18 +463,22 @@ class ClothScene {
 
         this._setupSimControls()
 
-        requestAnimationFrame(() => this.renderer.draw())
+        this._simulateAndDraw()
     }
 
-    protected static generateExampleScene(columns: number, rows: number, width = 8, height = 8): ClothData {
+    protected _simulateAndDraw() {
+        this.simulator.simulate(this.simTimeStep, this.data)
+        this.renderer.draw(false)
+        requestAnimationFrame(() => this._simulateAndDraw())
+    }
+
+    protected static generateExampleScene(columns: number, rows: number, width = 8, height = 8, xOffset = 0, yOffset = 1,): ClothData {
         const minX = -width * .5
         const minY = -height * .5
 
         const data = new ClothData()
         for (let y = 0; y < rows; ++y) {
             for (let x = 0; x < columns; ++x) {
-                const xOffset = (y + 1 < rows) ? (Math.random() - .5) * .2 : 0
-                const yOffset = (y + 1 < rows) ? (Math.random() - .5) * .2 : 0
                 data.addVertex(
                     minX + (x / columns) * width + xOffset,
                     minY + (y / rows) * height + yOffset,
