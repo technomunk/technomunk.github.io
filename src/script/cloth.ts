@@ -1,217 +1,539 @@
 import { error } from "./lib/util"
 import ViewRect from "./lib/viewrect"
 
-type VertexPos = [number, number]
-type Edge = { index: number, dist: number }
-type Vertices = {
-    pos: [Array<VertexPos>, Array<VertexPos>]
-    vel: [Array<VertexPos>, Array<VertexPos>]
-    edges: Array<Array<Edge>>,
-    pinned: Array<boolean>,
-    count: number
+class Vertex {
+    public static readonly DATA_SIZE = 7
+    public static readonly PINNED_OFFSET = 6
+
+    public readonly index: number
+
+    protected readonly _data: Array<number>
+    protected readonly _oldOffset: number
+    protected readonly _curOffset: number
+    protected readonly _newOffset: number
+
+    constructor(data: Array<number>, index: number, oldOffset: number) {
+        this.index = index
+        this._data = data
+        this._oldOffset = oldOffset * 2
+        this._curOffset = ((oldOffset + 1) % 3) * 2
+        this._newOffset = ((oldOffset + 2) % 3) * 2
+    }
+
+    public get oldX(): number {
+        return this._data[this._dataIndex + this._oldOffset + 0]
+    }
+    public get oldY(): number {
+        return this._data[this._dataIndex + this._oldOffset + 1]
+    }
+
+    public get curX(): number {
+        return this._data[this._dataIndex + this._curOffset + 0]
+    }
+    public get curY(): number {
+        return this._data[this._dataIndex + this._curOffset + 1]
+    }
+
+    public get newX(): number {
+        return this._data[this._dataIndex + this._newOffset + 0]
+    }
+    public set newX(value: number) {
+        this._data[this._dataIndex + this._newOffset + 0] = value
+    }
+    public get newY(): number {
+        return this._data[this._dataIndex + this._newOffset + 1]
+    }
+    public set newY(value: number) {
+        this._data[this._dataIndex + this._newOffset + 1] = value
+    }
+
+    public get pinned(): boolean {
+        return this._data[this._dataIndex + 6] == 1
+    }
+    public set pinned(value: boolean) {
+        this._data[this._dataIndex + Vertex.PINNED_OFFSET] = value ? 1 : 0
+    }
+
+    protected get _dataIndex(): number {
+        return this.index * Vertex.DATA_SIZE
+    }
 }
 
-const MILLISECONDS_PER_SECOND = 1_000
+class Edge {
+    public static DATA_SIZE = 3
 
-class ClothSim {
+    public readonly a: Vertex
+    public readonly b: Vertex
+
+    protected readonly _data: Array<number>
+    protected readonly _index: number
+
+    constructor(data: Array<number>, index: number, a: Vertex, b: Vertex) {
+        this._data = data
+        this._index = index
+        this.a = a
+        this.b = b
+    }
+
+    public get distance(): number {
+        return this._data[this._dataIndex + 2]
+    }
+    public set distance(value: number) {
+        this._data[this._dataIndex + 2] = value
+    }
+
+    protected get _dataIndex(): number {
+        return this._index * Edge.DATA_SIZE
+    }
+}
+
+class ClothData {
+    protected _vertices: Array<number> = []
+    protected _oldOffset = 0
+
+    // store a index, b index and distance
+    protected _edges: Array<number> = []
+
+    public get vertexCount(): number {
+        return this._vertices.length / Vertex.DATA_SIZE
+    }
+
+    public addVertex(x: number, y: number, pinned = false) {
+        this._vertices.push(x, y, x, y, x, y, pinned ? 1 : 0)
+    }
+
+    public getVertex(index: number): Vertex {
+        return new Vertex(this._vertices, index, this._oldOffset)
+    }
+
+    public findClosestVertex(x: number, y: number): Vertex {
+        if (this._vertices.length == 0) {
+            throw "No vertex exists in the scene to find"
+        }
+
+        let minDist = Infinity
+        let vertexIndex = 0
+        for (let i = 0; i < this.vertexCount; ++i) {
+            const [vx, vy] = this._getPos(i)
+            const d = len2(...diff(x, y, vx, vy))
+            if (d < minDist) {
+                vertexIndex = i
+                minDist = d
+            }
+        }
+
+        return this.getVertex(vertexIndex)
+    }
+
+    public removeVertex(index: number) {
+        this._vertices.splice(index * Vertex.DATA_SIZE, Vertex.DATA_SIZE)
+        this.removeEdgesConnectingTo(index)
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            if (this._edges[i + 0] > index) {
+                this._edges[i + 0] -= 1
+            }
+            if (this._edges[i + 1] > index) {
+                this._edges[i + 1] -= 1
+            }
+        }
+    }
+
+    public *vertices(): Generator<Vertex, void> {
+        for (let i = 0; i < this.vertexCount; ++i) {
+            yield this.getVertex(i)
+        }
+    }
+
+    public addEdge(aIndex: number, bIndex: number, slack = 0) {
+        if (aIndex == bIndex) {
+            throw "Can not add edge between the same vertex"
+        }
+        if (this.findEdge(aIndex, bIndex) != null) {
+            console.log("found existing edge")
+            return
+        }
+        const aPos = this._getPos(aIndex)
+        const bPos = this._getPos(bIndex)
+        this._edges.push(aIndex, bIndex, Math.sqrt(len2(...diff(...aPos, ...bPos))) + slack)
+    }
+
+    public findEdge(aIndex: number, bIndex: number): Edge | null {
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            const [a, b] = this._edges.slice(i, i + 2)
+            if ((a == aIndex && b == bIndex) || (a == bIndex && b == aIndex)) {
+                return new Edge(this._edges, i / Edge.DATA_SIZE, this.getVertex(a), this.getVertex(b))
+            }
+        }
+        return null
+    }
+
+    public removeEdge(aVertex: number, bVertex: number) {
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            const [a, b] = this._edges.slice(i, i + 2)
+            if (a == aVertex && b == bVertex) {
+                this._edges.splice(i, 1)
+                return
+            }
+        }
+    }
+
+    public removeEdgesConnectingTo(vertexIndex: number) {
+        let endAt = this._edges.length
+        for (let i = 0; i < endAt; i += Edge.DATA_SIZE) {
+            const [a, b, _] = this._edges.slice(i, i + 3)
+            if (a == vertexIndex || b == vertexIndex) {
+                for (let l = 0; l < Edge.DATA_SIZE; ++l) {
+                    this._edges[i + l] = this._edges[endAt - l - 1]
+                }
+                endAt -= Edge.DATA_SIZE
+            }
+        }
+
+        this._edges.splice(endAt)
+    }
+
+    public *edges(): Generator<Edge, void> {
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            const [a, b] = this._edges.slice(i, i + 2)
+            yield new Edge(this._edges, i / Edge.DATA_SIZE, this.getVertex(a), this.getVertex(b))
+        }
+    }
+
+    public updatePositions() {
+        this._oldOffset = (this._oldOffset + 1) % 3
+    }
+
+    protected _getPos(vertexIndex: number): [number, number] {
+        const offset = vertexIndex * Vertex.DATA_SIZE + this._oldOffset
+        return this._vertices.slice(offset, offset + 2) as [number, number]
+    }
+}
+
+class ClothView {
+    public readonly area: ViewRect
+    public data: ClothData
+    public vertexRadius = 8
+
+    protected _canvas: HTMLCanvasElement
+    protected _selectedVertex: number | null = null
+
+    protected _isDirty = false
+
+    constructor(canvas: HTMLCanvasElement, data: ClothData) {
+        this.data = data
+        this._canvas = canvas
+
+        const ratio = this._canvas.width / this._canvas.height
+        if (this._canvas.width > this._canvas.height) {
+            this.area = new ViewRect(0, 0, 10 * ratio, 10)
+        } else {
+            this.area = new ViewRect(0, 0, 10, 10 / ratio)
+        }
+        this._setupControls()
+    }
+
+    public resize(width: number, height: number) {
+        const widthToHeight = width / height
+        this.area.height *= height / this._canvas.height
+        this.area.width = this.area.height * widthToHeight
+
+        this._canvas.width = width
+        this._canvas.height = height
+    }
+
+    public canvasToWorld(x: number, y: number): [number, number] {
+        x /= this._canvas.width
+        y /= this._canvas.height
+        return this.area.relativeToActual(x, y)
+    }
+
+    public worldToCanvas(x: number, y: number): [number, number] {
+        [x, y] = this.area.actualToRelative(x, y)
+        return [this._canvas.width * x, this._canvas.height * (1 - y)]
+    }
+
+    protected _setupControls() {
+        this._canvas.addEventListener("click", (e) => this._processClick(e))
+    }
+
+    protected _processClick(e: MouseEvent) {
+        let vertex = this._getSelectedVertex(e.x, e.y)
+        if (e.ctrlKey) {
+            if (vertex == null) {
+                return
+            } else {
+                vertex.pinned = !vertex.pinned
+                this._isDirty = true
+            }
+        } else {
+            let vertexCreated = false
+            this._isDirty = true
+            if (vertex == null) {
+                this.data.addVertex(...this.canvasToWorld(e.x, e.y))
+                vertex = this.data.getVertex(this.data.vertexCount - 1)
+                vertexCreated = true
+            }
+
+            if (e.shiftKey) {
+                this._addEdge(vertex)
+            } else if (!vertexCreated) {
+                this.data.removeVertex(vertex.index)
+            }
+
+            if (vertexCreated) {
+                this._selectedVertex = this.data.vertexCount - 1
+            }
+        }
+
+        if (this._isDirty) {
+            this.onUpdate()
+            this._isDirty = false
+        }
+    }
+
+    protected _addEdge(vertex: Vertex) {
+        if (this._selectedVertex) {
+            if (this._selectedVertex == vertex.index) {
+                this._selectedVertex = null
+                this._isDirty = true
+                return
+            }
+            this.data.addEdge(this._selectedVertex, vertex.index)
+        }
+        this._selectedVertex = vertex.index
+        this._isDirty = true
+    }
+
+    protected _getSelectedVertex(cx: number, cy: number): Vertex | null {
+        const [wx, wy] = this.canvasToWorld(cx, cy)
+        if (this.data.vertexCount > 0) {
+            const vertex = this.data.findClosestVertex(wx, wy)
+            if (len2(...diff(...this.worldToCanvas(vertex.oldX, vertex.oldY), cx, cy)) < this.vertexRadius * this.vertexRadius * 4) {
+                return vertex
+            }
+        }
+
+        return null
+    }
+
+    protected onUpdate() { }
+}
+
+class ClothRenderer extends ClothView {
     public static CONTEXT_SETTINGS: CanvasRenderingContext2DSettings = {
         alpha: false,
         desynchronized: true,
         willReadFrequently: false,
     }
-    public SPRING_TENSION = 2
-    public GRAVITY = .4
-    public DAMPENING = 8
-    public MAX_SPRING_FORCE = 5
-    public WIND_STRENGTH = .2
 
-    protected canvas: HTMLCanvasElement
-    protected ctx: CanvasRenderingContext2D
+    public vertexStyles = {
+        pinned: "black",
+        unpinned: "grey",
+    }
+    public selectedVertexRadius = 1.3
 
-    protected view: ViewRect
-    protected vertices: Vertices
-    protected drawIndex = 0
-    protected lastAnimationTime = performance.now()
+    protected _ctx: CanvasRenderingContext2D
 
-    constructor(canvas: HTMLCanvasElement) {
-        this.canvas = canvas
-        this.ctx = canvas.getContext("2d", ClothSim.CONTEXT_SETTINGS) ?? error("Could not create rendering context")
-
-        const ratio = this.canvas.width / this.canvas.height
-        if (this.canvas.width > this.canvas.height) {
-            this.view = new ViewRect(0, 0, 10 * ratio, 10)
-        } else {
-            this.view = new ViewRect(0, 0, 10, 10 / ratio)
-        }
-
-        // this.vertices = {
-        //     count: 2,
-        //     pos: [[[0, 1], [0, -1]], [[0, 1], [0, -1]]],
-        //     vel: [[[0, 0], [.01, 0]], [[0, 0], [.01, 0]]],
-        //     pinned: [true, false],
-        //     edges: [[], [{index: 0, dist: 2}]],
-        // }
-
-        const vertexColumns = 9
-        const vertexRows = 3
-        const vertexCount = vertexColumns * vertexRows
-
-        this.vertices = {
-            count: vertexCount,
-            pos: [new Array(vertexCount), new Array(vertexCount)],
-            vel: [new Array(vertexCount), new Array(vertexCount)],
-            pinned: new Array(vertexCount),
-            edges: new Array(vertexCount),
-        }
-
-        for (let y = 0; y < vertexRows; ++y) {
-            for (let x = 0; x < vertexColumns; ++x) {
-                const index = y * vertexColumns + x
-                this.vertices.pos[0][index] = [(x - 4), (y + 2)]
-                this.vertices.pos[1][index] = [(x - 4), (y + 2)]
-                if (x == 0) {
-                    this.vertices.edges[index] = [{ index: index + 1, dist: 1 }]
-                    this.vertices.pinned[index] = true
-                } else if (x == vertexColumns - 1) {
-                    this.vertices.edges[index] = [{ index: index - 1, dist: 1 }]
-                    this.vertices.pinned[index] = true
-                } else {
-                    if (y == vertexRows >> 1) {
-                        this.vertices.edges[index] = [{ index: index - 1, dist: 1 }, { index: index + 1, dist: 1 }]
-                    } else {
-                        this.vertices.edges[index] = [{ index: index - 1, dist: 1 }, { index: index + 1, dist: 1 }]
-                    }
-                    this.vertices.pinned[index] = false
-                }
-            }
-        }
-
-        for (let i = 0; i < this.vertices.count; ++i) {
-            this.vertices.vel[0][i] = [0, 0]
-            this.vertices.vel[1][i] = [0, 0]
-        }
+    constructor(canvas: HTMLCanvasElement, data: ClothData) {
+        super(canvas, data)
+        this._ctx = canvas.getContext("2d", ClothRenderer.CONTEXT_SETTINGS) ?? error("Could not create rendering context")
     }
 
-    public draw() {
-        this.ctx.fillStyle = "white"
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    public draw(showVertices = true) {
+        this._ctx.fillStyle = "white"
+        this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height)
+        this._ctx.fill()
 
-        this.ctx.fillStyle = "black"
-        this.ctx.strokeStyle = "black"
-        this.ctx.lineWidth = 2
+        this._ctx.strokeStyle = "black"
+        for (const edge of this.data.edges()) {
+            this._drawEdge(edge)
+        }
 
-        for (let i = 0; i < this.vertices.count; ++i) {
-            const [x, y] = this.canvasOf(i)
-            // this.ctx.beginPath()
-            // this.ctx.ellipse(x, y, 5, 5, 0, 0, Math.PI * 2)
-            // this.ctx.fill()
-
-            for (const edge of this.vertices.edges[i]) {
-                if (edge.index < i) {
-                    continue
-                }
-                this.ctx.beginPath()
-                this.ctx.moveTo(x, y)
-                this.ctx.lineTo(...this.canvasOf(edge.index))
-                this.ctx.stroke()
+        if (showVertices) {
+            for (const vertex of this.data.vertices()) {
+                this._drawVertex(vertex)
             }
         }
     }
 
-    public animate(now: number) {
-        const timeDelta = Math.min(.2, (now - this.lastAnimationTime) / MILLISECONDS_PER_SECOND)
-        this.lastAnimationTime = now
-        this.simStep(timeDelta)
-        this.draw()
-        requestAnimationFrame((t) => this.animate(t))
-    }
-
-    public resize(width: number, height: number) {
-        const widthToHeight = width / height
-        this.view.height *= height / this.canvas.height
-        this.view.width = this.view.height * widthToHeight
-
-        this.canvas.width = width
-        this.canvas.height = height
-
+    override onUpdate() {
         this.draw()
     }
 
-    public simStep(timeDelta: number) {
-        const simIndex = (this.drawIndex + 1) & 1
-        for (let i = 0; i < this.vertices.count; ++i) {
-            this.simVertex(simIndex, i, timeDelta)
+    protected _drawEdge(edge: Edge) {
+        this._ctx.beginPath()
+        this._ctx.moveTo(...this.worldToCanvas(edge.a.oldX, edge.a.oldY))
+        this._ctx.lineTo(...this.worldToCanvas(edge.b.oldX, edge.b.oldY))
+        this._ctx.stroke()
+    }
+
+    protected _drawVertex(vertex: Vertex) {
+        this._ctx.fillStyle = vertex.pinned ? this.vertexStyles.pinned : this.vertexStyles.unpinned
+        this._ctx.beginPath()
+        this._ctx.ellipse(...this.worldToCanvas(vertex.oldX, vertex.oldY), this.vertexRadius, this.vertexRadius, 0, 0, Math.PI * 2)
+        this._ctx.fill()
+
+        if (vertex.index == this._selectedVertex) {
+            this._ctx.beginPath()
+            this._ctx.ellipse(...this.worldToCanvas(vertex.oldX, vertex.oldY), this.vertexRadius * this.selectedVertexRadius, this.vertexRadius * this.selectedVertexRadius, 0, 0, Math.PI * 2)
+            this._ctx.stroke()
         }
-        console.log("Simulation ran")
-        this.drawIndex = simIndex
+    }
+}
+
+class ClothSim {
+    public dampeningFactor = 0.95
+    public gravity = -.3
+    public windStrength = .5
+    public windPeriod = 1_000 * Math.PI
+
+    public simulate(timeStep: number, data: ClothData) {
+        for (const vertex of data.vertices()) {
+            this._simVertex(vertex, timeStep)
+        }
+
+        for (const edge of data.edges()) {
+            this._simEdge(edge, timeStep)
+        }
+
+        data.updatePositions()
     }
 
-    protected worldToCanvas(x: number, y: number): [number, number] {
-        [x, y] = this.view.actualToRelative(x, y)
-        return [this.canvas.width * x, this.canvas.height * (1 - y)]
-    }
-
-    protected canvasOf(index: number): [number, number] {
-        return this.worldToCanvas(...this.posOf(index))
-    }
-
-    protected posOf(index: number): [number, number] {
-        return this.vertices.pos[this.drawIndex][index]
-    }
-
-    protected simVertex(simIndex: number, index: number, timeDelta: number) {
-        const oldPos = this.posOf(index)
-        const newPos = this.vertices.pos[simIndex][index]
-        if (this.vertices.pinned[index]) {
-            newPos[0] = oldPos[0]
-            newPos[1] = oldPos[1]
+    protected _simVertex(vertex: Vertex, timeStep: number) {
+        if (vertex.pinned) {
+            vertex.newX = vertex.curX
+            vertex.newY = vertex.curY
             return
         }
 
-        // integrate position
-        const oldVel = this.vertices.vel[this.drawIndex][index]
-        newPos[0] = oldPos[0] + oldVel[0]
-        newPos[1] = oldPos[1] + oldVel[1]
+        let velX = vertex.curX - vertex.oldX
+        let velY = vertex.curY - vertex.oldY
 
-        // integrate velocity
-        let ax = 0, ay = 0
-    
-        // spring tension
-        for (const edge of this.vertices.edges[index]) {
-            const np = this.posOf(edge.index)
-            const delta = diff(np, oldPos)
-            const distance = Math.sqrt(len2(delta))
-            const d = distance - edge.dist
+        velX += Math.sin(performance.now() / this.windPeriod + vertex.curY) * this.windStrength * timeStep
+        velY += this.gravity * timeStep
 
-            const nx = delta[0] / distance
-            const ny = delta[1] / distance
+        velX *= this.dampeningFactor
+        velY *= this.dampeningFactor
 
-            ax += nx * timeDelta * Math.min(d * this.SPRING_TENSION, this.MAX_SPRING_FORCE)
-            ay += ny * timeDelta * Math.min(d * this.SPRING_TENSION, this.MAX_SPRING_FORCE)
+        vertex.newX = vertex.curX + velX
+        vertex.newY = vertex.curY + velY
+    }
+
+    protected _simEdge(edge: Edge, timeStep: number) {
+        if (edge.a.pinned && edge.b.pinned) {
+            return
         }
 
-        // integrate gravity
-        ay -= timeDelta * this.GRAVITY
-    
-        // add random wind
-        ax += Math.sin(performance.now() / MILLISECONDS_PER_SECOND / Math.PI - oldPos[1] / 5) * this.WIND_STRENGTH * timeDelta
+        let [dx, dy] = diff(edge.a.curX, edge.a.curY, edge.b.curX, edge.b.curY)
+        const dist = Math.sqrt(len2(dx, dy))
+        if (dist < edge.distance) {
+            return
+        }
 
-        // integrate dampening
-        ax -= oldVel[0] * this.DAMPENING * timeDelta
-        ay -= oldVel[1] * this.DAMPENING * timeDelta
+        dx /= dist
+        dy /= dist
+        let delta = dist - edge.distance
+        if (!edge.a.pinned && !edge.b.pinned) {
+            delta *= .5
+        }
 
-        // dampen velocity
-        const newVel = this.vertices.vel[simIndex][index]
-        newVel[0] = oldVel[0] + ax
-        newVel[1] = oldVel[1] + ay
+        if (!edge.a.pinned) {
+            edge.a.newX -= dx * delta
+            edge.a.newY -= dy * delta
+        }
+        if (!edge.b.pinned) {
+            edge.b.newX += dx * delta
+            edge.b.newY += dy * delta
+        }
+    }
+
+}
+
+class ClothScene {
+    public readonly data: ClothData
+    public readonly renderer: ClothRenderer
+    public readonly simulator: ClothSim
+
+    public simTimeStep = .01
+
+    constructor(canvas: HTMLCanvasElement) {
+        this.data = ClothScene.generateExampleScene(13, 13)
+        this.renderer = new ClothRenderer(canvas, this.data)
+        this.simulator = new ClothSim()
+
+        this._setupSimControls()
+
+        this._simulateAndDraw()
+    }
+
+    protected _simulateAndDraw() {
+        this.simulator.simulate(this.simTimeStep, this.data)
+        this.renderer.draw(false)
+        requestAnimationFrame(() => this._simulateAndDraw())
+    }
+
+    protected static generateExampleScene(columns: number, rows: number, width = 8, height = 8, xOffset = 0, yOffset = 1,): ClothData {
+        const minX = -width * .5
+        const minY = -height * .5
+
+        const data = new ClothData()
+        for (let y = 0; y < rows; ++y) {
+            for (let x = 0; x < columns; ++x) {
+                data.addVertex(
+                    minX + (x / columns) * width + xOffset,
+                    minY + (y / rows) * height + yOffset,
+                    y == (rows - 1) && (x & 3) == 0,
+                )
+            }
+        }
+
+        for (let y = 0; y < rows; ++y) {
+            for (let x = 0; x < columns; ++x) {
+                const index = (y * columns) + x
+                const left = index - 1
+                const right = index + 1
+                const top = ((y - 1) * columns) + x
+                const bottom = ((y + 1) * columns) + x
+
+                if (x > 0) {
+                    data.addEdge(index, left)
+                }
+                if (x + 1 < columns) {
+                    data.addEdge(index, right)
+                }
+                if (y > 0) {
+                    data.addEdge(index, top)
+                }
+                if (y + 1 < rows) {
+                    data.addEdge(index, bottom)
+                }
+            }
+        }
+
+        return data
+    }
+
+    protected _setupSimControls() {
+        document.addEventListener("keypress", (e) => this._handleKeyPress(e))
+    }
+
+    protected _handleKeyPress(e: KeyboardEvent) {
+        if (e.key == " ") {
+            this.simulator.simulate(.05, this.data)
+            requestAnimationFrame(() => this.renderer.draw())
+        }
     }
 }
 
-function diff(a: VertexPos, b: VertexPos): [number, number] {
-    return [a[0] - b[0], a[1] - b[1]]
+function diff(ax: number, ay: number, bx: number, by: number): [number, number] {
+    return [ax - bx, ay - by]
 }
 
-function len2([x, y]: VertexPos): number {
+function mid(ax: number, ay: number, bx: number, by: number): [number, number] {
+    return [(ax + bx) / 2, (ay + by) / 2]
+}
+
+function len2(x: number, y: number): number {
     return x * x + y * y
 }
 
@@ -220,14 +542,8 @@ function initialize(): void {
     const canvas: HTMLCanvasElement = document.querySelector("canvas#main-canvas") ?? error("Could not find main canvas")
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
-    const cs = new ClothSim(canvas)
-    window.addEventListener("resize", () => cs.resize(window.innerWidth, window.innerHeight))
-    document.addEventListener("keypress", (e) => {
-        if (e.key == " ") {
-            requestAnimationFrame(() => cs.animate(performance.now()))
-        }
-    })
-    requestAnimationFrame(() => cs.animate(performance.now()))
+    const cs = new ClothScene(canvas)
+    window.addEventListener("resize", () => cs.renderer.resize(window.innerWidth, window.innerHeight))
 }
 
 window.onload = initialize
