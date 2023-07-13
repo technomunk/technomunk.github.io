@@ -1,65 +1,113 @@
 import { error } from "./lib/util"
 import ViewRect from "./lib/viewrect"
 
-type P2 = [number, number]
-type Vertex = {
-    readonly index: number,
-    readonly oldPos: [number, number],
-    readonly newPos: [number, number],
-    readonly pinned: boolean,
+class Vertex {
+    public static DATA_SIZE = 5
+
+    public readonly index: number
+
+    protected readonly _data: Array<number>
+    protected readonly _newOffset: number
+    protected readonly _oldOffset: number
+
+    constructor(data: Array<number>, index: number, oldOffset: number) {
+        this.index = index
+        this._data = data
+        this._oldOffset = oldOffset * 2
+        this._newOffset = ((oldOffset + 1) & 1) * 2
+    }
+
+    public get oldX(): number {
+        return this._data[this._dataIndex + this._oldOffset + 0]
+    }
+    public get oldY(): number {
+        return this._data[this._dataIndex + this._oldOffset + 1]
+    }
+
+    public get newX(): number {
+        return this._data[this._dataIndex + this._newOffset + 0]
+    }
+    public set newX(value: number) {
+        this._data[this._dataIndex + this._newOffset + 0] = value
+    }
+    public get newY(): number {
+        return this._data[this._dataIndex + this._newOffset + 1]
+    }
+    public set newY(value: number) {
+        this._data[this._dataIndex + this._newOffset + 1] = value
+    }
+
+    public get pinned(): boolean {
+        return this._data[this._dataIndex + 4] == 1
+    }
+    public set pinned(value: boolean) {
+        this._data[this._dataIndex + 4] = value ? 1 : 0
+    }
+
+    protected get _dataIndex(): number {
+        return this.index * Vertex.DATA_SIZE
+    }
 }
-type Edge = {
-    vertexA: Vertex,
-    vertexB: Vertex,
-    distance: number,
+
+class Edge {
+    public static DATA_SIZE = 3
+
+    public readonly a: Vertex
+    public readonly b: Vertex
+
+    protected readonly _data: Array<number>
+    protected readonly _index: number
+
+    constructor(data: Array<number>, index: number, a: Vertex, b: Vertex) {
+        this._data = data
+        this._index = index
+        this.a = a
+        this.b = b
+    }
+
+    public get distance(): number {
+        return this._data[this._dataIndex + 2]
+    }
+    public set distance(value: number) {
+        this._data[this._dataIndex + 2] = value
+    }
+
+    protected get _dataIndex(): number {
+        return this._index * Edge.DATA_SIZE
+    }
 }
 
 const MILLISECONDS_PER_SECOND = 1_000
 
-class Scene {
-    protected _flipIndex = 0
-
-    protected _positions: [Array<P2>, Array<P2>] = [[], []]
-    protected _velocities: [Array<P2>, Array<P2>] = [[], []]
-    protected _pinned: Array<boolean> = []
-    protected _vertexCount = 0
+class ClothData {
+    protected _vertices: Array<number> = []
+    protected _oldOffset = 0
 
     // store a index, b index and distance
-    protected _edges: Array<[number, number, number]> = []
+    protected _edges: Array<number> = []
 
     public get vertexCount(): number {
-        return this._vertexCount
+        return this._vertices.length / 5
     }
 
     public addVertex(x: number, y: number) {
-        this._positions[0].push([x, y])
-        this._positions[1].push([x, y])
-        this._velocities[0].push([x, y])
-        this._velocities[1].push([x, y])
-        this._pinned.push(false)
-        this._vertexCount += 1
+        this._vertices.push(x, y, x, y, 0)
     }
 
     public getVertex(index: number): Vertex {
-        const unflipIndex = (this._flipIndex + 1) & 1
-        return {
-            index,
-            oldPos: this._positions[this._flipIndex][index],
-            newPos: this._positions[unflipIndex][index],
-            pinned: this._pinned[index]
-        }
+        return new Vertex(this._vertices, index, this._oldOffset)
     }
 
     public findClosestVertex(x: number, y: number): Vertex {
-        if (this._vertexCount < 1) {
+        if (this._vertices.length == 0) {
             throw "No vertex exists in the scene to find"
         }
 
-        const pos: P2 = [x, y]
         let minDist = Infinity
         let vertexIndex = 0
-        for (let i = 0; i < this._vertexCount; ++i) {
-            const d = len2(diff(this._positions[this._flipIndex][i], pos))
+        for (let i = 0; i < this.vertexCount; ++i) {
+            const [vx, vy] = this._getPos(i)
+            const d = len2(...diff(x, y, vx, vy))
             if (d < minDist) {
                 vertexIndex = i
                 minDist = d
@@ -70,34 +118,25 @@ class Scene {
     }
 
     public removeVertex(index: number) {
-        this._positions[0].splice(index, 1)
-        this._positions[1].splice(index, 1)
-        this._velocities[0].splice(index, 1)
-        this._velocities[1].splice(index, 1)
-        this._pinned.splice(index, 1)
-        this._vertexCount -= 1
-        this.removeEdges(index)
-        for (const edge of this._edges) {
-            if (edge[0] > index) {
-                edge[0] -= 1
+        this._vertices.splice(index * Vertex.DATA_SIZE, Vertex.DATA_SIZE)
+        this.removeEdgesConnectingTo(index)
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            if (this._edges[i + 0] > index) {
+                this._edges[i + 0] -= 1
             }
-            if (edge[1] > index) {
-                edge[1] -= 1
+            if (this._edges[i + 1] > index) {
+                this._edges[i + 1] -= 1
             }
         }
     }
 
-    public pinVertex(index: number, pinned: boolean) {
-        this._pinned[index] = pinned
-    }
-
     public *vertices(): Generator<Vertex, void> {
-        for (let i = 0; i < this._vertexCount; ++i) {
+        for (let i = 0; i < this.vertexCount; ++i) {
             yield this.getVertex(i)
         }
     }
 
-    public addEdge(aIndex: number, bIndex: number) {
+    public addEdge(aIndex: number, bIndex: number, slack = 0) {
         if (aIndex == bIndex) {
             throw "Can not add edge between the same vertex"
         }
@@ -105,27 +144,24 @@ class Scene {
             console.log("found existing edge")
             return
         }
-        const aPos = this._positions[this._flipIndex][aIndex]
-        const bPos = this._positions[this._flipIndex][bIndex]
-        this._edges.push([aIndex, bIndex, Math.sqrt(len2(diff(aPos, bPos)))])
+        const aPos = this._getPos(aIndex)
+        const bPos = this._getPos(bIndex)
+        this._edges.push(aIndex, bIndex, Math.sqrt(len2(...diff(...aPos, ...bPos))) + slack)
     }
 
     public findEdge(aIndex: number, bIndex: number): Edge | null {
-        for (const [a, b, d] of this._edges) {
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            const [a, b] = this._edges.slice(i, i + 2)
             if ((a == aIndex && b == bIndex) || (a == bIndex && b == aIndex)) {
-                return {
-                    vertexA: this.getVertex(a),
-                    vertexB: this.getVertex(b),
-                    distance: d,
-                }
+                return new Edge(this._edges, i / Edge.DATA_SIZE, this.getVertex(a), this.getVertex(b))
             }
         }
         return null
     }
 
     public removeEdge(aVertex: number, bVertex: number) {
-        for (let i = 0; i < this._edges.length; ++i) {
-            const [a, b, _] = this._edges[i]
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            const [a, b] = this._edges.slice(i, i + 2)
             if (a == aVertex && b == bVertex) {
                 this._edges.splice(i, 1)
                 return
@@ -133,13 +169,15 @@ class Scene {
         }
     }
 
-    public removeEdges(vertexIndex: number) {
+    public removeEdgesConnectingTo(vertexIndex: number) {
         let endAt = this._edges.length
-        for (let i = 0; i < endAt; ++i) {
-            const [a, b, _] = this._edges[i]
+        for (let i = 0; i < endAt; i += Edge.DATA_SIZE) {
+            const [a, b, _] = this._edges.slice(i, i + 3)
             if (a == vertexIndex || b == vertexIndex) {
-                this._edges[i] = this._edges[endAt - 1]
-                endAt -= 1
+                for (let l = 0; l < Edge.DATA_SIZE; ++l) {
+                    this._edges[i + l] = this._edges[endAt - l - 1]
+                }
+                endAt -= Edge.DATA_SIZE
             }
         }
 
@@ -147,13 +185,15 @@ class Scene {
     }
 
     public *edges(): Generator<Edge, void> {
-        for (const [a, b, dist] of this._edges) {
-            yield {
-                vertexA: this.getVertex(a),
-                vertexB: this.getVertex(b),
-                distance: dist,
-            }
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            const [a, b] = this._edges.slice(i, i + 2)
+            yield new Edge(this._edges, i / Edge.DATA_SIZE, this.getVertex(a), this.getVertex(b))
         }
+    }
+
+    protected _getPos(vertexIndex: number): [number, number] {
+        const offset = vertexIndex * Vertex.DATA_SIZE + this._oldOffset
+        return this._vertices.slice(offset, offset + 2) as [number, number]
     }
 }
 
@@ -174,7 +214,7 @@ class ClothSim {
     protected _ctx: CanvasRenderingContext2D
 
     protected _view: ViewRect
-    protected _scene = new Scene()
+    protected _scene = new ClothData()
 
     protected _selectedVertex: number | null = null
     protected _lastAnimationTime = performance.now()
@@ -256,14 +296,14 @@ class ClothSim {
             this._ctx.fillStyle = vertex.pinned ? "black" : "gray"
         }
         this._ctx.beginPath()
-        this._ctx.ellipse(...this.worldToCanvas(...vertex.oldPos), this.VERTEX_RADIUS, this.VERTEX_RADIUS, 0, 0, Math.PI * 2)
+        this._ctx.ellipse(...this.worldToCanvas(vertex.oldX, vertex.oldY), this.VERTEX_RADIUS, this.VERTEX_RADIUS, 0, 0, Math.PI * 2)
         this._ctx.fill()
     }
 
     protected drawEdge(edge: Edge) {
         this._ctx.beginPath()
-        this._ctx.moveTo(...this.worldToCanvas(...edge.vertexA.oldPos))
-        this._ctx.lineTo(...this.worldToCanvas(...edge.vertexB.oldPos))
+        this._ctx.moveTo(...this.worldToCanvas(edge.a.oldX, edge.a.oldY))
+        this._ctx.lineTo(...this.worldToCanvas(edge.b.oldX, edge.b.oldY))
         this._ctx.stroke()
     }
 
@@ -277,7 +317,7 @@ class ClothSim {
             if (vertex == null) {
                 return
             } else {
-                this._scene.pinVertex(vertex.index, !vertex.pinned)
+                vertex.pinned = !vertex.pinned
             }
         } else {
             let vertexCreated = false
@@ -347,7 +387,7 @@ class ClothSim {
         const [wx, wy] = this.canvasToWorld(cx, cy)
         if (this._scene.vertexCount > 0) {
             const vertex = this._scene.findClosestVertex(wx, wy)
-            if (len2(diff(this.worldToCanvas(...vertex.oldPos), [cx, cy])) < this.VERTEX_RADIUS * this.VERTEX_RADIUS * 4) {
+            if (len2(...diff(...this.worldToCanvas(vertex.oldX, vertex.oldY), cx, cy)) < this.VERTEX_RADIUS * this.VERTEX_RADIUS * 4) {
                 return vertex
             }
         }
@@ -403,11 +443,15 @@ class ClothSim {
     }
 }
 
-function diff(a: P2, b: P2): [number, number] {
-    return [a[0] - b[0], a[1] - b[1]]
+function diff(ax: number, ay: number, bx: number, by: number): [number, number] {
+    return [ax - bx, ay - by]
 }
 
-function len2([x, y]: P2): number {
+function mid(ax: number, ay: number, bx: number, by: number): [number, number] {
+    return [(ax + bx) / 2, (ay + by) / 2]
+}
+
+function len2(x: number, y: number): number {
     return x * x + y * y
 }
 
