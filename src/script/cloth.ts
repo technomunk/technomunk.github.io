@@ -100,6 +100,7 @@ class ClothData {
 
     public addVertex(x: number, y: number, pinned = false) {
         this._vertices.push(x, y, x, y, x, y, pinned ? 1 : 0)
+        console.debug("added vertex", { x, y, pinned, index: this.vertexCount - 1 })
     }
 
     public getVertex(index: number): Vertex {
@@ -128,14 +129,18 @@ class ClothData {
     public removeVertex(index: number) {
         this._vertices.splice(index * Vertex.DATA_SIZE, Vertex.DATA_SIZE)
         this.removeEdgesConnectingTo(index)
+        let updatedEdges = 0
         for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
             if (this._edges[i + 0] > index) {
                 this._edges[i + 0] -= 1
+                ++updatedEdges
             }
             if (this._edges[i + 1] > index) {
                 this._edges[i + 1] -= 1
+                ++updatedEdges
             }
         }
+        console.debug("removing vertex", { index }, "updated", updatedEdges, "edges")
     }
 
     public *vertices(): Generator<Vertex, void> {
@@ -171,7 +176,7 @@ class ClothData {
         for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
             const [a, b] = this._edges.slice(i, i + 2)
             if (a == aVertex && b == bVertex) {
-                this._edges.splice(i, 1)
+                this._edges.splice(i, Edge.DATA_SIZE)
                 return
             }
         }
@@ -182,13 +187,13 @@ class ClothData {
         for (let i = 0; i < endAt; i += Edge.DATA_SIZE) {
             const [a, b, _] = this._edges.slice(i, i + 3)
             if (a == vertexIndex || b == vertexIndex) {
-                for (let l = 0; l < Edge.DATA_SIZE; ++l) {
-                    this._edges[i + l] = this._edges[endAt - l - 1]
-                }
+                this._edges.copyWithin(i, endAt - Edge.DATA_SIZE, endAt)
+                console.log("removed edge", { a, b }) 
                 endAt -= Edge.DATA_SIZE
             }
         }
 
+        console.debug("removed", (this._edges.length - endAt) / Edge.DATA_SIZE, "edges")
         this._edges.splice(endAt)
     }
 
@@ -203,8 +208,18 @@ class ClothData {
         this._oldOffset = (this._oldOffset + 1) % 3
     }
 
+    public get oldPosOffset(): number {
+        return this._oldOffset * 2
+    }
+    public get curPosOffset(): number {
+        return ((this._oldOffset + 1) % 3) * 2
+    }
+    public get newPosOffset(): number {
+        return ((this._oldOffset + 2) % 3) * 2
+    }
+
     protected _getPos(vertexIndex: number): [number, number] {
-        const offset = vertexIndex * Vertex.DATA_SIZE + this._oldOffset
+        const offset = vertexIndex * Vertex.DATA_SIZE + this.curPosOffset
         return this._vertices.slice(offset, offset + 2) as [number, number]
     }
 }
@@ -408,6 +423,10 @@ class ClothSim {
 
         let velX = vertex.curX - vertex.oldX
         let velY = vertex.curY - vertex.oldY
+        if (timeStep < 0) {
+            velX *= -1
+            velY *= -1
+        }
 
         velX += Math.sin(performance.now() / this.windPeriod + vertex.curY) * this.windStrength * timeStep
         velY += this.gravity * timeStep
@@ -455,6 +474,9 @@ class ClothScene {
     public readonly simulator: ClothSim
 
     public simTimeStep = .01
+    public paused = false
+
+    protected _animFrame = 0
 
     constructor(canvas: HTMLCanvasElement) {
         this.data = ClothScene.generateExampleScene(13, 13)
@@ -468,8 +490,11 @@ class ClothScene {
 
     protected _simulateAndDraw() {
         this.simulator.simulate(this.simTimeStep, this.data)
-        this.renderer.draw(false)
-        requestAnimationFrame(() => this._simulateAndDraw())
+        this.renderer.draw(this.paused)
+
+        if (!this.paused) {
+            requestAnimationFrame(() => this._simulateAndDraw())
+        }
     }
 
     protected static generateExampleScene(columns: number, rows: number, width = 8, height = 8, xOffset = 0, yOffset = 1,): ClothData {
@@ -518,9 +543,25 @@ class ClothScene {
     }
 
     protected _handleKeyPress(e: KeyboardEvent) {
-        if (e.key == " ") {
-            this.simulator.simulate(.05, this.data)
-            requestAnimationFrame(() => this.renderer.draw())
+        switch (e.key) {
+            case " ":
+                this.paused = !this.paused
+                if (!this.paused) {
+                    requestAnimationFrame(() => this._simulateAndDraw())
+                }
+                break;
+            case "+":
+                this.paused = true
+                this.simulator.simulate(this.simTimeStep, this.data)
+                requestAnimationFrame(() => this.renderer.draw(true))
+                break;
+            case "-":
+                this.paused = true
+                this.simulator.simulate(-this.simTimeStep, this.data)
+                requestAnimationFrame(() => this.renderer.draw(true))
+                break;
+            default:
+                console.debug(e)
         }
     }
 }
