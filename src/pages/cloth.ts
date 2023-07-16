@@ -466,7 +466,7 @@ class ClothSim {
             velY *= -1
         }
 
-        velX += Math.sin(performance.now() / this.windPeriod + vertex.curY) * this.windStrength * timeStep
+        velX += Math.sin(performance.now() / this.windPeriod) * this.windStrength * timeStep
         velY += this.gravity * timeStep
 
         velX *= this.dampeningFactor
