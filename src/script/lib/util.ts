@@ -33,6 +33,12 @@ export function randRange(min: number, max: number): number {
 	return min + Math.random() * (max - min)
 }
 
+export function dist2(ax: number, ay: number, bx: number, by: number) {
+	const dx = ax - bx
+	const dy = ay - by
+	return dx * dx + dy * dy
+}
+
 export function clamp(v: number, min: number, max: number): number {
 	return Math.max(Math.min(v, max), min)
 }
