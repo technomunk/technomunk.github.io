@@ -71,6 +71,8 @@ export class SliceInterpreter {
         if (--this._eventCount == 1) {
             this._lx = event.x
             this._ly = event.y
+        } else if (this._eventCount < 0) {
+            this._eventCount = 0
         }
     }
 
