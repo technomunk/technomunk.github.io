@@ -82,6 +82,10 @@ class Edge {
         this._data[this._dataIndex + 2] = value
     }
 
+    public static describe(a: number, b: number): string {
+        return `${Math.min(a, b)} ${Math.max(a, b)}`
+    }
+
     protected get _dataIndex(): number {
         return this._index * Edge.DATA_SIZE
     }
@@ -97,10 +101,12 @@ class ClothData {
     public get vertexCount(): number {
         return this._vertices.length / Vertex.DATA_SIZE
     }
+    public get edgeCount(): number {
+        return this._edges.length / Edge.DATA_SIZE
+    }
 
     public addVertex(x: number, y: number, pinned = false) {
         this._vertices.push(x, y, x, y, x, y, pinned ? 1 : 0)
-        console.debug("added vertex", { x, y, pinned, index: this.vertexCount - 1 })
     }
 
     public getVertex(index: number): Vertex {
@@ -140,7 +146,6 @@ class ClothData {
                 ++updatedEdges
             }
         }
-        console.debug("removing vertex", { index }, "updated", updatedEdges, "edges")
     }
 
     public *vertices(): Generator<Vertex, void> {
@@ -154,12 +159,31 @@ class ClothData {
             throw "Can not add edge between the same vertex"
         }
         if (this.findEdge(aIndex, bIndex) != null) {
-            console.log("found existing edge")
+            console.debug("found existing edge")
             return
         }
         const aPos = this._getPos(aIndex)
         const bPos = this._getPos(bIndex)
         this._edges.push(aIndex, bIndex, Math.sqrt(len2(...diff(...aPos, ...bPos))) + slack)
+    }
+
+    public addBulkEdges(edges: Array<number>, slack = 0) {
+        const seen: Set<string> = new Set()
+        for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
+            seen.add(Edge.describe(this._edges[i + 0], this._edges[i + 1]))
+        }
+        const initialEdges = this.edgeCount
+        for (let i = 0; i < edges.length; i += 2) {
+            const a = edges[i + 0]
+            const b = edges[i + 1]
+            const desc = Edge.describe(a, b)
+            if (!seen.has(desc)) {
+                const aPos = this._getPos(a)
+                const bPos = this._getPos(b)
+                this._edges.push(Math.min(a, b), Math.max(a, b), Math.sqrt(len2(...diff(...aPos, ...bPos))) + slack)
+                seen.add(desc)
+            }
+        }
     }
 
     public findEdge(aIndex: number, bIndex: number): Edge | null {
@@ -188,12 +212,10 @@ class ClothData {
             const [a, b, _] = this._edges.slice(i, i + 3)
             if (a == vertexIndex || b == vertexIndex) {
                 this._edges.copyWithin(i, endAt - Edge.DATA_SIZE, endAt)
-                console.log("removed edge", { a, b }) 
                 endAt -= Edge.DATA_SIZE
             }
         }
 
-        console.debug("removed", (this._edges.length - endAt) / Edge.DATA_SIZE, "edges")
         this._edges.splice(endAt)
     }
 
@@ -402,6 +424,7 @@ class ClothSim {
     public windStrength = .5
     public windPeriod = 1_000 * Math.PI
 
+
     public simulate(timeStep: number, data: ClothData) {
         for (const vertex of data.vertices()) {
             this._simVertex(vertex, timeStep)
@@ -479,7 +502,7 @@ class ClothScene {
     protected _animFrame = 0
 
     constructor(canvas: HTMLCanvasElement) {
-        this.data = ClothScene.generateExampleScene(13, 13)
+        this.data = ClothScene.generateExampleScene(50, 25)
         this.renderer = new ClothRenderer(canvas, this.data)
         this.simulator = new ClothSim()
 
@@ -512,6 +535,7 @@ class ClothScene {
             }
         }
 
+        const edges = new Array()
         for (let y = 0; y < rows; ++y) {
             for (let x = 0; x < columns; ++x) {
                 const index = (y * columns) + x
@@ -521,19 +545,20 @@ class ClothScene {
                 const bottom = ((y + 1) * columns) + x
 
                 if (x > 0) {
-                    data.addEdge(index, left)
+                    edges.push(index, left)
                 }
                 if (x + 1 < columns) {
-                    data.addEdge(index, right)
+                    edges.push(index, right)
                 }
                 if (y > 0) {
-                    data.addEdge(index, top)
+                    edges.push(index, top)
                 }
                 if (y + 1 < rows) {
-                    data.addEdge(index, bottom)
+                    edges.push(index, bottom)
                 }
             }
         }
+        data.addBulkEdges(edges)
 
         return data
     }
@@ -549,17 +574,20 @@ class ClothScene {
                 if (!this.paused) {
                     requestAnimationFrame(() => this._simulateAndDraw())
                 }
-                break;
+                break
             case "+":
                 this.paused = true
                 this.simulator.simulate(this.simTimeStep, this.data)
                 requestAnimationFrame(() => this.renderer.draw(true))
-                break;
+                break
             case "-":
                 this.paused = true
                 this.simulator.simulate(-this.simTimeStep, this.data)
                 requestAnimationFrame(() => this.renderer.draw(true))
-                break;
+                break
+            case "p":
+                this.simulator.logPerformance()
+                break
             default:
                 console.debug(e)
         }
