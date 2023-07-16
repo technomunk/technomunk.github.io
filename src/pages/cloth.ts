@@ -1,5 +1,5 @@
-import { SliceEvent, SliceInterpreter } from "./lib/slice"
-import { clamp, error } from "./lib/util"
+import { GestureDecoder } from "./lib/gesture"
+import { error } from "./lib/util"
 import ViewRect from "./lib/viewrect"
 
 class Vertex {
@@ -149,20 +149,18 @@ class ClothData {
         }
     }
 
-    public removeVerticesAlongLine(ax: number, ay: number, bx: number, by: number, radius: number): number {
+    public removeVerticesAlongLine(ax: number, ay: number, bx: number, by: number, radius: number) {
         const toRemove = []
         for (let i = 0; i < this.vertexCount; ++i) {
             const [x, y] = this._getPos(i)
-            if (distToSegment(x, y, ax, ay, bx, by) < radius) {
+            if (distToLine(x, y, ax, ay, bx, by) < radius) {
                 toRemove.push(i)
             }
         }
-
         // TODO: as this is a bulk operation, it can be optimized to have at least linear time
-        for (const i of toRemove.reverse()) {
+        for (const i of toRemove) {
             this.removeVertex(i)
         }
-        return toRemove.length
     }
 
     public *vertices(): Generator<Vertex, void> {
@@ -270,8 +268,7 @@ class ClothView {
 
     protected _canvas: HTMLCanvasElement
     protected _selectedVertex: number | null = null
-    
-    protected _lastSlice: SliceEvent | undefined
+
     protected _isDirty = false
 
     constructor(canvas: HTMLCanvasElement, data: ClothData) {
@@ -308,18 +305,7 @@ class ClothView {
     }
 
     protected _setupControls() {
-        const si = new SliceInterpreter(this._canvas, this.vertexRadius) 
-        si.addSliceHandler(this._handleSlice.bind(this))
-        // this._canvas.addEventListener("click", (e) => this._processClick(e))
-    }
-
-    protected _handleSlice(slice: SliceEvent) {
-        this._lastSlice = slice
-        const [ax, ay] = this.canvasToWorld(slice.ax, slice.ay)
-        const [bx, by] = this.canvasToWorld(slice.bx, slice.by) 
-        const worldRadius = this.vertexRadius * this.vertexRadius / this._canvas.width * this.area.width
-        this.data.removeVerticesAlongLine(ax, ay, bx, by, worldRadius)
-        this.onUpdate()
+        this._canvas.addEventListener("click", (e) => this._processClick(e))
     }
 
     protected _processClick(e: MouseEvent) {
@@ -419,14 +405,6 @@ class ClothRenderer extends ClothView {
             for (const vertex of this.data.vertices()) {
                 this._drawVertex(vertex)
             }
-        }
-    
-        if (this._lastSlice) {
-            this._ctx.strokeStyle = "red"
-            this._ctx.beginPath()
-            this._ctx.moveTo(this._lastSlice.ax, this._lastSlice.ay)
-            this._ctx.lineTo(this._lastSlice.bx, this._lastSlice.by)
-            this._ctx.stroke()
         }
     }
 
@@ -643,26 +621,8 @@ function distToLine(x: number, y: number, ax: number, ay: number, bx: number, by
     return denominator / divisor
 }
 
-function distToSegment(x: number, y: number, ax: number, ay: number, bx: number, by: number): number {
-    const l2 = len2(...diff(ax, ay, bx, by))
-    if (l2 == 0) {
-        return Math.sqrt(len2(...diff(x, y, ax, ay)))
-    }
-
-    // project the point onto the segment line
-    const t = clamp(dot(...diff(x, y, ax, ay), ...diff(x, y, bx, by)), 0, 1)
-    const px = ax + t * bx - x
-    const py = ay + t * by - y
-
-    return Math.sqrt(len2(...diff(x, y, px, py)))
-}
-
 function len2(x: number, y: number): number {
     return x * x + y * y
-}
-
-function dot(ax: number, ay: number, bx: number, by: number): number {
-    return ax * bx + ay * by
 }
 
 
