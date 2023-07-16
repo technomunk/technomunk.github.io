@@ -1,3 +1,4 @@
+import { GestureDecoder } from "./lib/gesture"
 import { error } from "./lib/util"
 import ViewRect from "./lib/viewrect"
 
@@ -148,6 +149,20 @@ class ClothData {
         }
     }
 
+    public removeVerticesAlongLine(ax: number, ay: number, bx: number, by: number, radius: number) {
+        const toRemove = []
+        for (let i = 0; i < this.vertexCount; ++i) {
+            const [x, y] = this._getPos(i)
+            if (distToLine(x, y, ax, ay, bx, by) < radius) {
+                toRemove.push(i)
+            }
+        }
+        // TODO: as this is a bulk operation, it can be optimized to have at least linear time
+        for (const i of toRemove) {
+            this.removeVertex(i)
+        }
+    }
+
     public *vertices(): Generator<Vertex, void> {
         for (let i = 0; i < this.vertexCount; ++i) {
             yield this.getVertex(i)
@@ -172,7 +187,7 @@ class ClothData {
         for (let i = 0; i < this._edges.length; i += Edge.DATA_SIZE) {
             seen.add(Edge.describe(this._edges[i + 0], this._edges[i + 1]))
         }
-        const initialEdges = this.edgeCount
+
         for (let i = 0; i < edges.length; i += 2) {
             const a = edges[i + 0]
             const b = edges[i + 1]
@@ -585,9 +600,6 @@ class ClothScene {
                 this.simulator.simulate(-this.simTimeStep, this.data)
                 requestAnimationFrame(() => this.renderer.draw(true))
                 break
-            case "p":
-                this.simulator.logPerformance()
-                break
             default:
                 console.debug(e)
         }
@@ -600,6 +612,13 @@ function diff(ax: number, ay: number, bx: number, by: number): [number, number] 
 
 function mid(ax: number, ay: number, bx: number, by: number): [number, number] {
     return [(ax + bx) / 2, (ay + by) / 2]
+}
+
+function distToLine(x: number, y: number, ax: number, ay: number, bx: number, by: number): number {
+    // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+    const denominator = Math.abs((bx - ax) * (ay - y) - (ax - x) * (by - ay))
+    const divisor = Math.sqrt(len2(...diff(ax, ay, bx, by)))
+    return denominator / divisor
 }
 
 function len2(x: number, y: number): number {
