@@ -396,6 +396,7 @@ class ClothRenderer extends ClothView {
         pinned: "black",
         unpinned: "grey",
     }
+    public sliceStyle: string | undefined
     public selectedVertexRadius = 1.3
 
     protected _ctx: CanvasRenderingContext2D
@@ -421,8 +422,8 @@ class ClothRenderer extends ClothView {
             }
         }
     
-        if (this._lastSlice) {
-            this._ctx.strokeStyle = "red"
+        if (this.sliceStyle && this._lastSlice) {
+            this._ctx.strokeStyle = this.sliceStyle
             this._ctx.beginPath()
             this._ctx.moveTo(this._lastSlice.ax, this._lastSlice.ay)
             this._ctx.lineTo(this._lastSlice.bx, this._lastSlice.by)
