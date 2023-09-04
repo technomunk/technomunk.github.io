@@ -1,9 +1,10 @@
 import { UniformSetters, compileProgram, composeUniformSetters, setUniforms } from "./glutil"
 import ComplexPlaneView from "./complexview"
 
-import vertexShader from "/src/shader/fullscreen.vs"
-import fragmentShader from "/src/shader/julia.fs"
 import { error } from "./util"
+
+const vertexShader = require("../../shader/fullscreen.vs")
+const fragmentShader = require("../../shader/julia.fs")
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
 	alpha: false,

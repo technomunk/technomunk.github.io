@@ -1,7 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
 import { error } from "./util"
-import { Vec3, vec3 } from "./vec3"
 
 /** Compile a shader from the provided source.
  * @param gl The rendering context to compile the shader with.

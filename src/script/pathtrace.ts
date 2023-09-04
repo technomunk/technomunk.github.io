@@ -1,10 +1,11 @@
 import { UniformSetters, compileProgram, composeUniformSetters, logDebugInfo, setUniforms } from "./lib/glutil"
-import vertexShader from "/src/shader/pathtrace.vs"
-import fragmentShader from "/src/shader/pathtrace.fs"
 import { Bounds, Choice, clamp, error, isMobile, randRange } from "./lib/util"
 import { Camera } from "./lib/camera";
 import { GestureDecoder } from "./lib/gesture";
 import { Mat3, Vec3 } from "./lib/math";
+
+const vertexShader = require("../shader/pathtrace.vs")
+const fragmentShader = require("../shader/pathtrace.fs")
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
@@ -231,7 +232,7 @@ class Renderer {
         this.frameIndex += 1
         this.present()
 
-        if (this.frameIndex < 1<<9) {
+        if (this.frameIndex < 1 << 9) {
             this.animationRequest = requestAnimationFrame(() => this.redraw())
         } else {
             console.log("Image is final")
@@ -331,7 +332,7 @@ class Renderer {
                 url: new URL(`/src/img/z+.png`, import.meta.url),
             },
         ]
-        for (const {target, url} of faces) {
+        for (const { target, url } of faces) {
             this.gl.texImage2D(target, 0, this.gl.RGB, 2048, 2048, 0, this.gl.RGB, this.gl.UNSIGNED_BYTE, null)
             const image = new Image()
             image.src = url.toString()

@@ -1,14 +1,14 @@
 {
 	"compilerOptions": {
+		"outDir": "./dist/",
 		"experimentalDecorators": true,
 		"isolatedModules": true,
+		"moduleResolution": "bundler",
 		"target": "es2022",
 		"module": "es2022",
-		"strict": true
+		"strict": true,
+		"paths": {},
 	},
     "baseUrl": ".",
-    "paths": {
-      "~*": ["./*"]
-    },
-	"include": ["src/**/*",]
+	"include": ["src/**/*",],
 }

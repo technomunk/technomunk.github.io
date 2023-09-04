@@ -1,6 +1,7 @@
-import ImageGenerator from "./imggpu";
-import { error } from "./util";
-import mandelShader from "/src/shader/mandel.fs"
+import ImageGenerator from "./imggpu"
+import { error } from "./util"
+
+const mandelShader = require('../../shader/mandel.fs')
 
 export default class MandelMap {
     background?: CanvasImageSource

@@ -9,20 +9,17 @@
     "src/blog/sample.html"
   ],
   "scripts": {
-    "serve": "parcel",
-    "build": "rm -rf dist && parcel build --no-source-maps"
+    "serve": "webpack serve",
+    "build": "webpack build --mode production"
   },
   "devDependencies": {
-    "@parcel/core": "^2.9.3",
-    "@parcel/packager-raw-url": "^2.9.3",
-    "@parcel/packager-xml": "^2.9.3",
-    "@parcel/transformer-glsl": "^2.9.3",
-    "@parcel/transformer-inline-string": "^2.9.3",
-    "@parcel/transformer-webmanifest": "^2.9.3",
-    "@parcel/transformer-xml": "^2.9.3",
-    "@typescript-eslint/eslint-plugin": "^4.25.0",
-    "@typescript-eslint/parser": "^4.25.0",
-    "parcel": "^2.9.3"
+    "copy-webpack-plugin": "^11.0.0",
+    "ts-loader": "latest",
+    "typescript": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest",
+    "webpack-dev-server": "latest",
+    "webpack-glsl-loader": "latest"
   },
   "private": true,
   "repository": "git+https://github.com/technomunk/technomunk.github.io.git",

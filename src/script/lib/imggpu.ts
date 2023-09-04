@@ -1,5 +1,6 @@
 import { compileProgram } from "./glutil"
-import vertexShader from "/src/shader/fullscreen.vs"
+
+const vertexShader = require("../../shader/fullscreen.vs")
 
 const CONTEXT_OPTIONS: WebGLContextAttributes = {
     alpha: false,
@@ -29,7 +30,7 @@ export default class ImageGenerator {
         this.canvas = document.createElement("canvas")
         const gl = this.canvas.getContext("webgl2", CONTEXT_OPTIONS)
         if (gl) {
-            this.gl = gl 
+            this.gl = gl
         } else {
             throw "WebGL not supported"
         }
@@ -40,9 +41,9 @@ export default class ImageGenerator {
             this.resize(width, height)
         }
 
-        const program = compileProgram(this.gl, vertexShader, shader)    
+        const program = compileProgram(this.gl, vertexShader, shader)
         this.gl.useProgram(program)
-    
+
         for (const [name, value] of Object.entries(uniforms)) {
             const location = this.gl.getUniformLocation(program, name)
             if (!location) {
@@ -58,9 +59,9 @@ export default class ImageGenerator {
                 this.gl.uniform1i(location, value)
             }
         }
-    
+
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 3);
-    
+
         return this.canvas
     }
 

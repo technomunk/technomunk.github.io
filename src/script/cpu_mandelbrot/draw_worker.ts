@@ -117,5 +117,5 @@ onmessage = (msg: MessageEvent<DrawRegionMessage>) => {
 		msg.data.width,
 		msg.data.height);
 	draw(image, msg.data.rect, msg.data.config);
-	postMessage(msg.data, [msg.data.pixels]);
+	postMessage(msg.data, "*", [msg.data.pixels]);
 };
