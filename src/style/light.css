@@ -56,13 +56,11 @@ img.avatar {
 
 p {
 	text-indent: clamp(1rem, 5%, 2rem);
-	text-align: justify;
 }
 
 address,
 nav {
 	margin: .5em auto;
-	text-align: center;
 	font-size: var(--fs-section-head);
 	font-style: normal;
 	font-weight: 400;

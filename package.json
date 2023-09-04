@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "source": [
     "src/index.html",
-    "src/browserconfig.xml"
+    "src/browserconfig.xml",
+    "src/blog/index.html",
+    "src/blog/sample.html"
   ],
   "scripts": {
     "serve": "parcel",
