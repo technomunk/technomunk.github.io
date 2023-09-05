@@ -10,10 +10,16 @@
   ],
   "scripts": {
     "serve": "webpack serve",
-    "build": "webpack build --mode production"
+    "build": "webpack build",
+    "pre-publish": "webpack build --mode production"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "^11.0.0",
+    "copy-webpack-plugin": "latest",
+    "css-loader": "latest",
+    "highlight.js": "latest",
+    "html-webpack-link-type-plugin": "latest",
+    "html-webpack-plugin": "latest",
+    "style-loader": "latest",
     "ts-loader": "latest",
     "typescript": "latest",
     "webpack": "latest",

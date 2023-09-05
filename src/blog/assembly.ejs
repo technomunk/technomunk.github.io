@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed" rel="stylesheet">
+    <link rel="stylesheet" href="/style/light.css">
+    <link rel="stylesheet" href="blog.css">
+    <meta name="author" content="Grigory 'Technomunk' Glukhov">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:url" content="https://www.technomunk.com/">
+    <meta property="og:site_name" content="Technomunk">
+    <meta property="og:title" content="Blog: Sample">
+    <meta property="og:description" content="Technomunk's storyboard for the look and feel of different blogs.">
+    <meta property="og:image" content="img/avatar.jpg" />
+    <title>Technomunk on: Assembly</title>
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="theme-color" content="#333333">
+    <meta name="color-scheme" content="light dark">
+</head>
+
+<body>
+    <main>
+        <p class="strong">Assembly</p>
+        <p>Assembly is a family of low-level programming languages that generally look like this:</p>
+        <pre><code class="language-x86asm">; find an integer that is close to the square root of edi
+sqrt:
+    mov     eax, 1
+sqrt_loop:
+    mov     edx, eax
+    imul    edx, eax
+    cmp     edx, edi
+    jge     .return
+    inc     eax
+    jmp     .loop
+sqrt_return:
+    ret
+</code></pre>
+        <p>If that looks like a jumble of letters - excellent, this blog is just for you! However before we dive into
+            the actual code lets explore some basics of how computers operate.</p>
+        <p>Computers are little more than <strong>extremely</strong> fast calculators. And just like calculators they
+            require <dfn>instructions</dfn> (think math operations) that tell them what to do. Programs are lists of
+            instructions for computers to execute. They tell how to explain to monitors which colors to display, how to
+            detect taps on a touchscreen and what to do regarding said taps.</p>
+        <!-- Different types of computers understand different sets of instructions. For example smartphones and newer Macs
+        use a smaller set than typical desktops. These sets are called <dfn>instruction-set architectures</dfn> -->
+        <p>You may have heard that computers think in <strong>binary</strong>, which is true. They only understand 1s
+            and 0s, so the programs that computers read are long sequences of just that. These binary instructions are
+            called <dfn>machine code</dfn> and in the early days of programming - people had to create programs in 1s
+            and 0s using punch-cards, weaving wires through copper loops or typing them in on a keyboard. As you can
+            imagine - such process is very tedious, mistakes are difficult to spot and erase. So something more
+            human-friendly was invented - <dfn>assembly languages</dfn>. The name likely stems from the fact that these
+            programs can't be executed by computers directly, rather they need to be "assembled" into machine code
+            first.</p>
+        <p>Cool, but that doesn't explain why supposedly human-friendly instructions look like collections of random
+            letters to a lay person. And the reason is that the assembly is very closely related to the machine code it
+            is assembled into. Think of translation services, when you use them to translate a single word or a phrase -
+            you typically get an excellent translation. But try to translate whole sentences, paragraphs and texts - the
+            results quite often imperfect. Same is true with programming languages. The more translation that needs to
+            happen - the more difficult it is to make those translators and ensure the computer does exactly what we
+            think it will do.</p>
+        <!-- TODO: callout to uses that require knowing exactly what the computer does-->
+        <p>I promised that you will be able to read the piece of code the blog started with, so with the history out of
+            the way - let's get to it. And thankfully our example starts with something simple - a comment: "<code
+                class="language-x86asm">; find an integer that is close to the square root of edi</code>". It's a short
+            description that helps whomever is reading the code, it's purely for humans and will be ignored by the
+            assembler when converting the program into machine code. The semi-column is a marker that the following text
+            does not represent instructions to be executed by the computer.</p>
+        <p>Next line "<code class="language-x86asm">sqrt:</code>" however is a little more complex. It is a
+            <dfn>label</dfn>. You might think it's a title of our program. But to an assembler - it's a marker that it
+            needs to remember that specific place in the program. Why would it need to remember it? Well we might want
+            to find a square root of several numbers in our program and it would become tedious to copy the same
+            instructions all over the place and computers are able to jump to a specific place in the machine code, so
+            we could jump to our square-root <dfn>routine</dfn> (sub-program), execute it and then return to whatever
+            the bigger program was doing. The label tells the assembler we might want to jump to the following
+            instruction at some other point.
+        </p>
+        <p><code class="language-x86asm">mov eax, 1</code> is the first instruction of our program! It tells the
+            computer to <strong>move</strong> the value 5 into <dfn>register</dfn> <strong>eax</strong>. A register is a
+            very small amount of very fast memory that computers use to perform their calculations. Think of it like a
+            cutting board in the kitchen. While cooking you might move ingredients out of the fridge onto the cutting
+            board before slicing them. Computers do the same - load data from memory or external devices such as
+            keyboards into their registers before performing calculations on those values.</p>
+        <p><code class="language-x86asm">sqrt_loop:</code> is another label that we will use shortly. For now let's move
+            onto <code class="language-x86asm">imul edx, eax</code>. It's another <strong>move</strong> instruction,
+            this time we are moving the value from register <strong>eax</strong> into <strong>edx</strong>. Computers
+            have a handful of registers.
+        <pre><code class="language-x86asm">    mov     edi, 5
+    call    sqrt
+</code></pre>
+    </main>
+</body>
+
+</html>

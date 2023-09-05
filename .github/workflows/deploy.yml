@@ -41,7 +41,7 @@ jobs:
         run: yarn install
 
       - name: Build web-page
-        run: yarn build
+        run: yarn pre-publish
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v2

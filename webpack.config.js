@@ -1,6 +1,8 @@
 const path = require('path')
-
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackLinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
+
 
 const IGNORED_PATH_PREFIXES = [
     'img/x-',
@@ -30,6 +32,7 @@ module.exports = {
         comdyn: './src/script/comdyn.ts',
         pathtrace: './src/script/pathtrace.ts',
         cloth: './src/script/cloth.ts',
+        blog_assembly: './src/blog/assembly.ts',
     },
     module: {
         rules: [
@@ -68,6 +71,14 @@ module.exports = {
                 ]
             }
         ),
+        new HtmlWebpackPlugin(
+            {
+                filename: 'blog/assembly.html',
+                template: './src/blog/assembly.ejs',
+                chunks: ['blog_assembly']
+            }
+        ),
+        new HtmlWebpackLinkTypePlugin({}),
     ],
     devServer: {
         static: './dist',
@@ -75,7 +86,8 @@ module.exports = {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
             "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
-        }
+        },
+        hot: true,
     },
     output: {
         filename: '[name].js',
