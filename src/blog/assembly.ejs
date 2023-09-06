@@ -3,10 +3,7 @@
 <html>
 
 <head>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed" rel="stylesheet">
     <link rel="stylesheet" href="/style/light.css">
-    <link rel="stylesheet" href="blog.css">
     <meta name="author" content="Grigory 'Technomunk' Glukhov">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:url" content="https://www.technomunk.com/">
@@ -25,24 +22,16 @@
         <p class="strong">Assembly</p>
         <p>Assembly is a family of low-level programming languages that generally look like this:</p>
         <pre><code class="language-x86asm">; find an integer that is close to the square root of edi
-sqrt:
+find_integer_square_root:
     mov     eax, 0
-sqrt_loop:
+guess_a_root:
     inc     eax
     mov     ecx, eax
     mul     ecx, eax
     cmp     ecx, edi
-    jb      sqrt_loop
+    jb      guess_a_root
     ret
 </code></pre>
-        <p>If that looks like a jumble of letters - excellent, this blog is just for you! However before we dive into
-            the actual code lets explore some basics of how computers operate.</p>
-        <p>Computers are little more than <strong>extremely</strong> fast calculators. And just like calculators they
-            require <dfn>instructions</dfn> (think math operations) that tell them what to do. Programs are lists of
-            instructions for computers to execute. They tell how to explain to monitors which colors to display, how to
-            detect taps on a touchscreen and what to do regarding said taps.</p>
-        <!-- Different types of computers understand different sets of instructions. For example smartphones and newer Macs
-        use a smaller set than typical desktops. These sets are called <dfn>instruction-set architectures</dfn> -->
         <p>You may have heard that computers think in <strong>binary</strong>, which is true. They only understand 1s
             and 0s, so the programs that computers read are long sequences of just that. These binary instructions are
             called <dfn>machine code</dfn> and in the early days of programming - people had to create programs in 1s
@@ -51,6 +40,7 @@ sqrt_loop:
             human-friendly was invented - <dfn>assembly languages</dfn>. The name likely stems from the fact that these
             programs can't be executed by computers directly, rather they need to be "assembled" into machine code
             first.</p>
+        <!-- TODO: cite references -->
         <p>Cool, but that doesn't explain why supposedly human-friendly instructions look like collections of random
             letters to a lay person. And the reason is that the assembly is very closely related to the machine code it
             is assembled into. Think of translation services, when you use them to translate a single word or a phrase -
@@ -61,29 +51,29 @@ sqrt_loop:
         <!-- TODO: callout to uses that require knowing exactly what the computer does-->
         <p>I promised that you will be able to read the piece of code the blog started with, so with the history out of
             the way - let's get to it. And thankfully our example starts with something simple - a comment: <code
-                class="language-x86asm">; find an integer that is close to the square root of edi</code>. It's a short
-            description that helps whomever is reading the code, it's purely for humans and will be ignored by the
-            assembler when converting the program into machine code. The semi-column is a marker that the following text
-            does not represent instructions to be executed by the computer.</p>
-        <p>Next line <code class="language-x86asm">sqrt:</code> however is a little more complex. It is a
-            <dfn>label</dfn>. You might think it's a title of our program. But to an assembler - it's a marker that it
-            needs to remember that specific place in the program. Why would it need to remember it? Well we might want
-            to find the square root of several numbers in our program and it would become tedious to copy the same
+                class="language-x86asm">; find an integer that is close to the square root of edi</code>. The
+            semi-column is a marker that the following text does not represent instructions to be executed by the
+            computer.</p>
+        <p>Next line <code class="language-x86asm">find_integer_square_root:</code> however is a little more complex. It
+            is a <dfn>label</dfn>. You might think it's a title of our program. But to an assembler - it's a marker that
+            it needs to remember that specific place in the program. Why would it need to remember it? Well we might
+            want to find the square root of several numbers in our program and it would become tedious to copy the same
             instructions all over the place and computers are able to jump to a specific place in the machine code, so
-            we could jump to our square-root <dfn>routine</dfn> (sub-program), execute it and then return to whatever
-            the bigger program was doing. The label tells the assembler we might want to jump to the following
-            instruction at some other point.
+            we could jump to our square-root <dfn>routine</dfn>, execute it and then return to whatever the bigger
+            program was doing. The label tells the assembler we might want to jump to the following instruction at some
+            other point.
         </p>
         <p><code class="language-x86asm">mov eax, 0</code> is the first instruction of our program! It tells the
             computer to <strong>move</strong> the value 0 into <dfn>register</dfn> <strong>eax</strong>. A register is a
             very small amount of very fast memory that computers use to perform their calculations. Think of it like a
             cutting board in the kitchen. While cooking you might move ingredients out of the fridge onto the cutting
-            board before slicing them. Computers do the same - load data from memory or external devices such as
-            keyboards into their registers before performing calculations on those values. Because there might be some
-            other value in the register <dfn>eax</dfn> - we set it to 0 before calculating the square root.</p>
-        <p><code class="language-x86asm">sqrt_loop:</code> is another label that we will use shortly. For now let's move
-            onto <code class="language-x86asm">inc eax</code>. This instruction tells the computer to increment (add 1)
-            to the value in register <strong>eax</strong>.</p>
+            board before slicing them. Computers do the same - load data from memory or external devices into their
+            registers before performing calculations on those values. Because there might be some other value in the
+            register <dfn>eax</dfn> - we set it to 0 before calculating the square root.</p>
+        <!-- TODO: explain register naming in x86 -->
+        <p><code class="language-x86asm">guess_a_root:</code> is another label that we will use shortly. For now let's
+            move onto <code class="language-x86asm">inc eax</code>. This instruction tells the computer to increment
+            (add 1) to the value in register <strong>eax</strong>.</p>
         <p>The increment is followed by <code class="language-x86asm">move ecx, eax</code>. It's another
             <strong>move</strong> instruction, this time we are moving the value from register <strong>eax</strong> into
             <strong>ecx</strong>. Note that <strong>move</strong> is perhaps a misnomer here, as the value is copied
@@ -111,9 +101,9 @@ sqrt_loop:
             registers. So what happens in our case is the result of the comparison is remembered by the computer in a
             different special register. Just keep it in mind for now.
         </p>
-        <p><code class="language-x86asm">jb sqrt_loop</code> is referencing a label. And it immediately follows a
+        <p><code class="language-x86asm">jb guess_a_root</code> is referencing a label. And it immediately follows a
             comparison operation... If we put the two together - we might come to the correct conclusion that we tell
-            the computer to go back to <strong>sqrt_loop</strong> if the square of our guessed root value is smaller
+            the computer to go back to <strong>guess_a_root</strong> if the square of our guessed root value is smaller
             than the argument to our function. The instruction in question is called <dfn><b>j</b>ump if
                 <b>b</b>elow</dfn>. The jump part stems from the fact that we are skipping to some other place in our
             program instead of following along. And below should be self-explanatory: only perform the jump if our

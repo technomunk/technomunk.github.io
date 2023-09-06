@@ -1,3 +1,25 @@
+@font-face {
+    font-family: Rubik;
+    src: url("../font/Rubik-VariableFont_wght.ttf") format("truetype");
+    font-weight: 350;
+    font-variation-settings:
+        "wght" 350;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Rubik;
+    src: url("../font/Rubik-Italic-VariableFont_wght.ttf") format("truetype");
+    font-weight: 350;
+    font-variation-settings:
+        "wght" 330;
+    font-style: italic;
+}
+
+* {
+    font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
 code {
     color: #24292e;
     background: #fff;
@@ -20,6 +42,7 @@ strong {
     font-style: italic;
     font-weight: normal;
 }
+
 dfn {
     font-style: normal;
     text-decoration: underline;

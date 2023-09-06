@@ -52,7 +52,11 @@ module.exports = {
             {
                 test: /\.(fs|vs)$/,
                 use: 'webpack-glsl-loader',
-            }
+            },
+            {
+                test: /\.(woff|woff2|eot|ttf|otf)/,
+                type: 'asset/resource',
+            },
         ],
     },
     resolve: {
