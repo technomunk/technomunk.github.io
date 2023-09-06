@@ -135,6 +135,7 @@ sqrt_loop:
         <p>So if we expand our program, we can find the square root of any number by doing the following:
         <pre><code class="language-x86asm">    mov     edi, 5
         call    sqrt
+        ; the square root of whatever was in edi is now in ecx
     </code></pre>
         Note the <code class="language-x86asm">call sqrt</code>. This instruction is telling the computer to remember
         where it is right now so that it knows where to return to and start executing instructions under the
