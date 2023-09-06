@@ -68,7 +68,7 @@ sqrt_loop:
         <p>Next line <code class="language-x86asm">sqrt:</code> however is a little more complex. It is a
             <dfn>label</dfn>. You might think it's a title of our program. But to an assembler - it's a marker that it
             needs to remember that specific place in the program. Why would it need to remember it? Well we might want
-            to find a square root of several numbers in our program and it would become tedious to copy the same
+            to find the square root of several numbers in our program and it would become tedious to copy the same
             instructions all over the place and computers are able to jump to a specific place in the machine code, so
             we could jump to our square-root <dfn>routine</dfn> (sub-program), execute it and then return to whatever
             the bigger program was doing. The label tells the assembler we might want to jump to the following
@@ -94,12 +94,12 @@ sqrt_loop:
             mirrors that design.
         </p>
         <!-- TODO: shout-out why it's simpler to design such languages -->
-        <p>So far it's not clear how incrementing and copying some values helps us find a square root of a number. The
+        <p>So far it's not clear how incrementing and copying some values helps us find the square root of a number. The
             next operation might give us a clue: <code class="language-x86asm">mul ecx, eax</code>. Here we tell the
             computer to multiply the values in <strong>ecx</strong> and <strong>eax</strong> together and store the
             result in <strong>ecx</strong> (yes, we use the first register as both source and destination of data). And
             because we just copied the value from <strong>eax</strong> - effectively we squared whatever value was there
-            (so far it should be 1). Aha! So to find a square root looks like our program squares consecutive integers
+            (so far it should be 1). Aha! So to find the square root looks like our program squares consecutive integers
             until it finds the first one that is larger than our number.</p>
         <p><code class="language-x86asm">cmp ecx, edi</code> might make sense now, if you're following along. We are
             comparing the values in <strong>ecx</strong> and <strong>edi</strong> registers. <strong>ecx</strong>
@@ -129,7 +129,7 @@ sqrt_loop:
             <li>Square the guess</li>
             <li>Check if the square of the guess is smaller or equal to the argument</li>
             <li>Go back to 2 if it is</li>
-            <li>Return with our best match for a square root of an integer in <strong>ecx</strong></li>
+            <li>Return with our best match for the square root of an integer in <strong>ecx</strong></li>
         </ol>
         </p>
         <p>So if we expand our program, we can find the square root of any number by doing the following:
