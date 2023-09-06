@@ -32,7 +32,7 @@ sqrt_loop:
     mov     ecx, eax
     mul     ecx, eax
     cmp     ecx, edi
-    jbe     sqrt_loop
+    jb      sqrt_loop
     ret
 </code></pre>
         <p>If that looks like a jumble of letters - excellent, this blog is just for you! However before we dive into
@@ -111,14 +111,14 @@ sqrt_loop:
             registers. So what happens in our case is the result of the comparison is remembered by the computer in a
             different special register. Just keep it in mind for now.
         </p>
-        <p><code class="language-x86asm">jbe sqrt_loop</code> is referencing a label. And it immediately follows a
+        <p><code class="language-x86asm">jb sqrt_loop</code> is referencing a label. And it immediately follows a
             comparison operation... If we put the two together - we might come to the correct conclusion that we tell
             the computer to go back to <strong>sqrt_loop</strong> if the square of our guessed root value is smaller
-            than the argument to our function. The instruction in question is called <dfn><b>j</b>ump if <b>b</b>elow or
-                <b>e</b>qual</dfn>. The jump part stems from the fact that we are skipping to some other place in our
-            program instead of following along. And below or equal should be self-explanatory: only perform the jump if
-            our compared value is below (smaller) or equal to the second value. And this instruction is using the
-            remembered result of comparison in the special register that was just mentioned.</p>
+            than the argument to our function. The instruction in question is called <dfn><b>j</b>ump if
+                <b>b</b>elow</dfn>. The jump part stems from the fact that we are skipping to some other place in our
+            program instead of following along. And below be self-explanatory: only perform the jump if our compared
+            value is below (smaller) the second value. And this instruction is using the remembered result of comparison
+            in the special register that was just mentioned.</p>
         <p>Finally we come to the <code class="language-x86asm">ret</code> instruction. This one tells the computer that
             our square-root function is done and the computer should <strong>return</strong> to whatever it was doing
             before trying to find the square-root of the value in <strong>edi</strong>.</p>
@@ -133,7 +133,7 @@ sqrt_loop:
         </ol>
         </p>
         <p>So if we expand our program, we can find the square root of any number by doing the following:
-        <pre><code class="language-x86asm">    mov     edi, 5
+        <pre><code class="language-x86asm">    mov     edi, 8
     call    sqrt
     ; the square root of whatever was in edi is now in ecx
     </code></pre>
