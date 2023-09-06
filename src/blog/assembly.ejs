@@ -31,7 +31,7 @@ sqrt_loop:
     inc     eax
     mov     ecx, eax
     mul     ecx, eax
-    cmp     ecx, eax
+    cmp     ecx, edi
     jbe     sqrt_loop
     ret
 </code></pre>
@@ -47,7 +47,7 @@ sqrt_loop:
             and 0s, so the programs that computers read are long sequences of just that. These binary instructions are
             called <dfn>machine code</dfn> and in the early days of programming - people had to create programs in 1s
             and 0s using punch-cards, weaving wires through copper loops or typing them in on a keyboard. As you can
-            imagine - such process is very tedious, mistakes are difficult to spot and erase. So something more
+            imagine - such a process is very tedious and mistakes are difficult to spot or correct. So something more
             human-friendly was invented - <dfn>assembly languages</dfn>. The name likely stems from the fact that these
             programs can't be executed by computers directly, rather they need to be "assembled" into machine code
             first.</p>
@@ -55,8 +55,8 @@ sqrt_loop:
             letters to a lay person. And the reason is that the assembly is very closely related to the machine code it
             is assembled into. Think of translation services, when you use them to translate a single word or a phrase -
             you typically get an excellent translation. But try to translate whole sentences, paragraphs and texts - the
-            results quite often imperfect. Same is true with programming languages. The more translation that needs to
-            happen - the more difficult it is to make those translators and ensure the computer does exactly what we
+            results are quite often imperfect. Same is true with programming languages. The more translation that needs
+            to happen - the more difficult it is to make good translations and ensure the computer does exactly what we
             think it will do.</p>
         <!-- TODO: callout to uses that require knowing exactly what the computer does-->
         <p>I promised that you will be able to read the piece of code the blog started with, so with the history out of
@@ -84,15 +84,16 @@ sqrt_loop:
         <p><code class="language-x86asm">sqrt_loop:</code> is another label that we will use shortly. For now let's move
             onto <code class="language-x86asm">inc eax</code>. This instruction tells the computer to increment (add 1)
             to the value in register <strong>eax</strong>.</p>
-        <p>The increment is followed by <code class="language-x86asm">move ecx, eax</code>It's another
+        <p>The increment is followed by <code class="language-x86asm">move ecx, eax</code>. It's another
             <strong>move</strong> instruction, this time we are moving the value from register <strong>eax</strong> into
             <strong>ecx</strong>. Note that <strong>move</strong> is perhaps a misnomer here, as the value is copied
-            from the source. That is because it's physically simpler to copy 1s and 0s and then remove them than
+            from the source. That is because it's physically simpler to copy 1s and 0s and then remove them than to
             actively move them around. Another perhaps counter-intuitive quirk of many assembly languages is that the
-            destination of an operation comes first. In English we say "move from x to y", however it's simpler to
-            design hardware that prefers "move into y from x" and as assembly is very close to machine language - it
+            destination of an operation comes first. In English we say "move from A to B", however it's simpler to
+            design hardware that prefers "move into B from A" and as assembly is very close to machine language - it
             mirrors that design.
         </p>
+        <!-- TODO: shout-out why it's simpler to design such languages -->
         <p>So far it's not clear how incrementing and copying some values helps us find a square root of a number. The
             next operation might give us a clue: <code class="language-x86asm">mul ecx, eax</code>. Here we tell the
             computer to multiply the values in <strong>ecx</strong> and <strong>eax</strong> together and store the
@@ -105,9 +106,10 @@ sqrt_loop:
             contains the square of our guess and <strong>edi</strong> therefore must be the number we want to find the
             square root of. But where do we store the result of our comparison? You might think it is stored in
             <strong>ecx</strong>, as it's the first register in our instruction and so far that has always been the
-            destination of any operation. And some computers might work like that, but x86 engineers realized that quite
-            often we want to keep our compared values in registers. So what happens in our case is the result of the
-            comparison is remembered by the computer in a different special register. Just keep it in mind for now.
+            destination of any operation. And some computers might work like that, but the engineers designing x86 (the
+            computer architecture our example is using) realized that quite often we want to keep our compared values in
+            registers. So what happens in our case is the result of the comparison is remembered by the computer in a
+            different special register. Just keep it in mind for now.
         </p>
         <p><code class="language-x86asm">jbe sqrt_loop</code> is referencing a label. And it immediately follows a
             comparison operation... If we put the two together - we might come to the correct conclusion that we tell
@@ -115,7 +117,8 @@ sqrt_loop:
             than the argument to our function. The instruction in question is called <dfn><b>j</b>ump if <b>b</b>elow or
                 <b>e</b>qual</dfn>. The jump part stems from the fact that we are skipping to some other place in our
             program instead of following along. And below or equal should be self-explanatory: only perform the jump if
-            our compared value is below (smaller) or equal to the second value</p>
+            our compared value is below (smaller) or equal to the second value. And this instruction is using the
+            remembered result of comparison in the special register that was just mentioned.</p>
         <p>Finally we come to the <code class="language-x86asm">ret</code> instruction. This one tells the computer that
             our square-root function is done and the computer should <strong>return</strong> to whatever it was doing
             before trying to find the square-root of the value in <strong>edi</strong>.</p>
@@ -129,9 +132,14 @@ sqrt_loop:
             <li>Return with our best match for a square root of an integer in <strong>ecx</strong></li>
         </ol>
         </p>
+        <p>So if we expand our program, we can find the square root of any number by doing the following:
         <pre><code class="language-x86asm">    mov     edi, 5
-    call    sqrt
-</code></pre>
+        call    sqrt
+    </code></pre>
+        Note the <code class="language-x86asm">call sqrt</code>. This instruction is telling the computer to remember
+        where it is right now so that it knows where to return to and start executing instructions under the
+        <strong>sqrt</strong> label.
+        </p>
     </main>
 </body>
 
