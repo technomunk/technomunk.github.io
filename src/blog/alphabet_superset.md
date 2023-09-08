@@ -1,0 +1,28 @@
+# Alphabet Superset plan
+
+- [ ] A: Assembly
+- [ ] B: Benchmarking
+- [ ] C: Compilers
+- [ ] D: Declarative programming?
+- [ ] E: Encryption?
+- [ ] F: Functional programming?
+- [ ] G: GPUs
+- [ ] H: Hashing
+- [ ] I: Iteration?
+- [ ] J: Java?
+- [ ] K: Kernel? | Knapsack?
+- [ ] L: Lists?
+- [ ] M: Memory?
+- [ ] N: Networking
+- [ ] O: Optimization | Object-oriented
+- [ ] P: Processors | Parallelization
+- [ ] Q: Queues?
+- [ ] R: RegEx
+- [ ] S: Semantics & Style
+- [ ] T: Testing?
+- [ ] U: Unions?
+- [ ] V: Vectorization
+- [ ] W: Web?
+- [ ] X: XML
+- [ ] Y: YAGNI (You Ain't Gonna Need It)?
+- [ ] Z: Z-buffers?

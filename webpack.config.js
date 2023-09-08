@@ -62,6 +62,7 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.vs', '.fs', '.js'],
     },
+    devtool: 'inline-source-map',
     mode: 'development',
     plugins: [
         new CopyWebpackPlugin(

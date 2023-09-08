@@ -21,7 +21,7 @@
     <main>
         <p class="strong">Assembly</p>
         <p>Assembly is a family of low-level programming languages that generally look like this:</p>
-        <pre><code class="language-x86asm">; find an integer that is close to the square root of edi
+        <pre class="interactive-container"><code id="code" class="interactive x86asm">; find an integer that is close to the square root of edi
 find_integer_square_root:
     mov     eax, 0
 guess_a_root:
@@ -51,10 +51,10 @@ guess_a_root:
         <!-- TODO: callout to uses that require knowing exactly what the computer does-->
         <p>I promised that you will be able to read the piece of code the blog started with, so with the history out of
             the way - let's get to it. And thankfully our example starts with something simple - a comment: <code
-                class="language-x86asm">; find an integer that is close to the square root of edi</code>. The
+                class="x86asm">; find an integer that is close to the square root of edi</code>. The
             semi-column is a marker that the following text does not represent instructions to be executed by the
             computer.</p>
-        <p>Next line <code class="language-x86asm">find_integer_square_root:</code> however is a little more complex. It
+        <p>Next line <code class="x86asm">find_integer_square_root:</code> however is a little more complex. It
             is a <dfn>label</dfn>. You might think it's a title of our program. But to an assembler - it's a marker that
             it needs to remember that specific place in the program. Why would it need to remember it? Well we might
             want to find the square root of several numbers in our program and it would become tedious to copy the same
@@ -63,7 +63,7 @@ guess_a_root:
             program was doing. The label tells the assembler we might want to jump to the following instruction at some
             other point.
         </p>
-        <p><code class="language-x86asm">mov eax, 0</code> is the first instruction of our program! It tells the
+        <p><code class="x86asm">mov eax, 0</code> is the first instruction of our program! It tells the
             computer to <strong>move</strong> the value 0 into <dfn>register</dfn> <strong>eax</strong>. A register is a
             very small amount of very fast memory that computers use to perform their calculations. Think of it like a
             cutting board in the kitchen. While cooking you might move ingredients out of the fridge onto the cutting
@@ -71,10 +71,10 @@ guess_a_root:
             registers before performing calculations on those values. Because there might be some other value in the
             register <dfn>eax</dfn> - we set it to 0 before calculating the square root.</p>
         <!-- TODO: explain register naming in x86 -->
-        <p><code class="language-x86asm">guess_a_root:</code> is another label that we will use shortly. For now let's
-            move onto <code class="language-x86asm">inc eax</code>. This instruction tells the computer to increment
+        <p><code class="x86asm">guess_a_root:</code> is another label that we will use shortly. For now let's
+            move onto <code class="x86asm">inc eax</code>. This instruction tells the computer to increment
             (add 1) to the value in register <strong>eax</strong>.</p>
-        <p>The increment is followed by <code class="language-x86asm">move ecx, eax</code>. It's another
+        <p>The increment is followed by <code class="x86asm">move ecx, eax</code>. It's another
             <strong>move</strong> instruction, this time we are moving the value from register <strong>eax</strong> into
             <strong>ecx</strong>. Note that <strong>move</strong> is perhaps a misnomer here, as the value is copied
             from the source. That is because it's physically simpler to copy 1s and 0s and then remove them than to
@@ -85,13 +85,13 @@ guess_a_root:
         </p>
         <!-- TODO: shout-out why it's simpler to design such languages -->
         <p>So far it's not clear how incrementing and copying some values helps us find the square root of a number. The
-            next operation might give us a clue: <code class="language-x86asm">mul ecx, eax</code>. Here we tell the
+            next operation might give us a clue: <code class="x86asm">mul ecx, eax</code>. Here we tell the
             computer to multiply the values in <strong>ecx</strong> and <strong>eax</strong> together and store the
             result in <strong>ecx</strong> (yes, we use the first register as both source and destination of data). And
             because we just copied the value from <strong>eax</strong> - effectively we squared whatever value was there
             (so far it should be 1). Aha! So to find the square root looks like our program squares consecutive integers
             until it finds the first one that is larger than our number.</p>
-        <p><code class="language-x86asm">cmp ecx, edi</code> might make sense now, if you're following along. We are
+        <p><code class="x86asm">cmp ecx, edi</code> might make sense now, if you're following along. We are
             comparing the values in <strong>ecx</strong> and <strong>edi</strong> registers. <strong>ecx</strong>
             contains the square of our guess and <strong>edi</strong> therefore must be the number we want to find the
             square root of. But where do we store the result of our comparison? You might think it is stored in
@@ -101,7 +101,7 @@ guess_a_root:
             registers. So what happens in our case is the result of the comparison is remembered by the computer in a
             different special register. Just keep it in mind for now.
         </p>
-        <p><code class="language-x86asm">jb guess_a_root</code> is referencing a label. And it immediately follows a
+        <p><code class="x86asm">jb guess_a_root</code> is referencing a label. And it immediately follows a
             comparison operation... If we put the two together - we might come to the correct conclusion that we tell
             the computer to go back to <strong>guess_a_root</strong> if the square of our guessed root value is smaller
             than the argument to our function. The instruction in question is called <dfn><b>j</b>ump if
@@ -109,7 +109,7 @@ guess_a_root:
             program instead of following along. And below should be self-explanatory: only perform the jump if our
             compared value is below (smaller than) the second value. This instruction is using the remembered result of
             comparison in the special register that was just mentioned.</p>
-        <p>Finally we come to the <code class="language-x86asm">ret</code> instruction. This one tells the computer that
+        <p>Finally we come to the <code class="x86asm">ret</code> instruction. This one tells the computer that
             our square-root function is done and the computer should <strong>return</strong> to whatever it was doing
             before trying to find the square-root of the value in <strong>edi</strong>.</p>
         <p>Putting it all together our program does the following:
@@ -123,11 +123,11 @@ guess_a_root:
         </ol>
         </p>
         <p>So if we expand our program, we can find the square root of any number by doing the following:
-        <pre><code class="language-x86asm">    mov     edi, 8
+        <pre><code class="x86asm">    mov     edi, 8
     call    sqrt
     ; the square root of whatever was in edi is now in ecx
     </code></pre>
-        Note the <code class="language-x86asm">call sqrt</code>. This instruction is telling the computer to remember
+        Note the <code class="x86asm">call sqrt</code>. This instruction is telling the computer to remember
         where it is right now so that it knows where to return to and start executing instructions under the
         <strong>sqrt</strong> label.
         </p>

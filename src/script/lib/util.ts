@@ -46,3 +46,15 @@ export function clamp(v: number, min: number, max: number): number {
 export function isMobile(): boolean {
 	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
+
+export function lines(text: string): string[] {
+	const result = text.split(/\r?\n/)
+	let emptyIdx = 0
+	for (let i = 0; i < result.length; ++i) {
+		if (result[i].length == 0) {
+			emptyIdx = i
+		}
+	}
+	result.splice(emptyIdx)
+	return result
+}
