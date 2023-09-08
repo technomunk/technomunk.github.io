@@ -13,8 +13,8 @@ for (const interactive of document.querySelectorAll("code.interactive")) {
     console.log(interactive)
 }
 
-// for (const nonInteractive of document.querySelectorAll("code:not(.interactive)")) {
-//     if (nonInteractive.textContent) {
-//         console.log(tokenize(nonInteractive.textContent))
-//     }
-// }
+for (const nonInteractive of document.querySelectorAll("code:not(.interactive)")) {
+    if (nonInteractive.textContent) {
+        nonInteractive.innerHTML = tokenize(nonInteractive.textContent)
+    }
+}

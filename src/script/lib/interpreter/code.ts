@@ -29,7 +29,6 @@ export class CodeBlock {
                 this.code.push(lineElement)
             }
         }
-        console.log(this.labels)
     }
 
     getLine(n: number): string {

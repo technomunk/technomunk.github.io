@@ -49,12 +49,15 @@ export function isMobile(): boolean {
 
 export function lines(text: string): string[] {
 	const result = text.split(/\r?\n/)
-	let emptyIdx = 0
+	console.debug(result)
+	let emptyIdx
 	for (let i = 0; i < result.length; ++i) {
 		if (result[i].length == 0) {
 			emptyIdx = i
 		}
 	}
-	result.splice(emptyIdx)
+	if (emptyIdx != undefined) {
+		result.splice(emptyIdx)
+	}
 	return result
 }
