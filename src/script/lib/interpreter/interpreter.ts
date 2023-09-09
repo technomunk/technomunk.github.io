@@ -101,7 +101,14 @@ export class InterpreterUI {
             if (!this.vars.has(name)) {
                 this._createVarView(name)
             }
-            this.vars.get(name)!.textContent = `${name}: ${value}`
+            const element = this.vars.get(name)!
+            const newVal = `${name}: ${value}`
+            if (element.textContent != newVal) {
+                element.textContent = newVal
+                element.classList.add("highlight")
+            } else {
+                element.classList.remove("highlight")
+            }
         }
         this.interpreter.code.highlightLine(this.interpreter.nextLineIdx)
     }
@@ -114,11 +121,11 @@ export class InterpreterUI {
         this.interpreter.vars.set("cmp", Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER))
         this.update()
     }
-    
+
     protected createMenu(): HTMLDivElement {
         const menu = document.createElement("div")
         menu.classList.add("code-menu")
-        
+
         const nextButton = document.createElement("button")
         nextButton.onclick = this.next.bind(this)
         nextButton.textContent = "next"
@@ -131,25 +138,22 @@ export class InterpreterUI {
 
         return menu
     }
-    
+
     protected _createVarView(name: string): HTMLDivElement {
+        // const label = document.createElement("label")
+        // label.classList.add("var-label")
+        // label.htmlFor = name
+        // label.textContent = name
+        // this.menu.appendChild(label)
+
         const view = document.createElement("div")
+        view.id = name
         view.classList.add("var-view")
         this.vars.set(name, view)
         this.menu.appendChild(view)
+
         return view
     }
-}
-
-function splitLine(line: string): string[] {
-    let result = line.replaceAll(",", " ")
-        .split(" ")
-        .filter(s => s.length)
-    let commentStart = result.findIndex(s => s.startsWith(";"))
-    if (commentStart != -1) {
-        return result.slice(0, commentStart)
-    }
-    return result
 }
 
 function mov(interpreter: Interpreter, line: string[]) {

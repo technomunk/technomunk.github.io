@@ -16,15 +16,43 @@
     font-style: italic;
 }
 
+@keyframes highlightVarView {
+    0% {
+        background-color: #fcfc55
+    }
+
+    100% {
+        background-color: #d8ffb2
+    }
+}
+@keyframes highlightCodeLine {
+    0% {
+        background-color: #b467cd
+    }
+
+    100% {
+        background-color: #eeb9ff
+    }
+}
+
 * {
     font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
-code {
-    color: #24292e;
-    background: #fff;
+strong {
+    font-style: italic;
+    font-weight: normal;
 }
 
+dfn {
+    font-style: normal;
+    text-decoration: underline;
+}
+
+code {
+    color: #24292e;
+    background: #e6e6e6;
+}
 code,
 code * {
     font-size: medium;
@@ -38,21 +66,12 @@ pre code {
     border-radius: 2px;
 }
 
-strong {
-    font-style: italic;
-    font-weight: normal;
-}
-
-dfn {
-    font-style: normal;
-    text-decoration: underline;
-}
 
 pre.interactive-container {
     display: flex;
     justify-content: stretch;
     width: 100%;
-    background: #0d1117
+    background: #e6e6e6;
 }
 
 code#code {
@@ -61,18 +80,25 @@ code#code {
 
 .code-menu {
     margin: .5em;
-    background-color: #005cc5;
+    background-color: #87ebff;
     padding: 0.5em;
     flex-grow: .5;
+}
+
+.code-menu > button {
+    margin: .2em
 }
 
 .var-view {
     font-size: medium;
     font-family: ui-monospace, SFMono-REgular, "SF Mono", monospace !important;
-    background-color: #033a16;
-    /* padding: 4px; */
-    margin: 2px;
-    border: 2px solid black;
+    background-color: #b2ffcd;
+    margin: .2em;
+    padding: 1px 4px;
+    border: 1px solid black;
+}
+.var-view.highlight {
+    animation: highlightVarView .4s ease-out forwards;
 }
 
 .keyword {
@@ -104,18 +130,39 @@ code#code {
 }
 
 .code-line.highlight {
-    background: #ffcd94
+    animation: highlightCodeLine .3s ease-out forwards;
 }
 
 
 @media (prefers-color-scheme: dark) {
     code {
         color: #c9d1d9;
-        background: #0d1117
+        background-color: #0d1117
     }
 
-    .code-line.highlight {
-        background: #40143d
+    @keyframes highlightVarView {
+        0% { background-color: #76a800 }
+        100% { background-color: #1f2c00 }
+    }
+    @keyframes highlightCodeLine {
+        0% { background-color: #bd29b3 }
+        100% { background-color: #40143d }
+    }
+
+    pre.interactive-container {
+        background-color: #0d1117
+    }
+
+    .code-menu {
+        background-color: #0b1526;
+    }
+
+    .var-view {
+        background-color: #002312;
+        border: none
+    }
+    .var-view.highlight {
+        animation: highlightVarView .5s ease-out forwards;
     }
 
     .keyword {
