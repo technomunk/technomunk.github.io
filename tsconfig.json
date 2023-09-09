@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"outDir": "./dist/",
+		"sourceMap": true,
 		"experimentalDecorators": true,
 		"isolatedModules": true,
 		"moduleResolution": "bundler",

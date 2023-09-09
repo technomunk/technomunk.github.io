@@ -1,7 +1,8 @@
 import { error, lines } from "../util"
 
+type Tag = "comment" | "label" | "keyword" | "var" | "val" | "ref"
 type Token = {
-    tag: "comment" | "label" | "keyword" | "var" | "val" | "ref"
+    tag: Tag
     value: string
 }
 type TokenizedLine = Array<string | Token>
@@ -10,6 +11,7 @@ export class CodeBlock {
     readonly element: HTMLElement
     protected code: Array<HTMLElement> = []
     protected labels: Map<string, number> = new Map()
+    protected _vars: Set<string> = new Set()
 
     protected highlightedLine: number = 0
 
@@ -19,6 +21,9 @@ export class CodeBlock {
         element.innerHTML = ""
         for (const line of textLines) {
             const tokenizedLine = tokenizeLine(line)
+            for (const name of getTokens(tokenizedLine, "var")) {
+                this._vars.add(name)
+            }
             const lineElement = this.composeLineElement(tokenizedLine)
             element.appendChild(lineElement)
             if (isLabel(tokenizedLine)) {
@@ -29,6 +34,10 @@ export class CodeBlock {
                 this.code.push(lineElement)
             }
         }
+    }
+
+    get vars(): Iterable<string> {
+        return this._vars
     }
 
     getLine(n: number): string {
@@ -110,9 +119,9 @@ const TAGS: Map<string, "keyword" | "var"> = new Map([
     ["cmp", "keyword"],
     ["jb", "keyword"],
     ["ret", "keyword"],
-    ["eax", "var"],
-    ["ecx", "var"],
-    ["edi", "var"],
+    ["ax", "var"],
+    ["cx", "var"],
+    ["di", "var"],
 ])
 
 function determineTag(word: string): "keyword" | "var" | "val" | "ref" {
@@ -133,10 +142,21 @@ function span(token: string | Token): string {
     return `<span class="${token.tag}">${token.value}</span>`
 }
 
+function isToken(t: string | Token): t is Token {
+    return typeof t !== "string"
+}
+
 function isLabel(line: TokenizedLine): line is [Token, string] {
-    return line.length > 1 && typeof line[0] !== "string" && line[0].tag == "label"
+    return line.length > 1 && isToken(line[0]) && line[0].tag == "label"
 }
 
 function isExecutableCode(line: TokenizedLine): boolean {
-    return line.findIndex(t => typeof t !== "string" && t.tag != "comment") != -1
+    return line.findIndex(t => isToken(t) && t.tag != "comment") != -1
+}
+
+function getTokens(line: TokenizedLine, tag: Tag): string[] {
+    return line
+        .filter(isToken)
+        .filter(t => t.tag == tag)
+        .map(t => t.value)
 }

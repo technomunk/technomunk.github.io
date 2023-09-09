@@ -56,10 +56,15 @@ export class Interpreter {
 
     constructor(code: CodeBlock) {
         this.code = code
+        this.reset()
     }
 
     reset() {
         this.nextLineIdx = 0
+        for (const name of this.code.vars) {
+            this.vars.set(name, initialVar())
+        }
+        this.vars.set("cmp", initialVar())
     }
 
     next() {
@@ -78,83 +83,6 @@ export class Interpreter {
     }
 }
 
-export class InterpreterUI {
-    protected interpreter: Interpreter
-    protected vars: Map<string, HTMLElement> = new Map()
-    protected menu: HTMLDivElement
-
-    constructor(element: HTMLElement) {
-        const code = new CodeBlock(element)
-        this.interpreter = new Interpreter(code)
-        this.menu = this.createMenu()
-        code.element.parentNode!.appendChild(this.menu)
-        this.reset()
-    }
-
-    next() {
-        this.interpreter.next()
-        this.update()
-    }
-
-    update() {
-        for (const [name, value] of this.interpreter.vars) {
-            if (!this.vars.has(name)) {
-                this._createVarView(name)
-            }
-            const element = this.vars.get(name)!
-            const newVal = `${name}: ${value}`
-            if (element.textContent != newVal) {
-                element.textContent = newVal
-                element.classList.add("highlight")
-            } else {
-                element.classList.remove("highlight")
-            }
-        }
-        this.interpreter.code.highlightLine(this.interpreter.nextLineIdx)
-    }
-
-    reset() {
-        this.interpreter.reset()
-        this.interpreter.vars.set("edi", 16)
-        this.interpreter.vars.set("eax", Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER))
-        this.interpreter.vars.set("ecx", Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER))
-        this.interpreter.vars.set("cmp", Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER))
-        this.update()
-    }
-
-    protected createMenu(): HTMLDivElement {
-        const menu = document.createElement("div")
-        menu.classList.add("code-menu")
-
-        const nextButton = document.createElement("button")
-        nextButton.onclick = this.next.bind(this)
-        nextButton.textContent = "next"
-        menu.appendChild(nextButton)
-
-        const resetButton = document.createElement("button")
-        resetButton.onclick = this.reset.bind(this)
-        resetButton.textContent = "reset"
-        menu.appendChild(resetButton)
-
-        return menu
-    }
-
-    protected _createVarView(name: string): HTMLDivElement {
-        // const label = document.createElement("label")
-        // label.classList.add("var-label")
-        // label.htmlFor = name
-        // label.textContent = name
-        // this.menu.appendChild(label)
-
-        const view = document.createElement("div")
-        view.id = name
-        view.classList.add("var-view")
-        this.vars.set(name, view)
-        this.menu.appendChild(view)
-
-        return view
-    }
-}
 
 function mov(interpreter: Interpreter, line: string[]) {
     if (line.length != 3) {
@@ -207,4 +135,9 @@ function ret(interpreter: Interpreter, line: string[]) {
     // TODO: actual call stack
     alert("Computation done!")
     interpreter.nextLineIdx = -1
+}
+
+
+function initialVar(): number {
+    return Math.trunc(Math.random() * (1 << 16))
 }

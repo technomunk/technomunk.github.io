@@ -1,4 +1,4 @@
-import { InterpreterUI } from '../script/lib/interpreter/interpreter'
+import { InterpreterUI } from '../script/lib/interpreter/ui'
 import { tokenize } from '../script/lib/interpreter/code'
 import './blog.css'
 
