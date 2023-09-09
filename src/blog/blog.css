@@ -40,11 +40,6 @@
     font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
-strong {
-    font-style: italic;
-    font-weight: normal;
-}
-
 dfn {
     font-style: normal;
     text-decoration: underline;
