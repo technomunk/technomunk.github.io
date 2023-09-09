@@ -40,17 +40,26 @@ export class InterpreterUI {
             this.createVarView(name, val)
         }
 
+        this.createControls()
+
+        return this.menu
+    }
+
+    protected createControls() {
+        const controlContainer = document.createElement("div")
+        controlContainer.classList.add("controls")
+
         const nextButton = document.createElement("button")
         nextButton.onclick = this.next.bind(this)
         nextButton.textContent = "next"
-        this.menu.appendChild(nextButton)
+        controlContainer.appendChild(nextButton)
 
         const resetButton = document.createElement("button")
         resetButton.onclick = this.reset.bind(this)
         resetButton.textContent = "reset"
-        this.menu.appendChild(resetButton)
+        controlContainer.appendChild(resetButton)
 
-        return this.menu
+        this.menu.appendChild(controlContainer)
     }
 
     protected createVarView(name: string, val?: number): HTMLDivElement {

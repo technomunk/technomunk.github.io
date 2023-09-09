@@ -25,6 +25,7 @@
         background-color: #d8ffb2
     }
 }
+
 @keyframes highlightCodeLine {
     0% {
         background-color: #b467cd
@@ -53,6 +54,7 @@ code {
     color: #24292e;
     background: #e6e6e6;
 }
+
 code,
 code * {
     font-size: medium;
@@ -83,11 +85,21 @@ code#code {
     background-color: #87ebff;
     padding: 0.5em;
     flex-grow: .5;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
 }
 
-.code-menu > button {
-    margin: .2em
+.code-menu>.controls {
+    display: flex;
+    flex-direction: row;
+    margin: .2em;
+    justify-content: space-between;
 }
+.code-menu>.controls>button {
+    flex-grow: .4;
+}
+
 
 .var-view {
     font-size: medium;
@@ -97,6 +109,7 @@ code#code {
     padding: 1px 4px;
     border: 1px solid black;
 }
+
 .var-view.highlight {
     animation: highlightVarView .4s ease-out forwards;
 }
@@ -133,6 +146,11 @@ code#code {
     animation: highlightCodeLine .3s ease-out forwards;
 }
 
+@media (max-width: 800px) {
+    pre.interactive-container {
+        flex-direction: column;
+    }
+}
 
 @media (prefers-color-scheme: dark) {
     code {
@@ -141,12 +159,23 @@ code#code {
     }
 
     @keyframes highlightVarView {
-        0% { background-color: #76a800 }
-        100% { background-color: #1f2c00 }
+        0% {
+            background-color: #76a800
+        }
+
+        100% {
+            background-color: #1f2c00
+        }
     }
+
     @keyframes highlightCodeLine {
-        0% { background-color: #bd29b3 }
-        100% { background-color: #40143d }
+        0% {
+            background-color: #bd29b3
+        }
+
+        100% {
+            background-color: #40143d
+        }
     }
 
     pre.interactive-container {
@@ -161,6 +190,7 @@ code#code {
         background-color: #002312;
         border: none
     }
+
     .var-view.highlight {
         animation: highlightVarView .5s ease-out forwards;
     }

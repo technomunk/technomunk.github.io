@@ -139,6 +139,15 @@ guess_a_root:
         remember where it is right now so that it knows where to return to and start executing instructions under the
         <em>find_integer_square_root</em> label.
         </p>
+        <p>You might be wondering whether assembly is still useful in modern day and age when we have much more
+            ergonomic ways of programming. And it is! A prime example is performance fine-tuning: looking at compiled
+            assembly to see where the CPU might be wasting time with slow operations and perhaps manually tweaking it to
+            squeeze those last few percentages of improvement! Another good example is in cryptography. If the computer
+            uses different amount of energy or time to check a password - there is a potential vulnerability where the
+            attacker can measure how much energy or time was spent to get what the password was! To avoid such
+            possibility - someone can look through assembly and ensure the calculation always takes the exact same path
+            with any input.
+        </p>
     </main>
 </body>
 
