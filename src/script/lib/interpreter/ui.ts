@@ -1,16 +1,16 @@
 import { Choice } from "../util"
 import { CodeBlock } from "./code"
-import { Interpreter } from "./interpreter"
+import { AsmInterpreter } from "./interpreter"
 
 export class InterpreterUI {
-    arg = new Choice(16, 25, 36, 49, 64, 81, 100, 121)
-    protected interpreter: Interpreter
+    arg = new Choice(16, 25, 36, 49, 64)
+    protected interpreter: AsmInterpreter
     protected vars: Map<string, HTMLInputElement> = new Map()
     protected menu: HTMLDivElement
 
     constructor(element: HTMLElement) {
         const code = new CodeBlock(element)
-        this.interpreter = new Interpreter(code)
+        this.interpreter = new AsmInterpreter(code)
         this.menu = this.createMenu()
         code.element.parentNode!.appendChild(this.menu)
         this.reset()

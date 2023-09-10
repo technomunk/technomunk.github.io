@@ -1,8 +1,6 @@
 import { error } from "../util"
 import { CodeBlock } from "./code"
 
-type Operation = (interpreter: Interpreter, line: string[]) => void
-
 export class Variable {
     public value?: number
 
@@ -40,22 +38,20 @@ export class VariableStore implements Iterable<[string, number]> {
     }
 }
 
-export class Interpreter {
+type AsmInstruction = (interpreter: AsmInterpreter, args: string[]) => void
+
+export class AsmInterpreter {
     vars = new VariableStore()
     code: CodeBlock
     nextLineIdx = 0
 
-    protected instructions: Map<string, Operation> = new Map([
-        ["mov", mov],
-        ["inc", inc],
-        ["mul", mul],
-        ["cmp", cmp],
-        ["jb", jb],
-        ["ret", ret],
-    ])
+    protected instructions: Map<string, AsmInstruction> = new Map()
 
     constructor(code: CodeBlock) {
         this.code = code
+        for (const instruction of [mov, inc, mul, cmp, jb, ret]) {
+            this.addInstruction(instruction)
+        }
         this.reset()
     }
 
@@ -81,10 +77,14 @@ export class Interpreter {
     jumpTo(label: string) {
         this.nextLineIdx = this.code.deref(label) - 1
     }
+
+    addInstruction(instruction: AsmInstruction) {
+        this.instructions.set(instruction.name, instruction)
+    }
 }
 
 
-function mov(interpreter: Interpreter, line: string[]) {
+function mov(interpreter: AsmInterpreter, line: string[]) {
     if (line.length != 3) {
         throw "Illegal mov instruction"
     }
@@ -95,14 +95,14 @@ function mov(interpreter: Interpreter, line: string[]) {
     interpreter.vars.set(line[1], value)
 }
 
-function inc(interpreter: Interpreter, line: string[]) {
+function inc(interpreter: AsmInterpreter, line: string[]) {
     if (line.length != 2) {
         throw "Illegal inc instruction"
     }
     interpreter.vars.set(line[1], interpreter.vars.get(line[1]) + 1)
 }
 
-function mul(interpreter: Interpreter, line: string[]) {
+function mul(interpreter: AsmInterpreter, line: string[]) {
     if (line.length != 3) {
         throw "Illegal mul instruction"
     }
@@ -110,7 +110,7 @@ function mul(interpreter: Interpreter, line: string[]) {
     interpreter.vars.set(line[1], value)
 }
 
-function cmp(interpreter: Interpreter, line: string[]) {
+function cmp(interpreter: AsmInterpreter, line: string[]) {
     if (line.length != 3) {
         throw "Illegal cmp instruction"
     }
@@ -119,7 +119,7 @@ function cmp(interpreter: Interpreter, line: string[]) {
     interpreter.vars.set("cmp", Math.sign(valA - valB))
 }
 
-function jb(interpreter: Interpreter, line: string[]) {
+function jb(interpreter: AsmInterpreter, line: string[]) {
     if (line.length != 2) {
         throw "Illegal jb instruction"
     }
@@ -128,7 +128,7 @@ function jb(interpreter: Interpreter, line: string[]) {
     }
 }
 
-function ret(interpreter: Interpreter, line: string[]) {
+function ret(interpreter: AsmInterpreter, line: string[]) {
     if (line.length != 1) {
         throw "Illegal ret instruction"
     }
