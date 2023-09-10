@@ -38,20 +38,68 @@ export class VariableStore implements Iterable<[string, number]> {
     }
 }
 
-type AsmInstruction = (interpreter: AsmInterpreter, args: string[]) => void
+type AsmOp = (interpreter: AsmInterpreter, args: string[]) => void
+type OpStore = { [opcode: string]: AsmOp }
+
+const OPS: OpStore = {
+    mov(interpreter: AsmInterpreter, line: string[]) {
+        if (line.length != 3) {
+            throw "Illegal mov instruction"
+        }
+        let value = parseInt(line[2])
+        if (Number.isNaN(value)) {
+            value = interpreter.vars.get(line[2])
+        }
+        interpreter.vars.set(line[1], value)
+    },
+    inc(interpreter: AsmInterpreter, line: string[]) {
+        if (line.length != 2) {
+            throw "Illegal inc instruction"
+        }
+        interpreter.vars.set(line[1], interpreter.vars.get(line[1]) + 1)
+    },
+    mul(interpreter: AsmInterpreter, line: string[]) {
+        if (line.length != 3) {
+            throw "Illegal mul instruction"
+        }
+        let value = interpreter.vars.get(line[1]) * interpreter.vars.get(line[2])
+        interpreter.vars.set(line[1], value)
+    },
+    cmp(interpreter: AsmInterpreter, line: string[]) {
+        if (line.length != 3) {
+            throw "Illegal cmp instruction"
+        }
+        let valA = interpreter.vars.get(line[1])
+        let valB = interpreter.vars.get(line[2])
+        interpreter.vars.set("cmp", Math.sign(valA - valB))
+    },
+    jb(interpreter: AsmInterpreter, line: string[]) {
+        if (line.length != 2) {
+            throw "Illegal jb instruction"
+        }
+        if (interpreter.vars.get("cmp") == -1) {
+            interpreter.jumpTo(line[1])
+        }
+    },
+    ret(interpreter: AsmInterpreter, line: string[]) {
+        if (line.length != 1) {
+            throw "Illegal ret instruction"
+        }
+        // TODO: actual call stack
+        alert("Computation done!")
+        interpreter.nextLineIdx = -1
+    },
+}
 
 export class AsmInterpreter {
     vars = new VariableStore()
-    code: CodeBlock
-    nextLineIdx = 0
+    code: CodeBlock;
+    nextLineIdx = 0;
 
-    protected instructions: Map<string, AsmInstruction> = new Map()
+    protected instructions: Map<string, AsmOp> = new Map()
 
     constructor(code: CodeBlock) {
         this.code = code
-        for (const instruction of [mov, inc, mul, cmp, jb, ret]) {
-            this.addInstruction(instruction)
-        }
         this.reset()
     }
 
@@ -69,8 +117,7 @@ export class AsmInterpreter {
             .split(" ")
             .filter(w => w.length)
 
-        let op = this.instructions.get(line[0]) ?? error(`Unknown opcode: ${line[0]}`)
-        op(this, line)
+        OPS[line[0]](this, line)
         ++this.nextLineIdx
     }
 
@@ -78,65 +125,10 @@ export class AsmInterpreter {
         this.nextLineIdx = this.code.deref(label) - 1
     }
 
-    addInstruction(instruction: AsmInstruction) {
+    addInstruction(instruction: AsmOp) {
         this.instructions.set(instruction.name, instruction)
     }
 }
-
-
-function mov(interpreter: AsmInterpreter, line: string[]) {
-    if (line.length != 3) {
-        throw "Illegal mov instruction"
-    }
-    let value = parseInt(line[2])
-    if (Number.isNaN(value)) {
-        value = interpreter.vars.get(line[2])
-    }
-    interpreter.vars.set(line[1], value)
-}
-
-function inc(interpreter: AsmInterpreter, line: string[]) {
-    if (line.length != 2) {
-        throw "Illegal inc instruction"
-    }
-    interpreter.vars.set(line[1], interpreter.vars.get(line[1]) + 1)
-}
-
-function mul(interpreter: AsmInterpreter, line: string[]) {
-    if (line.length != 3) {
-        throw "Illegal mul instruction"
-    }
-    let value = interpreter.vars.get(line[1]) * interpreter.vars.get(line[2])
-    interpreter.vars.set(line[1], value)
-}
-
-function cmp(interpreter: AsmInterpreter, line: string[]) {
-    if (line.length != 3) {
-        throw "Illegal cmp instruction"
-    }
-    let valA = interpreter.vars.get(line[1])
-    let valB = interpreter.vars.get(line[2])
-    interpreter.vars.set("cmp", Math.sign(valA - valB))
-}
-
-function jb(interpreter: AsmInterpreter, line: string[]) {
-    if (line.length != 2) {
-        throw "Illegal jb instruction"
-    }
-    if (interpreter.vars.get("cmp") == -1) {
-        interpreter.jumpTo(line[1])
-    }
-}
-
-function ret(interpreter: AsmInterpreter, line: string[]) {
-    if (line.length != 1) {
-        throw "Illegal ret instruction"
-    }
-    // TODO: actual call stack
-    alert("Computation done!")
-    interpreter.nextLineIdx = -1
-}
-
 
 function initialVar(): number {
     return Math.trunc(Math.random() * (1 << 16))
