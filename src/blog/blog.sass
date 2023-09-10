@@ -1,0 +1,167 @@
+$font-family-regular: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
+$font-family-monospace: ui-monospace, SFMono-REgular, "SF Mono", monospace !important
+
+@font-face
+    font-family: Rubik
+    src: url("../font/Rubik-VariableFont_wght.ttf") format("truetype")
+    font-weight: 350
+    font-variation-settings: "wght" 350
+    font-style: normal
+
+@font-face
+    font-family: Rubik
+    src: url("../font/Rubik-Italic-VariableFont_wght.ttf") format("truetype")
+    font-weight: 350
+    font-variation-settings: "wght" 330
+    font-style: italic
+
+@keyframes highlightVarView
+    0%
+        background-color: #fcfc55
+
+    100%
+        background-color: #d8ffb2
+
+@keyframes highlightCodeLine
+    0%
+        background-color: #b467cd
+
+    100%
+        background-color: #eeb9ff
+
+*
+    font-family: $font-family-regular
+
+dfn
+    font-style: normal
+    text-decoration: underline
+
+code
+    color: #24292e
+    background: #e6e6e6
+
+code,code *
+    font-family: $font-family-monospace
+    font-size: medium
+
+pre code
+    padding: 1em
+    display: block
+    overflow-x: auto
+    border-radius: 2px
+
+pre.interactive-container
+    display: flex
+    justify-content: stretch
+    width: 100%
+    background: #e6e6e6
+
+code#code
+    flex-grow: .5
+
+.code-menu
+    margin: .5em
+    background-color: #87ebff
+    padding: 0.5em
+    flex-grow: .5
+    display: flex
+    flex-direction: column
+    justify-content: space-around
+
+    &>*
+        margin: .2em
+
+    &>.controls
+        display: flex
+        justify-content: space-between
+
+        &>button
+            flex-grow: .4
+            border: none
+
+    &>.var-view
+        display: flex
+        background-color: #b2ffcd
+        border: 1 px solid black
+        margin: .2em
+        &>*
+            font-size: medium
+            font-family: $font-family-monospace
+            margin: .2em
+            padding: 1px 4px
+        &>input
+            flex-grow: 1
+            text-align: end
+            background-color: #0000
+            border: none
+        &.highlight
+            animation: highlightVarView .4s ease-out forwards
+
+.keyword
+    color: #d73a49
+.comment
+    color: #6a737d
+.label
+    color: #6f42c1
+.var
+    color: #005cc5
+.val
+    color: #e36209
+.str
+    color: #032f62
+.ref
+    color: #e36209
+
+.code-line.highlight
+    animation: highlightCodeLine .3s ease-out forwards
+
+@media (max-width: 800px)
+    pre.interactive-container
+        flex-direction: column
+
+@media (prefers-color-scheme: dark)
+    code
+        color: #c9d1d9
+        background-color: #0d1117
+
+    @keyframes highlightVarView
+        0%
+            background-color: #76a800
+
+        100%
+            background-color: #1f2c00
+
+    @keyframes highlightCodeLine
+        0%
+            background-color: #bd29b3
+
+        100%
+            background-color: #40143d
+
+    pre.interactive-container
+        background-color: #0d1117
+
+    .code-menu
+        background-color: #0b1526
+
+        &>.var-view
+            background-color: #002312
+            &>*
+                border: none
+            &.highlight
+                animation: highlightVarView .4s ease-out forwards
+
+    .keyword
+        color: #ff7b72
+    .comment
+        color: #8b949e
+    .label
+        color: #d2a8ff
+    .var
+        color: #79c0ff
+    .val
+        color: #ffa657
+    .str
+        color: #a5d6ff
+    .ref
+        color: #7ee787

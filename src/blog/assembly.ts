@@ -1,6 +1,6 @@
 import { InterpreterUI } from '../script/lib/interpreter/ui'
 import { tokenize } from '../script/lib/interpreter/code'
-import './blog.css'
+import './blog.sass'
 
 for (const codeElement of document.querySelectorAll("code")) {
     if (codeElement.classList.contains("interactive")) {

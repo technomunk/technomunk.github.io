@@ -1,9 +1,11 @@
+import { Choice } from "../util"
 import { CodeBlock } from "./code"
 import { Interpreter } from "./interpreter"
 
 export class InterpreterUI {
+    arg = new Choice(16, 25, 36, 49, 64, 81, 100, 121)
     protected interpreter: Interpreter
-    protected vars: Map<string, HTMLElement> = new Map()
+    protected vars: Map<string, HTMLInputElement> = new Map()
     protected menu: HTMLDivElement
 
     constructor(element: HTMLElement) {
@@ -28,7 +30,7 @@ export class InterpreterUI {
 
     reset() {
         this.interpreter.reset()
-        this.interpreter.vars.set("di", 16)
+        this.interpreter.vars.set("di", this.arg.random())
         this.update()
     }
 
@@ -63,30 +65,45 @@ export class InterpreterUI {
     }
 
     protected createVarView(name: string, val?: number): HTMLDivElement {
-        // const label = document.createElement("label")
-        // label.classList.add("var-label")
-        // label.htmlFor = name
-        // label.textContent = name
-        // this.menu.appendChild(label)
-
         const view = document.createElement("div")
-        view.id = name
         view.classList.add("var-view")
-        this.vars.set(name, view)
-        this.setVar(name, val ?? NaN)
-        this.menu.appendChild(view)
 
+        const label = document.createElement("label")
+        label.classList.add("var-label")
+        label.htmlFor = name
+        label.textContent = `${name}:`
+        view.appendChild(label)
+
+        const text = document.createElement("input")
+        text.inputMode = "numeric"
+        text.id = name
+        this.vars.set(name, text)
+        this.setVar(name, val ?? NaN)
+        view.appendChild(text)
+        text.addEventListener("input", () => {
+            this.interpreter.vars.set(name, parseInt(text.value))
+            this.setHighlight(text, true)
+        })
+
+        this.menu.appendChild(view)
         return view
     }
 
     protected setVar(name: string, val: number) {
         const element = this.vars.get(name)!
-        const newVal = `${name}: ${val}`
-        if (element.textContent != newVal) {
-            element.textContent = newVal
-            element.classList.add("highlight")
+        if (element.value != val.toFixed()) {
+            element.value = val.toFixed()
+            this.setHighlight(element, true)
         } else {
-            element.classList.remove("highlight")
+            this.setHighlight(element, false)
+        }
+    }
+
+    protected setHighlight(element: HTMLInputElement, highlight: boolean) {
+        if (highlight) {
+            element.parentElement?.classList.add("highlight")
+        } else {
+            element.parentElement?.classList.remove("highlight")
         }
 
     }

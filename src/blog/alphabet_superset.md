@@ -4,22 +4,22 @@
 - [ ] B: Benchmarking
 - [ ] C: Compilers
 - [ ] D: Declarative programming?
-- [ ] E: Encryption?
+- [ ] E: Encryption? | Email
 - [ ] F: Functional programming?
 - [ ] G: GPUs
 - [ ] H: Hashing
 - [ ] I: Iteration?
-- [ ] J: Java?
+- [ ] J: Java? | JIT
 - [ ] K: Kernel? | Knapsack?
 - [ ] L: Lists?
 - [ ] M: Memory?
 - [ ] N: Networking
-- [ ] O: Optimization | Object-oriented
-- [ ] P: Processors | Parallelization
-- [ ] Q: Queues?
-- [ ] R: RegEx
+- [ ] O: Optimization | Object-oriented | OS
+- [ ] P: Processors | Parallelization | Pointers
+- [ ] Q: Queues? | Quantum Computing
+- [ ] R: RegEx | Recursion
 - [ ] S: Semantics & Style
-- [ ] T: Testing?
+- [ ] T: Testing? | Type Theory
 - [ ] U: Unions?
 - [ ] V: Vectorization
 - [ ] W: Web?

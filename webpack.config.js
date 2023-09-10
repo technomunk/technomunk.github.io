@@ -2,6 +2,7 @@ const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackLinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
+const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 
 
 const IGNORED_PATH_PREFIXES = [
@@ -45,6 +46,10 @@ module.exports = {
                 use: ['style-loader', 'css-loader'],
             },
             {
+                test: /\.sass$/,
+                use: ['style-loader', 'css-loader', 'sass-loader']
+            },
+            {
                 test: /\.ts$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
@@ -83,7 +88,8 @@ module.exports = {
                 chunks: ['blog_assembly']
             }
         ),
-        new HtmlWebpackLinkTypePlugin({}),
+        new HtmlWebpackLinkTypePlugin(),
+        new HtmlWebpackHarddiskPlugin(),
     ],
     devServer: {
         static: './dist',
