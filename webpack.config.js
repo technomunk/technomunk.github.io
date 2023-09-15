@@ -60,9 +60,13 @@ module.exports = {
                 use: 'webpack-glsl-loader',
             },
             {
-                test: /\.(woff|woff2|eot|ttf|otf)/,
+                test: /\.(woff|woff2|eot|ttf|otf)$/,
                 type: 'asset/resource',
             },
+            {
+                test: /\.html$/,
+                use: ['html-loader'],
+            }
         ],
     },
     resolve: {

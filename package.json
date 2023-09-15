@@ -17,6 +17,7 @@
     "copy-webpack-plugin": "latest",
     "css-loader": "latest",
     "highlight.js": "latest",
+    "html-loader": "latest",
     "html-webpack-harddisk-plugin": "latest",
     "html-webpack-link-type-plugin": "latest",
     "html-webpack-plugin": "latest",

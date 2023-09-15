@@ -1,5 +1,10 @@
+@use "../style/light"
+    
 $font-family-regular: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
 $font-family-monospace: ui-monospace, SFMono-REgular, "SF Mono", monospace !important
+
+$color-background-code: #e6e6e6
+$color-code: #24292e
 
 @font-face
     font-family: Rubik
@@ -37,8 +42,8 @@ dfn
     text-decoration: underline
 
 code,textarea
-    color: #24292e
-    background: #e6e6e6
+    color: $color-code
+    background: $color-background-code
 
 code,code *,textarea
     font-family: $font-family-monospace
@@ -54,19 +59,19 @@ pre.interactive-container
     display: flex
     justify-content: stretch
     width: 100%
-    background: #e6e6e6
+    background: $color-background-code
 
 code#code
     flex-grow: .5
 
 strong
     font-weight: bolder
-    background-color: #e6e6e6
+    background-color: $color-background-code
     padding: 0px 5px
 
-input.ta-center
+.ta-center
     text-align: center
-input.ta-end
+.ta-end
     text-align: end
 
 button:disabled
@@ -83,12 +88,18 @@ button:disabled
     flex-direction: column
     justify-content: space-around
 
+    & button
+        border: solid 1px black
+        font-size: 18px
+    & input
+        padding: 4px
+        font-size: 18px
+
     &>*
         margin: .2em
 
     &>input
         border: none
-        background-color: #87ebff
         &:disabled
             color: black
 
@@ -99,11 +110,11 @@ button:disabled
 
     &>.controls
         display: flex
+        gap: 10px
         justify-content: space-between
 
         &>button
             flex-grow: .4
-            border: none
 
     &>.shelf
         display: flex
