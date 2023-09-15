@@ -4,33 +4,38 @@ type Tag = "comment" | "label" | "keyword" | "var" | "val" | "ref"
 type Token = {
     tag: Tag
     value: string
+    hint?: string
 }
 type TokenSeq = Array<string | Token>
+type PartialToken = {
+    tag: Tag
+    hint?: string
+}
 
 const TOKENIZERS = {
     "asm": tokenizeAsm,
     "brainfuck": tokenizeBrainfuck,
 }
-const ASM_TAGS: Map<string, "keyword" | "var"> = new Map([
-    ["mov", "keyword"],
-    ["inc", "keyword"],
-    ["mul", "keyword"],
-    ["cmp", "keyword"],
-    ["jb", "keyword"],
-    ["ret", "keyword"],
-    ["ax", "var"],
-    ["cx", "var"],
-    ["di", "var"],
+const ASM_TAGS: Map<string, PartialToken> = new Map([
+    ["mov", { tag: "keyword", hint: "Copy a value" }],
+    ["inc", { tag: "keyword", hint: "Increment provided value" }],
+    ["mul", { tag: "keyword", hint: "Multiply 2 values together" }],
+    ["cmp", { tag: "keyword", hint: "Compare 2 values together and set the cmp register to the result" }],
+    ["jb", { tag: "keyword", hint: "Jump to the provided label if the tested value was below the compared one" }],
+    ["ret", { tag: "keyword" }],
+    ["ax", { tag: "var" }],
+    ["cx", { tag: "var" }],
+    ["di", { tag: "var" }],
 ])
-const BRAINFUCK_TAGS: Map<string, Tag> = new Map([
-    ["+", "keyword"],
-    ["-", "keyword"],
-    [">", "keyword"],
-    ["<", "keyword"],
-    [".", "ref"],
-    [",", "ref"],
-    ["[", "label"],
-    ["]", "label"],
+const BRAINFUCK_TAGS: Map<string, PartialToken> = new Map([
+    ["+", { tag: "keyword", hint: "Increment active value" }],
+    ["-", { tag: "keyword", hint: "Decrement active value" }],
+    [">", { tag: "keyword", hint: "Select next value" }],
+    ["<", { tag: "keyword", hint: "Select previous value" }],
+    [".", { tag: "ref", hint: "Print the active value to the output" }],
+    [",", { tag: "ref", hint: "Read a character from input into the active value" }],
+    ["[", { tag: "label", hint: "Jump past the matching ] if the active value is 0" }],
+    ["]", { tag: "label", hint: "Jump to the matching [ if the active value is not 0" }],
 ])
 
 
@@ -107,7 +112,7 @@ function tokenizeBrainfuck(text: string): string {
 
 function tokenizeAsmLine(line: string): TokenSeq {
     if (line.match(/^.+:$/)) {
-        return [{ tag: "label", value: line.slice(0, -1) }, ":"]
+        return [{ tag: "label", value: line.slice(0, -1), hint: "A label for the following code line" }, ":"]
     }
     const commentStart = line.search(";")
     let comment = ""
@@ -124,7 +129,7 @@ function tokenizeAsmLine(line: string): TokenSeq {
         }
         lastEnd = end
         const word = line.slice(start, end)
-        result.push({ tag: determineTag(word), value: word })
+        result.push({ value: word, ...determineTag(word) })
     }
     if (comment.length) {
         result.push({ tag: "comment", value: comment })
@@ -143,7 +148,7 @@ function tokenizeBrainfuckLine(line: string): TokenSeq {
             if (start != end) {
                 result.push(commentOrWhitespace(line.substring(start, end)))
             }
-            result.push({ tag, value: line[end] })
+            result.push({ value: line[end], ...tag })
             start = end + 1
             continue
         }
@@ -170,15 +175,15 @@ function* words(line: string): Generator<[number, number]> {
     }
 }
 
-function determineTag(word: string): "keyword" | "var" | "val" | "ref" {
+function determineTag(word: string): PartialToken {
     const tag = ASM_TAGS.get(word)
     if (tag != undefined) {
         return tag
     }
     if (Number.isNaN(parseInt(word))) {
-        return "ref"
+        return { tag: "ref", hint: "Reference to a previously defined label" }
     }
-    return "val"
+    return { tag: "val" }
 }
 
 function commentOrWhitespace(text: string): Token | string {
@@ -191,6 +196,9 @@ function commentOrWhitespace(text: string): Token | string {
 function span(token: string | Token): string {
     if (typeof token === "string") {
         return token
+    }
+    if (token.hint) {
+        return `<span class="${token.tag}" title="${token.hint}">${token.value}</span>`
     }
     return `<span class="${token.tag}">${token.value}</span>`
 }
