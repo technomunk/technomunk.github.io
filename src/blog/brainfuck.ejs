@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <link rel="stylesheet" href="/style/light.css">
+    <meta name="author" content="Grigory 'Technomunk' Glukhov">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:url" content="https://www.technomunk.com/">
+    <meta property="og:site_name" content="Technomunk">
+    <meta property="og:title" content="Technomunk on: Brainfuck
+    <meta property=" og:description" content="Surface level exploration of the most famous esoteric language">
+    <meta property="og:image" content="img/avatar.jpg" />
+    <title>Technomunk on: Brainfuck</title>
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="theme-color" content="#333333">
+    <meta name="color-scheme" content="light dark">
+</head>
+
+<body>
+    <main>
+        <p class="em">Brainfuck</p>
+        <p>Welcome to the world of esoteric programming languages! Esoteric languages are meant as exercises of
+            programming language design. They test the limits of what is possible, usable or are for plain fun. Similar
+            to code golfing they provide extremely little value as production code, however exploring them can give you
+            a rich insight into designing software.</p>
+        <p>The most famous example is <dfn>Brainfuck</dfn>, a programming language that consists of just 8 valid symbols
+            that
+            operate on memory directly. In a way it's very similar to the original <a
+                href="https://en.wikipedia.org/wiki/Turing_machine">Turing Machine</a> - a theoretical computer that
+            operates on an infinite tape, moving along said tape either reading or writing data to it. And what Alan
+            Turing proved is that minimal design is sufficient to solve a vast array of different problems. In fact any
+            Turing-Complete language is just as powerful as any other, so at least theoretically Brainfuck can be used
+            to achieve the same results as Python or JavaScript.</p>
+        <p>And just like a Turing Machine Brainfuck works on a linear array that the program can move along. The first 2
+            operators do just that: <strong>&lt</strong> moves backwards on the tape and <strong>&gt</strong> moves
+            forward.</p>
+        <!-- TODO: add visual navigator -->
+        <p>For reading or writing data Brainfuck has 4 operators: <strong>+</strong> for incrementing,
+            <strong>-</strong> for decrementing, <strong>.</strong> for printing to the output and finally
+            <strong>,</strong> for reading from input.
+        </p>
+        <p>So putting it all together the following will read a character from input and print the next ASCII character:
+            <code class="brainfuck">,+.</code>
+        </p>
+        <p>However with these operators it would be impossible to write the same program as we did in the <a
+                href="../assembly.html">post on assembly</a>. We are missing conditional operators, which brings us to
+            the final 2 operators: <strong>[</strong> which will skip to the associated closing brace if the value at
+            current cell is 0 and <strong>]</strong> which will jump back to the associated opening brace if the value
+            is non-zero.
+        </p>
+        <pre class="interactive-container">
+            <code class="interactive brainfuck" rows="34" cols="76">++++ ++++               Set Cell #0 to 8
+[
+    >++++               Add 4 to Cell #1; this will always set Cell #1 to 4
+    [                   as the cell will be cleared by the loop
+        >++             Add 4*2 to Cell #2
+        >+++            Add 4*3 to Cell #3
+        >+++            Add 4*3 to Cell #4
+        >+              Add 4 to Cell #5
+        <<<<-           Decrement the loop counter in Cell #1
+    ]                   Loop till Cell #1 is zero
+    >+                  Add 1 to Cell #2
+    >+                  Add 1 to Cell #3
+    >-                  Subtract 1 from Cell #4
+    >>+                 Add 1 to Cell #6
+    [<]                 Move back to the first zero cell you find; this will
+                        be Cell #1 which was cleared by the previous loop
+    <-                  Decrement the loop Counter in Cell #0
+]                       Loop till Cell #0 is zero
+>>.                     Cell #2 has value 72 which is 'H'
+>---.                   Subtract 3 from Cell #3 to get 101 which is 'e'
++++++ ++..+++.          Likewise for 'llo' from Cell #3
+>>.                     Cell #5 is 32 for the space
+<-.                     Subtract 1 from Cell #4 for 87 to give a 'W'
+<.                      Cell #3 was set to 'o' from the end of 'Hello'
++++.----- -.----- ---.  Cell #3 for 'rl' and 'd'
+>>+.                    Add 1 to Cell #5 gives us an exclamation point
+>++.                    And finally a newline from Cell #6
+</code>
+        </pre>
+    </main>
+</body>
+
+</html>

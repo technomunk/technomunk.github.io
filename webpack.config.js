@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackLinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
+const webpack = require('webpack')
 
 
 const IGNORED_PATH_PREFIXES = [
@@ -34,6 +35,7 @@ module.exports = {
         pathtrace: './src/script/pathtrace.ts',
         cloth: './src/script/cloth.ts',
         blog_assembly: './src/blog/assembly.ts',
+        blog_brainfuck: './src/blog/brainfuck.ts',
     },
     module: {
         rules: [
@@ -88,8 +90,16 @@ module.exports = {
                 chunks: ['blog_assembly']
             }
         ),
+        new HtmlWebpackPlugin(
+            {
+                filename: 'blog/brainfuck.html',
+                template: './src/blog/brainfuck.ejs',
+                chunks: ['blog_brainfuck']
+            }
+        ),
         new HtmlWebpackLinkTypePlugin(),
         new HtmlWebpackHarddiskPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
     ],
     devServer: {
         static: './dist',

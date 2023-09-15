@@ -1,4 +1,3 @@
-import { error } from "../util"
 import { CodeBlock } from "./code"
 
 export class Variable {
@@ -111,7 +110,7 @@ export class AsmInterpreter {
         this.vars.set("cmp", initialVar())
     }
 
-    next() {
+    step() {
         const line = this.code.getLine(this.nextLineIdx)
             .replace(",", " ")
             .split(" ")

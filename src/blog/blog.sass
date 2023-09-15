@@ -22,7 +22,7 @@ $font-family-monospace: ui-monospace, SFMono-REgular, "SF Mono", monospace !impo
     100%
         background-color: #d8ffb2
 
-@keyframes highlightCodeLine
+@keyframes highlightCode
     0%
         background-color: #b467cd
 
@@ -36,11 +36,11 @@ dfn
     font-style: normal
     text-decoration: underline
 
-code
+code,textarea
     color: #24292e
     background: #e6e6e6
 
-code,code *
+code,code *,textarea
     font-family: $font-family-monospace
     font-size: medium
 
@@ -59,17 +59,37 @@ pre.interactive-container
 code#code
     flex-grow: .5
 
+strong
+    font-weight: bolder
+    background-color: #e6e6e6
+    padding: 0px 5px
+
+input.ta-center
+    text-align: center
+input.ta-end
+    text-align: end
+
+button:disabled
+    background-color: grey
+
 .code-menu
     margin: .5em
     background-color: #87ebff
     padding: 0.5em
-    flex-grow: .5
+    flex-basis: 0
+    flex-grow: 1
+    min-width: 0
     display: flex
     flex-direction: column
     justify-content: space-around
 
     &>*
         margin: .2em
+
+    &>.output
+        background-color: #87ebff
+        &.highlight
+            animation: highlightVarView .4s ease-out forwards
 
     &>.controls
         display: flex
@@ -79,22 +99,24 @@ code#code
             flex-grow: .4
             border: none
 
-    &>.var-view
+    &>.shelf
         display: flex
         background-color: #b2ffcd
         border: 1 px solid black
         margin: .2em
+        flex-wrap: wrap
         &>*
             font-size: medium
             font-family: $font-family-monospace
             margin: .2em
             padding: 1px 4px
         &>input
-            flex-grow: 1
-            text-align: end
             background-color: #0000
             border: none
-        &.highlight
+            width: 24px
+            margin: 0
+            flex: 24px
+        &.highlight, &>.highlight
             animation: highlightVarView .4s ease-out forwards
 
 .keyword
@@ -112,16 +134,19 @@ code#code
 .ref
     color: #e36209
 
-.code-line.highlight
-    animation: highlightCodeLine .3s ease-out forwards
+code .highlight
+    animation: highlightCode .3s ease-out forwards
 
-@media (max-width: 800px)
+@media (max-width: 900px)
     pre.interactive-container
         flex-direction: column
 
 @media (prefers-color-scheme: dark)
-    code
+    code,textarea
         color: #c9d1d9
+        background-color: #0d1117
+
+    strong
         background-color: #0d1117
 
     @keyframes highlightVarView
@@ -131,7 +156,7 @@ code#code
         100%
             background-color: #1f2c00
 
-    @keyframes highlightCodeLine
+    @keyframes highlightCode
         0%
             background-color: #bd29b3
 
@@ -143,13 +168,13 @@ code#code
 
     .code-menu
         background-color: #0b1526
+        &>.output
+            background-color:  #002312
 
-        &>.var-view
+        &>.shelf,&>.grid
             background-color: #002312
             &>*
                 border: none
-            &.highlight
-                animation: highlightVarView .4s ease-out forwards
 
     .keyword
         color: #ff7b72
