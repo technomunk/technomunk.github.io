@@ -116,7 +116,7 @@ export class BrainfuckUI {
     varGrid: HTMLDivElement
     runButton: HTMLButtonElement
     input: HTMLInputElement
-    output: HTMLDivElement
+    output: HTMLInputElement
     code: HTMLSpanElement[] = []
     vars: HTMLInputElement[] = []
 
@@ -132,7 +132,7 @@ export class BrainfuckUI {
         }
         this.runButton = document.createElement("button")
         this.input = document.createElement("input")
-        this.output = document.createElement("div")
+        this.output = document.createElement("input")
         this.interpreter = new BrainfuckInterpreter(filterOps(code))
         this.varGrid = this.createVarGrid()
         this.menu = this.createMenu()
@@ -149,9 +149,7 @@ export class BrainfuckUI {
         this.interpreter.step()
 
         this.vars[this.interpreter.dataIdx].value = this.interpreter.val.toFixed()
-        if (this.interpreter.output.length > 0) {
-            this.output.textContent = this.interpreter.output
-        }
+        this.output.value = this.interpreter.output
 
         if (dataIdx != this.interpreter.dataIdx) {
             this.setHighlight(this.vars[dataIdx], false)
@@ -184,7 +182,7 @@ export class BrainfuckUI {
         for (const varView of this.vars) {
             varView.value = "0"
         }
-        this.output.textContent = " "
+        this.output.value = this.interpreter.output
         this.running = false
         this.runButton.textContent = "start"
         this.runButton.disabled = false
@@ -214,7 +212,8 @@ export class BrainfuckUI {
         }
 
         this.output.classList.add("output")
-        this.output.textContent = " "
+        this.output.placeholder = "output"
+        this.output.disabled = true
         this.menu.appendChild(this.output)
 
         this.createControls()

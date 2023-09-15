@@ -86,8 +86,14 @@ button:disabled
     &>*
         margin: .2em
 
-    &>.output
+    &>input
+        border: none
         background-color: #87ebff
+        &:disabled
+            color: black
+
+    &>.output
+        text-align: center
         &.highlight
             animation: highlightVarView .4s ease-out forwards
 
@@ -168,8 +174,10 @@ code .highlight
 
     .code-menu
         background-color: #0b1526
-        &>.output
+        &>input
             background-color:  #002312
+            &:disabled
+                color: #ffff
 
         &>.shelf,&>.grid
             background-color: #002312
