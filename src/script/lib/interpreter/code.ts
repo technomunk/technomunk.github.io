@@ -5,7 +5,34 @@ type Token = {
     tag: Tag
     value: string
 }
-type TokenizedLine = Array<string | Token>
+type TokenSeq = Array<string | Token>
+
+const TOKENIZERS = {
+    "asm": tokenizeAsm,
+    "brainfuck": tokenizeBrainfuck,
+}
+const ASM_TAGS: Map<string, "keyword" | "var"> = new Map([
+    ["mov", "keyword"],
+    ["inc", "keyword"],
+    ["mul", "keyword"],
+    ["cmp", "keyword"],
+    ["jb", "keyword"],
+    ["ret", "keyword"],
+    ["ax", "var"],
+    ["cx", "var"],
+    ["di", "var"],
+])
+const BRAINFUCK_TAGS: Map<string, Tag> = new Map([
+    ["+", "keyword"],
+    ["-", "keyword"],
+    [">", "keyword"],
+    ["<", "keyword"],
+    [".", "ref"],
+    [",", "ref"],
+    ["[", "label"],
+    ["]", "label"],
+])
+
 
 export class CodeBlock {
     readonly element: HTMLElement
@@ -20,7 +47,7 @@ export class CodeBlock {
         const textLines = lines(element.textContent!)
         element.innerHTML = ""
         for (const line of textLines) {
-            const tokenizedLine = tokenizeLine(line)
+            const tokenizedLine = tokenizeAsmLine(line)
             for (const name of getTokens(tokenizedLine, "var")) {
                 this._vars.add(name)
             }
@@ -54,7 +81,7 @@ export class CodeBlock {
         this.highlightedLine = n
     }
 
-    composeLineElement(text: TokenizedLine): HTMLElement {
+    composeLineElement(text: TokenSeq): HTMLElement {
         const element = document.createElement("span")
         element.classList.add("code-line")
         element.innerHTML = text.map(t => span(t)).join("") + "\n"
@@ -62,13 +89,23 @@ export class CodeBlock {
     }
 }
 
-export function tokenize(text: string): string {
+export function tokenize(text: string, language: "asm" | "brainfuck"): string {
+    return TOKENIZERS[language](text)
+}
+
+function tokenizeAsm(text: string): string {
     return lines(text)
-        .map(l => tokenizeLine(l).map(t => span(t)).join(""))
+        .map(l => tokenizeAsmLine(l).map(t => span(t)).join(""))
         .join("\n")
 }
 
-function tokenizeLine(line: string): TokenizedLine {
+function tokenizeBrainfuck(text: string): string {
+    return lines(text)
+        .map(l => tokenizeBrainfuckLine(l).map(t => span(t)).join(""))
+        .join("\n")
+}
+
+function tokenizeAsmLine(line: string): TokenSeq {
     if (line.match(/^.+:$/)) {
         return [{ tag: "label", value: line.slice(0, -1) }, ":"]
     }
@@ -79,7 +116,7 @@ function tokenizeLine(line: string): TokenizedLine {
         line = line.slice(0, commentStart)
     }
 
-    const result: TokenizedLine = []
+    const result: TokenSeq = []
     let lastEnd = 0
     for (const [start, end] of words(line)) {
         if (lastEnd < start) {
@@ -93,6 +130,27 @@ function tokenizeLine(line: string): TokenizedLine {
         result.push({ tag: "comment", value: comment })
     }
 
+    return result
+}
+
+function tokenizeBrainfuckLine(line: string): TokenSeq {
+    const result: TokenSeq = []
+    let start = 0
+    let end = 0
+    for (; end < line.length; ++end) {
+        const tag = BRAINFUCK_TAGS.get(line[end])
+        if (tag != undefined) {
+            if (start != end) {
+                result.push(commentOrWhitespace(line.substring(start, end)))
+            }
+            result.push({ tag, value: line[end] })
+            start = end + 1
+            continue
+        }
+    }
+    if (end != start) {
+        result.push(commentOrWhitespace(line.substring(start)))
+    }
     return result
 }
 
@@ -112,20 +170,8 @@ function* words(line: string): Generator<[number, number]> {
     }
 }
 
-const TAGS: Map<string, "keyword" | "var"> = new Map([
-    ["mov", "keyword"],
-    ["inc", "keyword"],
-    ["mul", "keyword"],
-    ["cmp", "keyword"],
-    ["jb", "keyword"],
-    ["ret", "keyword"],
-    ["ax", "var"],
-    ["cx", "var"],
-    ["di", "var"],
-])
-
 function determineTag(word: string): "keyword" | "var" | "val" | "ref" {
-    const tag = TAGS.get(word)
+    const tag = ASM_TAGS.get(word)
     if (tag != undefined) {
         return tag
     }
@@ -133,6 +179,13 @@ function determineTag(word: string): "keyword" | "var" | "val" | "ref" {
         return "ref"
     }
     return "val"
+}
+
+function commentOrWhitespace(text: string): Token | string {
+    if (text.match(/^\s*$/) == null) {
+        return { tag: "comment", value: text }
+    }
+    return text
 }
 
 function span(token: string | Token): string {
@@ -146,15 +199,15 @@ function isToken(t: string | Token): t is Token {
     return typeof t !== "string"
 }
 
-function isLabel(line: TokenizedLine): line is [Token, string] {
+function isLabel(line: TokenSeq): line is [Token, string] {
     return line.length > 1 && isToken(line[0]) && line[0].tag == "label"
 }
 
-function isExecutableCode(line: TokenizedLine): boolean {
+function isExecutableCode(line: TokenSeq): boolean {
     return line.findIndex(t => isToken(t) && t.tag != "comment") != -1
 }
 
-function getTokens(line: TokenizedLine, tag: Tag): string[] {
+function getTokens(line: TokenSeq, tag: Tag): string[] {
     return line
         .filter(isToken)
         .filter(t => t.tag == tag)
