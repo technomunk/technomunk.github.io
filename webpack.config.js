@@ -3,7 +3,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackLinkTypePlugin = require('html-webpack-link-type-plugin').HtmlWebpackLinkTypePlugin
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
-const webpack = require('webpack')
 
 
 const IGNORED_PATH_PREFIXES = [
@@ -99,7 +98,6 @@ module.exports = {
         ),
         new HtmlWebpackLinkTypePlugin(),
         new HtmlWebpackHarddiskPlugin(),
-        new webpack.HotModuleReplacementPlugin(),
     ],
     devServer: {
         static: './dist',
