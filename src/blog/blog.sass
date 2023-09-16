@@ -64,9 +64,9 @@ strong
     background-color: #e6e6e6
     padding: 0px 5px
 
-input.ta-center
+.ta-center
     text-align: center
-input.ta-end
+.ta-end
     text-align: end
 
 button:disabled
@@ -88,11 +88,12 @@ button:disabled
 
     &>input
         border: none
-        background-color: #87ebff
+        background-color: #b2ffcd
+        padding: 4px
         &:disabled
             color: black
 
-    &>.output
+    &>.output,&>.input
         text-align: center
         &.highlight
             animation: highlightVarView .4s ease-out forwards

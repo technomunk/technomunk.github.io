@@ -93,7 +93,8 @@ export class BrainfuckInterpreter {
     }
 
     read() {
-        this.val = this.input.charCodeAt(0)
+        const charCode = this.input.charCodeAt(0)
+        this.val = Number.isNaN(charCode) ? 0 : charCode
         this.input = this.input.substring(1)
     }
     print() {

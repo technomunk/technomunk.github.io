@@ -110,6 +110,8 @@ export class InterpreterUI {
     }
 }
 
+const NAMES = new Choice("Technomunk", "Blog", "World", "Brainfuck")
+
 export class BrainfuckUI {
     interpreter: BrainfuckInterpreter
     menu: HTMLDivElement
@@ -182,6 +184,8 @@ export class BrainfuckUI {
         for (const varView of this.vars) {
             varView.value = "0"
         }
+        this.input.value = NAMES.random()
+        this.interpreter.input = this.input.value
         this.output.value = this.interpreter.output
         this.running = false
         this.runButton.textContent = "start"
@@ -211,6 +215,14 @@ export class BrainfuckUI {
             this.createVarView(this.interpreter.data[i])
         }
 
+        this.input.classList.add("input")
+        this.input.placeholder = "input"
+        this.input.addEventListener("change", (e) => {
+            e.preventDefault()
+            this.interpreter.input = this.input.value
+        })
+        this.menu.appendChild(this.input)
+
         this.output.classList.add("output")
         this.output.placeholder = "output"
         this.output.disabled = true
@@ -229,6 +241,8 @@ export class BrainfuckUI {
         stepButton.textContent = "step"
         stepButton.addEventListener("click", (e) => {
             e.preventDefault()
+            this.running = false
+            this.runButton.textContent = "start"
             this.step()
         })
         controls.appendChild(stepButton)
