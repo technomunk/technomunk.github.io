@@ -24,18 +24,18 @@
             programming language design. They test the limits of what is possible, usable or are for plain fun. Similar
             to code golfing they provide extremely little value as production code, however exploring them can give you
             a rich insight into designing software.</p>
-        <p>The most famous example is <dfn>Brainfuck</dfn>, a programming language that consists of just 8 valid symbols
-            that
-            operate on memory directly. In a way it's very similar to the original <a
+        <p>The most famous example of such a language is <dfn>Brainfuck</dfn>, a programming language that consists of
+            just 8 valid symbols that operate on memory cells. In a way it's very similar to the original <a
                 href="https://en.wikipedia.org/wiki/Turing_machine">Turing Machine</a> - a theoretical computer that
             operates on an infinite tape, moving along said tape either reading or writing data to it. And what Alan
             Turing proved is that minimal design is sufficient to solve a vast array of different problems. In fact any
             Turing-Complete language is just as powerful as any other, so at least theoretically Brainfuck can be used
-            to achieve the same results as Python or JavaScript.</p>
+            to achieve the same results as Python or JavaScript. Theoretically because to be Turing-complete Brainfuck
+            needs to operate on infinite memory.</p>
         <p>And just like a Turing Machine Brainfuck works on a linear array that the program can move along. The first 2
             operators do just that: <strong>&lt</strong> moves backwards on the tape and <strong>&gt</strong> moves
             forward.</p>
-        <!-- TODO: add visual navigator -->
+        <!-- TODO: add visual navigator --></p>
         <p>For reading or writing data Brainfuck has 4 operators: <strong>+</strong> for incrementing,
             <strong>-</strong> for decrementing, <strong>.</strong> for printing to the output and finally
             <strong>,</strong> for reading from input.
@@ -47,7 +47,7 @@
                 href="../assembly.html">post on assembly</a>. We are missing conditional operators, which brings us to
             the final 2 operators: <strong>[</strong> which will skip to the associated closing brace if the value at
             current cell is 0 and <strong>]</strong> which will jump back to the associated opening brace if the value
-            is non-zero.
+            is non-zero. And that's it! Any other character is treated as a comment and should be ignored.
         </p>
         <pre class="interactive-container">
             <code class="interactive brainfuck" rows="34" cols="76">++++ ++++               Set Cell #0 to 8
@@ -79,6 +79,47 @@
 &gt++.                    And finally a newline from Cell #6
 </code>
         </pre>
+        <p>That's a lot of code for a simple <code>print("Hello World!")</code>! Programming in Brainfuck is an exercise
+            in patience and self-torture, as the name implies. However it is an excellent example to learn about
+            compilers, because the rules are so simple - anyone should be able to write a compiler or an interpreter for
+            brainfuck and that is an excellent exercise that I strongly encourage you to do! Especially if you start
+            thinking about optimizing the program instead of executing an instruction for each character in the input
+            😉.
+        </p>
+        <p>But are 8 instructions really enough to write any program out there? Well actually 8 might be too many! It's
+            possible to use fewer instructions by putting boundaries on the memory cells. If we say that each cell can
+            only hold 8 bit numbers (1 byte) - adding 254 is the same as subtracting one, so minus becomes redundant.
+        </p>
+        <p>But those print and read instructions seem kinda magical. Do you ever wonder how they operate under the
+            hood? How does the computer tell the screen to display text? Or how does it figure out that you pressed a
+            key on the keyboard? The complete process is too involved to get into in this blog, but a core concept is
+            <dfn>memory mapping</dfn>. The computer can address <em>a lot</em> of memory. So much in fact - that it's
+            very unlikely it has access to so much physical memory. So instead of leaving empty addresses to waste -
+            engineers allow special addresses to interact not with memory but computer hardware.
+        </p>
+        <p>So let's use our Brainfuck example. Instead of having special print and read instructions we will add some
+            magic to a handful of memory cells (remember theoretically we have infinite number of them). If you ponder a
+            bit you might realize that we can say one cell should contain an input and another cell should contain an
+            output. But how would we take the data in or out of them? How do we signal the system that we intend to
+            increment the output a bit more before printing it to the screen?</p>
+        <p>We could add extra instructions, but remember that we want to see how few instructions we can get away with.
+            So instead - let's mark another cell as "command", so if it contains <strong>1</strong> - we tell the system
+            to print the character from the output cell. If it contains <strong>2</strong> - we tell the system that we
+            want it to update the input cell with a new character and so on. But we are still stuck with the same
+            problem - how do we tell the system that our command is done? I would suggest adding another one (final)
+            special cell - signal. Whenever the signal cell is updated - the system is <em>signalled</em> that we want
+            it to perform the command according to the command cell.</p>
+        <p>And the commands can be a lot more advanced than just printing or reading. They could be playing a sound,
+            connecting to the internet, asking the system to run another program and so on and so on. And that is memory
+            mapping! Instead of saying that all memory is just memory the computer marks (maps) some addresses to have
+            special meaning. Such as a command for other hardware, data with color values for the screen to display
+            whenever it's ready and so forth.</p>
+        <p>We could even go one further - we could include the source code of the program in memory as well and allow
+            our program to modify itself 😲. Such a design is called <a href="">Von Neuman architecture</a>, but I will
+            spare the details for another blog.</p>
+        <p>I urge you again to try writing your own brainfuck interpreter and perhaps consider optimizing it. The first
+            step might be replacing consecutive increments with adding the number of increments immediately. And once
+            you figure that out - perhaps you will see the next possible optimization.</p>
     </main>
 </body>
 
