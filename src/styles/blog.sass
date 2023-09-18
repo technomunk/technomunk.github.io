@@ -1,0 +1,213 @@
+$font-family-regular: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
+$font-family-monospace: ibmplexmono, ui-monospace, SFMono-REgular, "SF Mono", monospace !important
+
+@font-face
+    font-family: Rubik
+    src: url("/font/rubik.ttf") format("truetype")
+    font-weight: 350
+    font-variation-settings: "wght" 350
+    font-style: normal
+
+@font-face
+    font-family: Rubik
+    src: url("/font/rubik_italic.ttf") format("truetype")
+    font-weight: 350
+    font-variation-settings: "wght" 330
+    font-style: italic
+
+@font-face
+    font-family: ibmplexmono
+    src: url("/font/imbplexmono.ttf") format("truetype")
+    font-weight: 400
+
+
+@keyframes highlightVarView
+    0%
+        background-color: #fcfc55
+
+    100%
+        background-color: #d8ffb2
+
+@keyframes highlightCode
+    0%
+        background-color: #b467cd
+
+    100%
+        background-color: #eeb9ff
+
+@mixin monospace
+    font-family: $font-family-monospace
+    font-size: medium
+
+*
+    font-family: $font-family-regular
+    font-size: 18px
+
+body
+    margin: 1em max(1em, 3%) 0
+    min-width: 14em
+
+h1
+    font-size: 32px
+    font-weight: bolder
+    text-align: center
+
+p,h1
+    text-indent: 3%
+
+code
+    color: #24292e
+    background: #e6e6e6
+
+code,code *
+    @include monospace
+
+pre, code-interpreter
+    & code
+        padding: 1em
+        display: block
+        overflow-x: auto
+        border-radius: 2px
+
+code-interpreter
+    &>code
+        white-space: pre
+    display: flex
+    justify-content: stretch
+    width: 100%
+    background: #e6e6e6
+
+code#code
+    flex-grow: .5
+
+.ta-center
+    text-align: center
+.ta-end
+    text-align: end
+
+button:disabled
+    background-color: grey
+
+.code-menu
+    margin: .5em
+    background-color: #87ebff
+    padding: 0.5em
+    flex-basis: 0
+    flex-grow: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    justify-content: space-around
+
+    &>*
+        margin: .2em
+
+    &>input
+        border: none
+        background-color: #b2ffcd
+        padding: 4px
+        &:disabled
+            color: black
+
+    &>.output,&>.input
+        text-align: center
+        &.highlight
+            animation: highlightVarView .4s ease-out forwards
+
+    &>.controls
+        display: flex
+        justify-content: space-between
+
+        &>button
+            flex-grow: .4
+            border: none
+
+    &>.shelf
+        display: flex
+        background-color: #b2ffcd
+        border: 1 px solid black
+        margin: .2em
+        flex-wrap: wrap
+        &>*
+            @include monospace
+            margin: .2em
+            padding: 1px 4px
+        &>input
+            background-color: #0000
+            border: none
+            width: 24px
+            margin: 0
+            flex: 24px
+        &.highlight, &>.highlight
+            animation: highlightVarView .4s ease-out forwards
+
+.keyword
+    color: #d73a49
+.comment
+    color: #6a737d
+.label
+    color: #6f42c1
+.var
+    color: #005cc5
+.val
+    color: #e36209
+.str
+    color: #032f62
+.ref
+    color: #e36209
+
+code .highlight
+    animation: highlightCode .3s ease-out forwards
+
+@media (max-width: 900px)
+    pre.interactive-container
+        flex-direction: column
+
+@media (prefers-color-scheme: dark)
+    code
+        color: #c9d1d9
+        background-color: #0d1117
+
+    @keyframes highlightVarView
+        0%
+            background-color: #76a800
+
+        100%
+            background-color: #1f2c00
+
+    @keyframes highlightCode
+        0%
+            background-color: #bd29b3
+
+        100%
+            background-color: #40143d
+
+    pre.interactive-container
+        background-color: #0d1117
+
+    .code-menu
+        background-color: #0b1526
+        &>input
+            background-color: #002312
+            &:disabled
+                color: #ffff
+
+        &>.shelf,&>.grid
+            background-color: #002312
+            &>*
+                border: none
+
+    .keyword
+        color: #ff7b72
+    .comment
+        color: #8b949e
+    .label
+        color: #d2a8ff
+    .var
+        color: #79c0ff
+    .val
+        color: #ffa657
+    .str
+        color: #a5d6ff
+    .ref
+        color: #7ee787

@@ -1,0 +1,9 @@
+---
+const { arg } = Astro.props
+---
+
+<code-interpreter lang="asm" arg={arg}><slot /></code-interpreter>
+
+<script>
+    import "../scripts/interpreter"
+</script>

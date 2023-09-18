@@ -1,6 +1,0 @@
-[submodule "submodules/p2ds"]
-	path = submodules/p2ds
-	url = https://github.com/technomunk/p2ds/
-[submodule "submodules/wasm-game-of-life"]
-	path = submodules/wasm-game-of-life
-	url = https://github.com/technomunk/wasm-game-of-life
