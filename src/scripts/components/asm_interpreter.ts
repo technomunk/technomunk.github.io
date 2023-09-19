@@ -1,30 +1,33 @@
-import { AsmInterpreter } from "./lib/asm"
-import { CodeBlock, tokenize } from "./lib/code"
-import { Choice } from "./lib/util"
+import { AsmInterpreter } from "../lib/code/interpreter/asm"
+import { Choice, error } from "../lib/util"
+import { CodeBlock } from "../lib/code/codeblock"
+import { GRAMMARS } from "../lib/code/grammar"
+import { setHighlight } from "../lib/highlight"
 
 
-class InterpreterElement extends HTMLElement {
-    lang: "asm" | "brainfuck"
-    interpreter: AsmInterpreter
-    arg: Choice<number>
+class AsmInterpreterElement extends HTMLElement {
+    readonly interpreter: AsmInterpreter
+    readonly args: Map<string, Choice<number>> = new Map()
+
     protected vars: Map<string, HTMLInputElement> = new Map()
     protected menu: HTMLDivElement
 
     constructor() {
         super()
+        for (const { name, value } of this.attributes) {
+            if (name.startsWith("arg-")) {
+                this.args.set(name.slice(4), new Choice(...value.split(",").map(a => parseInt(a))))
+            }
+        }
 
-        const lang = this.getAttribute("lang")
-        if (lang == undefined) { throw "Missing 'lang' attribute" }
-        if (lang !== "asm" && lang !== "brainfuck") { throw "'lang' must be one of ['asm', 'brainfuck']" }
-        this.lang = lang
-
-        const arg = this.getAttribute("arg")
-        if (arg == undefined) { throw "Missing 'arg' attribute" }
-        this.arg = new Choice(...arg.split(",").map(a => parseInt(a)))
-
-        const code = tokenize(this.textContent!, this.lang)
-        this.innerHTML = `<code>${code}</code>`
-        this.interpreter = new AsmInterpreter(new CodeBlock(this.querySelector("code")!))
+        if (this.childElementCount == 1) {
+            if (this.children[0] instanceof HTMLPreElement) {
+                this.innerHTML = this.children[0].innerHTML
+            }
+        }
+        const code = new CodeBlock(this.querySelector("code") || error("Missing <code> element to interpret"), GRAMMARS.asm)
+        this.interpreter = new AsmInterpreter(code)
+        this.interpreter.vars.set("cmp")
         this.menu = this.createMenu()
         this.appendChild(this.menu)
         this.reset()
@@ -39,12 +42,14 @@ class InterpreterElement extends HTMLElement {
         for (const [name, value] of this.interpreter.vars) {
             this.setVar(name, value)
         }
-        this.interpreter.code.highlightLine(this.interpreter.nextLineIdx)
+        this.interpreter.code.highlightExpr(this.interpreter.exprIndex)
     }
 
     reset() {
         this.interpreter.reset()
-        this.interpreter.vars.set("di", this.arg.random())
+        for (const [name, choice] of this.args) {
+            this.interpreter.vars.set(name, choice.random())
+        }
         this.update()
     }
     protected createMenu(): HTMLDivElement {
@@ -96,7 +101,7 @@ class InterpreterElement extends HTMLElement {
         view.appendChild(text)
         text.addEventListener("input", () => {
             this.interpreter.vars.set(name, parseInt(text.value))
-            this.setHighlight(text, true)
+            setHighlight(text, true)
         })
 
         this.menu.appendChild(view)
@@ -108,19 +113,11 @@ class InterpreterElement extends HTMLElement {
         const element = this.vars.get(name)!
         if (element.value != val.toFixed()) {
             element.value = val.toFixed()
-            this.setHighlight(element, true)
+            setHighlight(element, true)
         } else {
-            this.setHighlight(element, false)
-        }
-    }
-
-    protected setHighlight(element: HTMLInputElement, highlight: boolean) {
-        if (highlight) {
-            element.parentElement?.classList.add("highlight")
-        } else {
-            element.parentElement?.classList.remove("highlight")
+            setHighlight(element, false)
         }
     }
 }
 
-customElements.define("code-interpreter", InterpreterElement)
+customElements.define("asm-interpreter", AsmInterpreterElement)

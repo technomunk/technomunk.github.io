@@ -1,0 +1,61 @@
+---
+title: "Technomunk on: Brainfuck"
+description: "Surface level exploration of the most famous esoteric language"
+layout: ../../layouts/Blog.astro
+fallbackLang: bnfk
+publishedOn: 2023-09-17
+---
+
+import BnfkInterpreter from "../../components/BnfkInterpreter.astro";
+
+# Brainfuck
+
+Welcome to the world of esoteric programming languages! Esoteric languages are meant as exercises of programming language design. They test the limits of what is possible, usable or are for plain fun. Similar to code golfing they provide extremely little value as production code, however exploring them can give you a rich insight into designing software.
+
+The most famous example of such a language is <dfn>Brainfuck</dfn>, a programming language that consists of just 8 valid symbols that operate on memory cells. In a way it's very similar to the original [Turing Machine](https://en.wikipedia.org/wiki/Turing_machine) - a theoretical computer that operates on an infinite tape, moving along said tape either reading or writing data to it. And what Alan Turing proved is that minimal design is sufficient to solve a vast array of different problems. In fact any Turing-Complete language is just as powerful as any other, so at least theoretically Brainfuck can be used to achieve the same results as Python or JavaScript. Theoretically because to be Turing-complete Brainfuck needs to operate on infinite memory.
+
+And just like a Turing Machine Brainfuck works on a linear array that the program can move along. The first 2 operators do just that: **\<** moves backwards on the tape and **>** moves forward.
+
+{/* TODO: add visual navigator */}
+
+For reading or writing data Brainfuck has 4 operators: **+** for incrementing, **-** for decrementing, **.** for printing to the output and finally **,** for reading from input.
+
+So putting it all together the following will read a character from input and print the next ASCII character: `,+.`
+
+However with these operators it would be impossible to write the same program as we did in the [post on assembly](../assembly). We are missing conditional operators, which brings us to the final 2 operators: **[** which will skip to the associated closing brace if the value at current cell is 0 and **]** which will jump back to the associated opening brace if the value is non-zero. And that's it! Any other character is treated as a comment and should be ignored.
+
+<BnfkInterpreter cells="8" names="from Technomunk;blog;world;dear reader">
+```bnfk
++++++ +++               Set Cell #0 to 8 to setup multiplying the following cells by 8
+[
+    >+++++ ++++         Add 9 to Cell #1
+    >+++++ +++++ +++    Add 13 to Cell #2
+    >++++               Add 4 to Cell $3
+    <<<-                Decrement the loop Counter in Cell #0
+]                       Loop till Cell #0 is zero
+>.                      Cell #1 has value 72 which is 'H'
+>---.                   Subtract 3 from Cell #2 to get 101 which is 'e'
++++++ ++..              'l' is 108 so we need to add 7 before printing
++++.                    'o' is 111 so add 3
+>.                      Cell #3 is 32 for the space
+<,                      Start reading the name into Cell #2 which we don't need any more
+[.,]                    Read input until we find a 0
+>+.                     Exclamation point is 33 so add one to space and print it
+```
+</BnfkInterpreter>
+
+That's a lot of code for a simple `print("Hello World!")`! Programming in Brainfuck is an exercise in patience and self-torture, as the name implies. However it is an excellent example to learn about compilers, because the rules are so simple - anyone should be able to write a compiler or an interpreter for brainfuck and that is an excellent exercise that I strongly encourage you to do! Especially if you start thinking about optimizing the program instead of executing an instruction for each character in the input 😉.
+
+But are 8 instructions really enough to write any program out there? Well actually 8 might be too many! It's possible to use fewer instructions by putting boundaries on the memory cells. If we say that each cell can only hold 8 bit numbers (1 byte) - adding 254 is the same as subtracting one, so minus becomes redundant.
+
+But those print and read instructions seem kinda magical. Do you ever wonder how they operate under the hood? How does the computer tell the screen to display text? Or how does it figure out that you pressed a key on the keyboard? The complete process is too involved to get into in this blog, but a core concept is <dfn>memory mapping</dfn>. The computer can address *a lot* of memory. So much in fact - that it's very unlikely it has access to so much physical memory. So instead of leaving empty addresses to waste - engineers allow special addresses to interact not with memory but computer hardware.
+
+So let's use our Brainfuck example. Instead of having special print and read instructions we will add some magic to a handful of memory cells (remember theoretically we have infinite number of them). If you ponder a bit you might realize that we can say one cell should contain an input and another cell should contain an output. But how would we take the data in or out of them? How do we signal the system that we intend to increment the output a bit more before printing it to the screen?
+
+We could add extra instructions, but remember that we want to see how few instructions we can get away with. So instead - let's mark another cell as "command", so if it contains **1** - we tell the system to print the character from the output cell. If it contains **2** - we tell the system that we want it to update the input cell with a new character and so on. But we are still stuck with the same problem - how do we tell the system that our command is done? I would suggest adding another one (final) special cell - signal. Whenever the signal cell is updated - the system is *signalled* that we want it to perform the command according to the command cell.
+
+And the commands can be a lot more advanced than just printing or reading. They could be playing a sound, connecting to the internet, asking the system to run another program and so on and so on. And that is memory mapping! Instead of saying that all memory is just memory the computer marks (maps) some addresses to have special meaning. Such as a command for other hardware, data with color values for the screen to display whenever it's ready and so forth.
+
+We could even go one further - we could include the source code of the program in memory as well and allow our program to modify itself 😲 or maybe download other programs from the internet. Such a design is called [Von Neumann architecture](https://en.wikipedia.org/wiki/Von_Neumann_architecture), but I will spare the details for another blog.
+
+I urge you again to try writing your own brainfuck interpreter and perhaps consider optimizing it. The first step might be replacing consecutive increments with adding the number of increments immediately. And once you figure that out - perhaps you will see the next possible optimization.

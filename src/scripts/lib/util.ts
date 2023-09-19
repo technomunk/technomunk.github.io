@@ -32,3 +32,14 @@ export class Choice<T> extends Array<T> {
         return this[Math.floor(Math.random() * this.length)]
     }
 }
+
+export function any(...collections: Array<Iterable<boolean>>): boolean {
+    for (const collection of collections) {
+        for (const element of collection) {
+            if (element) {
+                return true
+            }
+        }
+    }
+    return false
+}

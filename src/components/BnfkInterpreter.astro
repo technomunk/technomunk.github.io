@@ -1,0 +1,13 @@
+---
+interface Props {
+    cells: number
+    names: string
+}
+const { cells, names } = Astro.props
+---
+
+<bnfk-interpreter class="interpreter" {cells} {names}><slot /></bnfk-interpreter>
+
+<script>
+    import "../scripts/components/bnfk_interpreter"
+</script>

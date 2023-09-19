@@ -1,4 +1,5 @@
 ---
+const posts = await Astro.glob("./*.mdx")
 ---
 <html lang="en">
     <head>
@@ -11,7 +12,7 @@
         </main>
         <nav>
             <ul>
-                <li><a href="/blog/assembly">Assembly</a></li>
+                {posts.map((p) => <li><a href={p.url}>{p.getHeadings()[0].text}</a></li>)}
             </ul>
         </nav>
     </body>
