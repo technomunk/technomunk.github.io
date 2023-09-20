@@ -1,43 +1,51 @@
 ---
-import Contact from "../components/Contact.astro";
+import { Image } from "astro:assets"
+import avatarImg from "@assets/img/avatar.jpg"
+import Contact from "@components/Contact.astro"
+import MainLayout from "@layouts/MainLayout.astro"
+import "@styles/avatar.sass"
 ---
 
-<html lang="en">
-    <head>
-        <meta name="viewport" content="width=device-width" />
-        <meta name="generator" content={Astro.generator} />
-        <title>Grigory 'Technomunk' Glukhov</title>
-    </head>
-    <body>
-        <header class="strong center">
-            <img class="avatar" src="img/avatar.jpg" alt="Avatar" />
-            <caption translate="no">Grigory '<mark>Technomunk</mark>' Glukhov</caption>
-        </header>
-        <main>
-            <p>
-                Salutations! I'm a programmer by trade and passion. Versed in a variety of topics, tools and
-                methodologies. My goal is to be a great universal programmer, capable of solving any problem thrown my
-                way in a concise and performant manner. I've done backend, gamedev, networking, functional programming,
-                test-driven development, tool development, 3d rendering, procedural animation and more.
-            </p>
-        </main>
-        <nav class="center">
-            Personal projects:
+<MainLayout title="Technomunk" description="Technomunk's online page with a couple of interactive projects and a blog.">
+    <header class="strong text-center">
+        <Image class="avatar" src={avatarImg} alt="Avatar" />
+        <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
+    </header>
+    <main>
+        <p>
+            Salutations! I'm a programmer by trade and passion. Versed in a variety of topics, tools and methodologies.
+            My goal is to be a great universal programmer, capable of solving any problem thrown my way in a concise and
+            performant manner. I've done backend, gamedev, networking, functional programming, test-driven development,
+            tool development, 3d rendering, procedural animation and more.
+        </p>
+    </main>
+    <div class="center text-center">
+        <nav class="card">
+            <h1 class="text-center">Pages:</h1>
             <ul>
-                <li><a href="blog">Online blog</a></li>
-                <li>
-                    <a href="comdyn.html">Interactive Julia sets explorer.</a>
-                </li>
-                <li><a href="pathtrace.html">Real-time path tracing.</a></li>
-                <li><a href="cloth.html">Real-time cloth simulation.</a></li>
-                <!-- <li><a href="gol.html">Game-of-life simulation using web assembly.</a></li> -->
+                <li><a href="/blog">Online blog</a></li>
+                <!-- <li><a href="/julia">Interactive Julia sets explorer</a></li> -->
+                <!-- <li><a href="/pathtrace">Real-time path tracing</a></li> -->
+                <!-- <li><a href="/cloth-sim">Real-time cloth simulation</a></li> -->
+                <!-- <li><a href="gol.html">Game-of-life simulation using web assembly</a></li> -->
             </ul>
         </nav>
-        <Contact />
-        <footer>
-            This webpage is under development, feel free to check back later! <i>🙃</i>
-        </footer>
-    </body>
-</html>
+        <address class="card">
+            <h2 class="text-center">Contact details:</h2>
+            <ul>
+                <li><a href="https://github.com/technomunk">Github</a></li>
+                <li><a href="mailto: thegriffones@gmail.com">thegriffones@gmail.com</a></li>
+            </ul>
+        </address>
+    </div>
+</MainLayout>
 
-<style></style>
+<style>
+    mark {
+        font-style: italic;
+        background-color: transparent;
+    }
+    body>div {
+        max-width: 80%;
+    }
+</style>

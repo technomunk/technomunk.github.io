@@ -1,26 +1,5 @@
-$font-family-regular: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
-$font-family-monospace: ibmplexmono, ui-monospace, SFMono-REgular, "SF Mono", monospace !important
-
-@font-face
-    font-family: Rubik
-    src: url("/font/rubik.ttf") format("truetype")
-    font-weight: 350
-    font-variation-settings: "wght" 350
-    font-style: normal
-
-@font-face
-    font-family: Rubik
-    src: url("/font/rubik_italic.ttf") format("truetype")
-    font-weight: 350
-    font-variation-settings: "wght" 330
-    font-style: italic
-
-@font-face
-    font-family: ibmplexmono
-    src: url("/font/imbplexmono.ttf") format("truetype")
-    font-weight: 400
-
-
+@use './font'
+    
 @keyframes highlightVarView
     0%
         background-color: #fcfc55
@@ -35,32 +14,17 @@ $font-family-monospace: ibmplexmono, ui-monospace, SFMono-REgular, "SF Mono", mo
     100%
         background-color: #eeb9ff
 
-@mixin monospace
-    font-family: $font-family-monospace
-    font-size: medium
-
-*
-    font-family: $font-family-regular
-    font-size: 18px
-
-body
-    margin: 1em max(1em, 3%) 0
-    min-width: 14em
-
 h1
     font-size: 32px
     font-weight: bolder
     text-align: center
-
-p,h1
-    text-indent: 3%
 
 code
     color: #24292e
     background: #e6e6e6
 
 code,code *
-    @include monospace
+    @include font.monospace
 
 pre,.interpreter
     & code
@@ -79,11 +43,6 @@ pre,.interpreter
     justify-content: stretch
     width: 100%
     background: #e6e6e6
-
-.ta-center
-    text-align: center
-.ta-end
-    text-align: end
 
 button:disabled
     background-color: grey
@@ -129,7 +88,7 @@ button:disabled
         margin: .2em
         flex-wrap: wrap
         &>*
-            @include monospace
+            @include font.monospace
             margin: .2em
             padding: 1px 4px
         &>input
