@@ -1,7 +1,6 @@
 ---
 import { Image } from "astro:assets"
 import avatarImg from "@assets/img/avatar.jpg"
-import Contact from "@components/Contact.astro"
 import MainLayout from "@layouts/MainLayout.astro"
 import "@styles/avatar.sass"
 ---
@@ -23,13 +22,15 @@ import "@styles/avatar.sass"
         <nav class="card">
             <h1 class="text-center">Pages:</h1>
             <ul>
+                <!-- TODO: make these into cards instead -->
                 <li><a href="/blog">Online blog</a></li>
-                <!-- <li><a href="/julia">Interactive Julia sets explorer</a></li> -->
+                <li><a href="/julia">Interactive Julia sets explorer</a></li>
                 <!-- <li><a href="/pathtrace">Real-time path tracing</a></li> -->
                 <!-- <li><a href="/cloth-sim">Real-time cloth simulation</a></li> -->
                 <!-- <li><a href="gol.html">Game-of-life simulation using web assembly</a></li> -->
             </ul>
         </nav>
+        <!-- TODO: move this into the footer -->
         <address class="card">
             <h2 class="text-center">Contact details:</h2>
             <ul>
