@@ -75,22 +75,24 @@ button:disabled
 
     &>div
         display: flex
+        gap: 1em
         justify-content: space-between
         &>input
-            border: none
             background-color: #b2ffcd
             padding: 4px
             &:disabled
                 color: black
         &>button
+            flex-basis: 100px
             flex-grow: .4
-            border: none
+            border: outset
 
     &>.shelf
         display: flex
         background-color: #b2ffcd
-        border: 1 px solid black
+        border: 2px inset
         flex-wrap: wrap
+        gap: 0
         &>input
             text-align: end
             &.io
@@ -119,55 +121,6 @@ button:disabled
 code .hl
     animation: highlightCode .3s ease-out forwards
 
-@media (max-width: 900px)
+@media (max-width: 1000px)
     .interpreter
         flex-direction: column
-
-@media (prefers-color-scheme: dark)
-    code
-        color: #c9d1d9
-        background-color: #0d1117
-
-    @keyframes highlightVarView
-        0%
-            background-color: #76a800
-
-        100%
-            background-color: #1f2c00
-
-    @keyframes highlightCode
-        0%
-            background-color: #bd29b3
-
-        100%
-            background-color: #40143d
-
-    pre.interactive-container
-        background-color: #0d1117
-
-    .code-menu
-        background-color: #0b1526
-        &>input
-            background-color: #002312
-            &:disabled
-                color: #ffff
-
-        &>.shelf,&>.grid
-            background-color: #002312
-            &>*
-                border: none
-
-    .s-kwd
-        color: #ff7b72
-    .s-cmt
-        color: #8b949e
-    .s-lbl,.s-scp
-        color: #d2a8ff
-    .s-var
-        color: #79c0ff
-    .s-val
-        color: #ffa657
-    .s-str
-        color: #a5d6ff
-    .s-ref
-        color: #7ee787
