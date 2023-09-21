@@ -1,8 +1,8 @@
-import { AsmInterpreter } from "../lib/code/interpreter/asm"
-import { Choice, error } from "../lib/util"
-import { CodeBlock } from "../lib/code/codeblock"
-import { GRAMMARS } from "../lib/code/grammar"
-import { setHighlight } from "../lib/highlight"
+import { AsmInterpreter } from "@lib/code/interpreter/asm"
+import { Choice, error } from "@lib/util"
+import { CodeBlock } from "@lib/code/codeblock"
+import { GRAMMARS } from "@lib/code/grammar"
+import { setHighlight } from "@lib/highlight"
 
 
 class AsmInterpreterElement extends HTMLElement {
@@ -22,14 +22,14 @@ class AsmInterpreterElement extends HTMLElement {
 
         if (this.childElementCount == 1) {
             if (this.children[0] instanceof HTMLPreElement) {
-                this.innerHTML = this.children[0].innerHTML
+                this.prepend(...this.children[0].children)
+                this.children[0].remove()
             }
         }
         const code = new CodeBlock(this.querySelector("code") || error("Missing <code> element to interpret"), GRAMMARS.asm)
         this.interpreter = new AsmInterpreter(code)
         this.interpreter.vars.set("cmp")
-        this.menu = this.createMenu()
-        this.appendChild(this.menu)
+        this.menu = this.setupMenu()
         this.reset()
     }
 
@@ -52,34 +52,26 @@ class AsmInterpreterElement extends HTMLElement {
         }
         this.update()
     }
-    protected createMenu(): HTMLDivElement {
-        this.menu = document.createElement("div")
-        this.menu.classList.add("code-menu")
 
-        for (const [name, val] of this.interpreter.vars) {
-            this.createVarView(name, val)
+    protected setupMenu(): HTMLDivElement {
+        const menu = this.querySelector("div.interpreter-menu") as HTMLDivElement
+
+        const nextButton = menu.querySelector("button#next") as HTMLButtonElement
+        nextButton.onclick = this.step.bind(this)
+        const resetButton = menu.querySelector("button#reset") as HTMLButtonElement
+        resetButton.onclick = this.reset.bind(this)
+
+        for (const varElement of this.querySelectorAll("[data-is-var]")) {
+            if (varElement.textContent) {
+                this.interpreter.vars.set(varElement.textContent)
+            }
         }
 
-        this.createControls()
+        for (const [varName, value] of this.interpreter.vars) {
+            menu.appendChild(this.createVarView(varName, value))
+        }
 
-        return this.menu
-    }
-
-    protected createControls() {
-        const controlContainer = document.createElement("div")
-        controlContainer.classList.add("controls")
-
-        const nextButton = document.createElement("button")
-        nextButton.onclick = this.step.bind(this)
-        nextButton.textContent = "next"
-        controlContainer.appendChild(nextButton)
-
-        const resetButton = document.createElement("button")
-        resetButton.onclick = this.reset.bind(this)
-        resetButton.textContent = "reset"
-        controlContainer.appendChild(resetButton)
-
-        this.menu.appendChild(controlContainer)
+        return menu
     }
 
     protected createVarView(name: string, val?: number): HTMLDivElement {
@@ -104,7 +96,6 @@ class AsmInterpreterElement extends HTMLElement {
             setHighlight(text, true)
         })
 
-        this.menu.appendChild(view)
         return view
     }
 

@@ -2,7 +2,15 @@
 const arg_di = Astro.props["arg-di"]
 ---
 
-<asm-interpreter arg-di={arg_di} class="interpreter"><slot /></code-interpreter>
+<asm-interpreter arg-di={arg_di} class="interpreter">
+<slot />
+<div class="interpreter-menu">
+    <div>
+        <button id="next">next</button>
+        <button id="reset">reset</button>
+    </div>
+</div>
+</code-interpreter>
 
 <script>
     import "../scripts/components/asm_interpreter"

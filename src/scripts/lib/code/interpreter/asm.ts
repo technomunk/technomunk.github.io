@@ -1,3 +1,4 @@
+import type { CodeBlock } from "../codeblock"
 import { Interpreter, VarStore } from "./base"
 
 type AsmOp = (interpreter: AsmInterpreter, args: string[]) => void
@@ -56,8 +57,13 @@ const OPS: OpStore = {
 export class AsmInterpreter extends Interpreter {
     vars: VarStore = new VarStore()
 
+    constructor(code: CodeBlock) {
+        super(code)
+        this.vars.set("cmp")
+    }
+
     reset() {
-        this.exprIndex = -1
+        this.exprIndex = 0
         for (const name of this.code.vars) {
             this.vars.set(name)
         }

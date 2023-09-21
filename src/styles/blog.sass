@@ -23,7 +23,7 @@ code
     color: #24292e
     background: #e6e6e6
 
-code,code *
+code,.interpreter,code *,.interpreter *
     @include font.monospace
 
 pre,.interpreter
@@ -47,7 +47,7 @@ pre,.interpreter
 button:disabled
     background-color: grey
 
-.code-menu
+.interpreter-menu
     margin: .5em
     background-color: #87ebff
     padding: 0.5em
@@ -73,7 +73,7 @@ button:disabled
         &.hl
             animation: highlightVarView .4s ease-out forwards
 
-    &>.controls
+    &>div
         display: flex
         justify-content: space-between
 
@@ -85,10 +85,8 @@ button:disabled
         display: flex
         background-color: #b2ffcd
         border: 1 px solid black
-        margin: .2em
         flex-wrap: wrap
         &>*
-            @include font.monospace
             margin: .2em
             padding: 1px 4px
         &>input

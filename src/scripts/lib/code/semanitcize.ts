@@ -39,29 +39,29 @@ function intoSpan(token: string | Token, grammar: Grammar): string {
     if (typeof token === "string") {
         return token
     }
-    const attrs = new Map<string, string>([["class", CLASS_MAP[token.tag]]])
+    const attrs = new Map<string, string | null>([["class", CLASS_MAP[token.tag]]])
     if (token.hint) {
         attrs.set("title", token.hint)
     }
     switch (token.tag) {
         case "label":
-            attrs.set("data-is-lbl", "")
+            attrs.set("data-is-lbl", null)
             break
         case "var":
-            attrs.set("data-is-var", "")
+            attrs.set("data-is-var", null)
             break
     }
     if (grammar.exprUnit == "character" && token.tag != "comment" && token.tag != "label") {
-        attrs.set("data-is-expr", "")
+        attrs.set("data-is-expr", null)
     }
 
     return `<span ${serializeAttrs(attrs)}>${token.value}</span>`
 }
 
-function serializeAttrs(attrs: Map<string, string>): string {
+function serializeAttrs(attrs: Map<string, string | null>): string {
     const result = []
     for (const [name, value] of attrs.entries()) {
-        result.push(`${name}="${value}"`)
+        result.push(value ?`${name}="${value}"` : name)
     }
     return result.join(" ")
 }
