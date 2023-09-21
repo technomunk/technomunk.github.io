@@ -1,0 +1,27 @@
+---
+const posts = await Astro.glob("./*.mdx")
+
+import MainLayout from "@layouts/MainLayout.astro"
+---
+
+<MainLayout title="Technomunk's Blog" description="Technomunk's personal blog">
+    <main class="text-center">
+        <h1>Welcome to Technomunk's blog!</h1>
+        <p>Here you can find all the pages I've written thus far ^^</p>
+    </main>
+    <nav class="center">
+        {
+            posts.map((p) => (
+                <div class="card">
+                    <a href={p.url}>{p.getHeadings()[0].text}</a>
+                </div>
+            ))
+        }
+    </nav>
+</MainLayout>
+
+<style>
+    body > nav {
+        max-width: 80%;
+    }
+</style>

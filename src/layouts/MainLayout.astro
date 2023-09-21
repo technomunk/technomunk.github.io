@@ -1,0 +1,36 @@
+---
+interface Props {
+    title: string
+    description: string
+}
+
+const { title, description } = Astro.props
+
+import avatarImg from "@assets/img/avatar.jpg"
+import "@styles/main.sass"
+---
+
+<html lang="en">
+    <head>
+        <link rel="apple-touch-icon" sizes="120x120" href="/img/apple-touch-icon.png" />
+        <link rel="icon" type="image/ico" href="/img/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png" />
+        <link rel="mask-icon" href="/img/safari-pinned-tab.svg" color="#5bbad5" />
+        <meta charset="UTF-8" />
+        <meta name="author" content="Grigory 'Technomunk' Glukhov" />
+        <meta name="description" content={description} />
+        <meta name="generator" content={Astro.generator} />
+        <meta name="viewport" content="width=device-width" />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={avatarImg.src} />
+        <meta property="og:site_name" content="Technomunk" />
+        <meta property="og:title" content={title} />
+        <meta property="og:url" content="https://www.technomunk.com/" />
+        <title>{title}</title>
+        <slot name="head" />
+    </head>
+    <body>
+        <slot />
+    </body>
+</html>

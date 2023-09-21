@@ -1,15 +1,19 @@
 {
-	"compilerOptions": {
-		"outDir": "./dist/",
-		"sourceMap": true,
-		"experimentalDecorators": true,
-		"isolatedModules": true,
-		"moduleResolution": "bundler",
-		"target": "es2022",
-		"module": "es2022",
-		"strict": true,
-		"paths": {},
-	},
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@astrojs/ts-plugin",
+      },
+    ],
     "baseUrl": ".",
-	"include": ["src/**/*",],
+    "paths": {
+      "@assets/*": ["src/assets/*"],
+      "@components/*": ["src/components/*"],
+      "@layouts/*": ["src/layouts/*"],
+      "@lib/*": ["src/scripts/lib/*"],
+      "@scripts/*": ["src/scripts/*"],
+      "@styles/*": ["src/styles/*"],
+    }
+  }
 }

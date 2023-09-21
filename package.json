@@ -1,43 +1,27 @@
 {
-  "name": "technomunk.github.io",
-  "description": "A place to showcase some of my personal projects and abilities",
-  "version": "1.0.0",
-  "source": [
-    "src/index.html",
-    "src/browserconfig.xml",
-    "src/blog/index.html",
-    "src/blog/sample.html"
-  ],
+  "name": "steadfast-fusion",
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "serve": "webpack serve",
-    "build": "webpack build",
-    "pre-publish": "webpack build --mode production"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "latest",
-    "css-loader": "latest",
-    "highlight.js": "latest",
-    "html-webpack-harddisk-plugin": "latest",
-    "html-webpack-link-type-plugin": "latest",
-    "html-webpack-plugin": "latest",
-    "sass": "latest",
-    "sass-loader": "latest",
-    "style-loader": "latest",
-    "ts-loader": "latest",
-    "typescript": "latest",
-    "webpack": "latest",
-    "webpack-cli": "latest",
-    "webpack-dev-server": "latest",
-    "webpack-glsl-loader": "latest"
-  },
-  "private": true,
-  "repository": "git+https://github.com/technomunk/technomunk.github.io.git",
-  "keywords": [],
-  "author": "technomunk <thegriffones@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/technomunk/technomunk.github.io/issues"
-  },
-  "homepage": "https://github.com/technomunk/technomunk.github.io#readme",
-  "packageManager": "yarn@3.5.0"
+    "@astrojs/mdx": "^1.1.0",
+    "@astrojs/ts-plugin": "^1.1.3",
+    "@types/hast": "^3.0.1",
+    "@types/mdast": "^4.0.0",
+    "@types/vfile": "^4.0.0",
+    "astro": "^3.1.0",
+    "prettier-plugin-astro": "^0.12.0",
+    "rehype": "^13.0.1",
+    "remark": "^15.0.1",
+    "remark-lint": "^9.1.2",
+    "sass": "^1.67.0",
+    "typescript": "^5.2.2",
+    "unist-util-visit": "^5.0.0"
+  }
 }

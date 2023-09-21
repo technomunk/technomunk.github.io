@@ -1,0 +1,37 @@
+---
+interface Props {
+    cells: number
+    names: string
+}
+const { cells, names } = Astro.props
+const cellIds = []
+for (let i = 0; i < cells; ++i) {
+    cellIds.push(i)
+}
+---
+
+<bnfk-interpreter class="interpreter" {cells} {names}>
+    <slot />
+    <div class="interpreter-menu">
+        <div class="shelf" id="vars">
+            {cellIds.map(() => <input pattern="\d*"></input>)}
+        </div>
+        <div class="shelf">
+            <label for="input">input:</label>
+            <input id="input" class="io"></input>
+        </div>
+        <div class="shelf">
+            <label for="output">output:</label>
+            <input id="output" class="io" disabled></input>
+        </div>
+        <div>
+            <button id="step">step</button>
+            <button id="run">run</button>
+            <button id="reset">reset</button>
+        </div>
+    </div>
+</bnfk-interpreter>
+
+<script>
+    import "../scripts/components/bnfk_interpreter"
+</script>
