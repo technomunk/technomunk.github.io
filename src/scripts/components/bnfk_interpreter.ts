@@ -1,14 +1,12 @@
-import { BnfkInterpreter } from "../lib/code/interpreter/bnfk"
-import { Choice, error } from "../lib/util"
-import { CodeBlock } from "../lib/code/codeblock"
-import { GRAMMARS } from "../lib/code/grammar"
-import { setHighlight } from "../lib/highlight"
+import { BnfkInterpreter } from "@lib/code/interpreter/bnfk"
+import { Choice, error } from "@lib/util"
+import { CodeBlock } from "@lib/code/codeblock"
+import { GRAMMARS } from "@lib/code/grammar"
+import { setHighlight } from "@lib/highlight"
 
 
 class BnfkInterpreterElement extends HTMLElement {
     interpreter: BnfkInterpreter
-    menu: HTMLDivElement
-    varGrid: HTMLDivElement
     runButton: HTMLButtonElement
     input: HTMLInputElement
     output: HTMLInputElement
@@ -20,10 +18,10 @@ class BnfkInterpreterElement extends HTMLElement {
     constructor() {
         super()
 
-        if (this.childElementCount == 1) {
-            if (this.children[0] instanceof HTMLPreElement) {
-                this.innerHTML = this.children[0].innerHTML
-            }
+        if (this.children[0] instanceof HTMLPreElement) {
+            const children = this.children[0].children
+            this.children[0].remove()
+            this.prepend(...children)
         }
 
         const { cellCount, names } = this.parseAttrs()
@@ -32,12 +30,13 @@ class BnfkInterpreterElement extends HTMLElement {
         const code = new CodeBlock(this.querySelector("code") || error("Missing <code> element to interpret!"), GRAMMARS.bnfk)
         this.interpreter = new BnfkInterpreter(code, cellCount)
 
-        this.runButton = document.createElement("button")
-        this.input = document.createElement("input")
-        this.output = document.createElement("input")
-        this.varGrid = this.createVarGrid()
-        this.menu = this.createMenu()
-        this.appendChild(this.menu)
+        this.runButton = this.querySelector("button#run")!
+        this.input = this.querySelector("input#input")!
+        this.output = this.querySelector("input#output")!
+
+        this.setupControls()
+
+        this.vars = [...this.querySelectorAll("#vars>input")] as HTMLInputElement[]
 
         this.reset()
     }
@@ -108,83 +107,26 @@ class BnfkInterpreterElement extends HTMLElement {
         }
     }
 
-    protected createVarGrid(): HTMLDivElement {
-        this.varGrid = document.createElement("div")
-        this.varGrid.classList.add("shelf")
-        return this.varGrid
-    }
 
-    protected createMenu(): HTMLDivElement {
-        this.menu = document.createElement("div")
-        this.menu.classList.add("code-menu")
-        this.menu.appendChild(this.varGrid)
-
-        for (let i = 0; i < this.interpreter.data.length; ++i) {
-            this.createVarView(this.interpreter.data[i])
-        }
-
-        this.input.classList.add("input")
-        this.input.placeholder = "input"
-        this.input.addEventListener("change", (e) => {
-            e.preventDefault()
-            this.interpreter.input = this.input.value
-        })
-        this.menu.appendChild(this.input)
-
-        this.output.classList.add("output")
-        this.output.placeholder = "output"
-        this.output.disabled = true
-        this.menu.appendChild(this.output)
-
-        this.createControls()
-
-        return this.menu
-    }
-
-    protected createControls() {
-        const controls = document.createElement("div")
-        controls.classList.add("controls")
-
-        const stepButton = document.createElement("button")
-        stepButton.textContent = "step"
+    protected setupControls() {
+        const stepButton = this.querySelector("button#step") as HTMLButtonElement
         stepButton.addEventListener("click", (e) => {
             e.preventDefault()
             this.running = false
             this.runButton.textContent = "start"
             this.step()
         })
-        controls.appendChild(stepButton)
 
         this.runButton.textContent = "start"
         this.runButton.addEventListener("click", (e) => {
             e.preventDefault()
             this.toggleRun()
         })
-        controls.appendChild(this.runButton)
 
-        const resetButton = document.createElement("button")
-        resetButton.textContent = "reset"
+        const resetButton = document.querySelector("button#reset") as HTMLButtonElement
         resetButton.addEventListener("click", (e) => {
             e.preventDefault()
             this.reset()
-        })
-        controls.appendChild(resetButton)
-
-        this.menu.appendChild(controls)
-    }
-
-    protected createVarView(val: number) {
-        const text = document.createElement("input")
-        text.classList.add("ta-center")
-        text.inputMode = "numeric"
-        const idx = this.vars.length
-        this.vars.push(text)
-        this.setVar(idx, val)
-
-        this.varGrid.appendChild(text)
-        text.addEventListener("input", () => {
-            this.interpreter.data[idx], parseInt(text.value)
-            setHighlight(text, true)
         })
     }
 

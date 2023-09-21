@@ -20,11 +20,10 @@ class AsmInterpreterElement extends HTMLElement {
             }
         }
 
-        if (this.childElementCount == 1) {
-            if (this.children[0] instanceof HTMLPreElement) {
-                this.prepend(...this.children[0].children)
-                this.children[0].remove()
-            }
+        if (this.children[0] instanceof HTMLPreElement) {
+            const children = this.children[0].children
+            this.children[0].remove()
+            this.prepend(...children)
         }
         const code = new CodeBlock(this.querySelector("code") || error("Missing <code> element to interpret"), GRAMMARS.asm)
         this.interpreter = new AsmInterpreter(code)
@@ -56,8 +55,8 @@ class AsmInterpreterElement extends HTMLElement {
     protected setupMenu(): HTMLDivElement {
         const menu = this.querySelector("div.interpreter-menu") as HTMLDivElement
 
-        const nextButton = menu.querySelector("button#next") as HTMLButtonElement
-        nextButton.onclick = this.step.bind(this)
+        const stepButton = menu.querySelector("button#step") as HTMLButtonElement
+        stepButton.onclick = this.step.bind(this)
         const resetButton = menu.querySelector("button#reset") as HTMLButtonElement
         resetButton.onclick = this.reset.bind(this)
 
@@ -68,7 +67,7 @@ class AsmInterpreterElement extends HTMLElement {
         }
 
         for (const [varName, value] of this.interpreter.vars) {
-            menu.appendChild(this.createVarView(varName, value))
+            menu.insertBefore(this.createVarView(varName, value), stepButton.parentNode)
         }
 
         return menu
