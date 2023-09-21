@@ -20,15 +20,31 @@ body
 p
     text-indent: 3%
 
+a.card
+    $bg-color: #f5faff
+    text-decoration: none
+    color: black
+    background-color: $bg-color
+
+    &:visited
+        background-color: desaturate(darken($bg-color, 10%), 70%)
+
+    &:hover
+        background-color: darken($bg-color, 20%)
+
+    &>h1,h2,h3
+        font-style: italic
+
 .card
-    display: inline-block
+    display: block
     padding: 20px
-    margin: 10px 20px 20px
+    margin: 1em auto 1.5em
     vertical-align: middle
-    width: max-content
+    width: 90%
+    max-width: fit-content
     border: 1px solid black
     box-shadow: 4px 4px 8px 4px black
-    &>h1,h2
+    &>h1,h2,h3
         padding: 0
         margin: 0
     &>ul

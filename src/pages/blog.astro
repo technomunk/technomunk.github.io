@@ -1,6 +1,6 @@
 ---
-const posts = await Astro.glob("./*.mdx")
-
+const posts = await Astro.glob("./blog/*.mdx")
+import Card from "@components/Card.astro"
 import MainLayout from "@layouts/MainLayout.astro"
 ---
 
@@ -11,17 +11,9 @@ import MainLayout from "@layouts/MainLayout.astro"
     </main>
     <nav class="center">
         {
-            posts.map((p) => (
-                <div class="card">
-                    <a href={p.url}>{p.getHeadings()[0].text}</a>
-                </div>
+            posts.map(p => (
+                <Card title={p.getHeadings()[0].text} description={p.frontmatter.description} href={p.url!} />
             ))
         }
     </nav>
 </MainLayout>
-
-<style>
-    body > nav {
-        max-width: 80%;
-    }
-</style>
