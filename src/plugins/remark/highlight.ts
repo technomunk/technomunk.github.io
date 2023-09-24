@@ -1,21 +1,23 @@
 import type { Code, InlineCode, Root } from 'mdast'
 
 import { visit } from 'unist-util-visit'
-import { GRAMMARS } from '../../scripts/lib/code/grammar'
-import { markSemanticsWithSpans } from '../../scripts/lib/code/semanitcize'
+import { highlightTokens } from '../../scripts/lib/code/lex/highlight'
 
 function highlightNode(node: Code | InlineCode, fallbackLang?: string) {
     const lang = (node as any).lang || fallbackLang
-    if (GRAMMARS[lang] == undefined) {
-        console.warn(`Unknown language: "${lang}", skipping highlight`)
+
+    try {
+        node.value = `<code>${highlightTokens(node.value, lang)}</code>`
+        if (node.type == "code") {
+            node.value = `<pre>${node.value}</pre>`
+        }
+        // @ts-expect-error
+        node.type = "html"
+    } catch (error) {
+        console.warn(`Couldn't highlight language "${lang}", skipping`)
+        console.debug(error)
         return
     }
-    node.value = `<code>${markSemanticsWithSpans(node.value, lang)}</code>`
-    if (node.type == "code") {
-        node.value = `<pre>${node.value}</pre>`
-    }
-    // @ts-expect-error
-    node.type = "html"
 }
 
 /** Custom code highlight plugin */

@@ -1,15 +1,20 @@
 ---
-const arg_di = Astro.props["arg-di"]
+interface Props {
+    di: string
+    code: string
+}
+const { di, code } = Astro.props
+import { markSemanticsWithSpans } from "@lib/code/semanitcize"
 ---
 
-<asm-interpreter arg-di={arg_di} class="interpreter">
-<slot />
-<div class="interpreter-menu">
-    <div>
-        <button id="step">step</button>
-        <button id="reset">reset</button>
+<asm-interpreter {di} class="interpreter">
+    <code set:html={markSemanticsWithSpans(code, "asm")} />
+    <div class="interpreter-menu">
+        <div>
+            <button id="step">step</button>
+            <button id="reset">reset</button>
+        </div>
     </div>
-</div>
 </asm-interpreter>
 
 <script>

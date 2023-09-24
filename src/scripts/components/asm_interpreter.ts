@@ -14,11 +14,9 @@ class AsmInterpreterElement extends HTMLElement {
 
     constructor() {
         super()
-        for (const { name, value } of this.attributes) {
-            if (name.startsWith("arg-")) {
-                this.args.set(name.slice(4), new Choice(...value.split(",").map(a => parseInt(a))))
-            }
-        }
+
+        // TODO: figure out a nice way to set arguments
+        this.args.set("di", new Choice(...this.getAttribute("di")!.split(",").map(a => parseInt(a))))
 
         if (this.children[0] instanceof HTMLPreElement) {
             const children = this.children[0].children

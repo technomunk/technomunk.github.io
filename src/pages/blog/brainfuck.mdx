@@ -24,9 +24,7 @@ So putting it all together the following will read a character from input and pr
 
 However with these operators it would be impossible to write the same program as we did in the [post on assembly](../assembly). We are missing conditional operators, which brings us to the final 2 operators: **[** which will skip to the associated closing brace if the value at current cell is 0 and **]** which will jump back to the associated opening brace if the value is non-zero. And that's it! Any other character is treated as a comment and should be ignored.
 
-<BnfkInterpreter cells="8" names="from Technomunk;blog;world;dear reader">
-```bnfk
-+++++ +++               Set Cell #0 to 8 to setup multiplying the following cells by 8
+<BnfkInterpreter cells="8" names="from Technomunk;blog;world;dear reader" code={`+++++ +++               Set Cell #0 to 8 to setup multiplying the following cells by 8
 [
     >+++++ ++++         Add 9 to Cell #1
     >+++++ +++++ +++    Add 13 to Cell #2
@@ -40,9 +38,7 @@ However with these operators it would be impossible to write the same program as
 >.                      Cell #3 is 32 for the space
 <,                      Start reading the name into Cell #2 which we don't need any more
 [.,]                    Read input until we find a 0
->+.                     Exclamation point is 33 so add one to space and print it
-```
-</BnfkInterpreter>
+>+.                     Exclamation point is 33 so add one to space and print it`}/>
 
 That's a lot of code for a simple `print("Hello World!")`! Programming in Brainfuck is an exercise in patience and self-torture, as the name implies. However it is an excellent example to learn about compilers, because the rules are so simple - anyone should be able to write a compiler or an interpreter for brainfuck and that is an excellent exercise that I strongly encourage you to do! Especially if you start thinking about optimizing the program instead of executing an instruction for each character in the input 😉.
 

@@ -3,9 +3,8 @@ title: 'Technomunk on: Compilers'
 description: 'Brief foray into what compilers are and how they operate'
 layout: '@layouts/BlogLayout.astro'
 publishedOn: 2023-09-09
+fallbackLang: lisp
 ---
-
-import { Code } from 'astro:components'
 
 # Compilers
 
@@ -15,7 +14,8 @@ The process of converting some text data into some data structure that is simple
 
 So let's take some [Common Lisp](https://lisp-lang.org/) code as an example:
 {/* TODO: add syntax-viewer */}
-<Code lang="lisp" theme="github-light" code={`(defun nth_fibonacci (n)
+```lisp
+(defun nth_fibonacci (n)
     "Calculate the Nth Fibonacci number."
     (if (< n 2)
         n
@@ -26,21 +26,25 @@ So let's take some [Common Lisp](https://lisp-lang.org/) code as an example:
     )
 )
 
-(write (nth_fibonacci (read)))`}/>
+(write (nth_fibonacci (read)))
+```
 
 If you-re not familiar with the language - don't worry, neither are computers before we write a parser! It is equivalent to the following Python, although we will focus on Lisp, as its syntax maps better to what we will be talking about.
-<Code lang="py" theme="github-light" code={`def nth_fibonacci(n):
+```py
+def nth_fibonacci(n):
     """Calculate the Nth Fibonnaci number."""
     if n < 2:
         return n
     return nth_fibonacci(n - 1) + nth_fibbonachi(n - 2)
 
-print(nth_fibonacci(int(input())))`} />
+print(nth_fibonacci(int(input())))
+```
 
-Let's start with something simpler: a single *expression* <Code lang="lisp" theme="github-light" code="(+ 1 2)" inline />. As you might suspect it evaluates to 3. And that's pretty much all an expression is - a sequence of instructions that evaluates to some value. Most languages allow nesting expressions together <Code lang="lisp" theme="github-light" code="(+ (read) (read))" />. The summation is now invoking another expression (reading from input) for each of its arguments. And this nesting is why source code is usually represented as a *syntax tree* when working with it - sometimes it's sufficient to identify that "oh, this is an expression, but our syntax doesn't allow an expression here". When in doubt - expressions are whatever the language allows you to put on the right hand side of assignment.
+Let's start with something simpler: a single *expression* `(+ 1 2)`. As you might suspect it evaluates to 3. And that's pretty much all an expression is - a sequence of instructions that evaluates to some value. Most languages allow nesting expressions together `(+ (read) (read))`. The summation is now invoking another expression (reading from input) for each of its arguments. And this nesting is why source code is usually represented as a *syntax tree* when working with it - sometimes it's sufficient to identify that "oh, this is an expression, but our syntax doesn't allow an expression here". When in doubt - expressions are whatever the language allows you to put on the right hand side of assignment.
 
 But speaking of assignment - is it an expression? Or a function definition? Is our first set of brackets an expression? Well they don't *evaluate* to anything, so maybe not. They are just a statement - a block of code that tells what the program should do. So our first statement syntax tree looks something like:
-<Code theme="github-light" code={`statement (function definition) { name: "nth_fibonacci", parameters: ["n"], doc: "Calculate the Nth Fibonacci number." }
+```ast
+statement (function definition) { name: "nth_fibonacci", parameters: ["n"], doc: "Calculate the Nth Fibonacci number." }
     expression (if)
         expression (<)
             variable "n"
@@ -55,19 +59,20 @@ But speaking of assignment - is it an expression? Or a function definition? Is o
                 expression (-)
                     variable "n"
                     value 2
-`} />
+```
 
 Arguably the statement does evaluate to something - modifying the global state to define a new function that can be called. And in fact that exactly how Lisp works! So every set of brackets is an expression!
 
-Alright, we have a weird looking data structure we have no idea how to create (and I will delve into parsing some other time), what next? How does having this tree help us? Imagine we're writing an interpreter and we had the parser that would provide us the syntax tree. How would we go about evaluating an expression?
+Alright, we have a weird looking data structure that we have no idea how to create (and I will delve into parsing some other time), what next? How does having this tree help us? Imagine we're writing an interpreter and we had the parser that would provide us the syntax tree. How would we go about evaluating an expression?
 
 Firstly we may notice that all expressions have a name of the function they correspond to - alright, we can have a hashmap of names to a function. What should a function take? For arithmetic operations it should probably be numbers, but in our example we have variables... So we also need a mechanism of retreiving the values of variables by name. Let's use another hashmap! Ok, we can now evaluate subtraction in our example. But what about compound expressions? Something like
-<Code theme="github-light" code={`expression (+)
+```ast
+expression (+)
     expression (*)
         variable "n"
         value 2
     value -1
-`} />
+```
 
 Maybe we could replace the * expression with the result of the multiplication? Aha! Then the + expression could receive the resulting value and be replaced with the result! So to evaluate an expression tree - we recursively evaluate the nested expressions to get our result!
 
