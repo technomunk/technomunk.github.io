@@ -4978,6 +4978,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pegjs@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "pegjs@npm:0.10.0"
+  bin:
+    pegjs: bin/pegjs
+  checksum: 65d184ca0e1823ec0a3e7f384d7fd771bcbbc7abf460c82c9704022c1fa325425dc9007c92982b951879c3c9d4c39bf5cd6d99690e0540ff5016c04ca1ecd17e
+  languageName: node
+  linkType: hard
+
 "periscopic@npm:^3.0.0":
   version: 3.1.0
   resolution: "periscopic@npm:3.1.0"
@@ -5857,6 +5866,7 @@ __metadata:
     "@types/mdast": ^4.0.0
     "@types/vfile": ^4.0.0
     astro: ^3.1.0
+    pegjs: ^0.10.0
     prettier-plugin-astro: ^0.12.0
     rehype: ^13.0.1
     remark: ^15.0.1
