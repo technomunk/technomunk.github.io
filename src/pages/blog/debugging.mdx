@@ -1,0 +1,37 @@
+---
+title: 'Technomunk on: Debugging'
+description: 'Organizing the process of fixing a mess'
+layout: '@layouts/BlogLayout.astro'
+publishedOn: 2023-09-09
+---
+
+# Debugging
+
+Have you considered your troubleshooting process? It is one of the most common processes at work and yet everyone does it slightly differently, using different rules of thumb and mental models. Let's explore a simple example together and identify the general steps. Perhaps you will be able to identify which part poses the greatest challenge for you!
+
+Imagine you bought a table lamp. It fits the interior perfectly and will complete your desk organization. After you get it home, without much delay you plug it in - and it doesn't turn on... So there is an issue and this first step can be very important - realizing that something is wrong. Hopefully everyone knows how a lamp works - it shines when it is turned on.
+
+The store is already closed, so you might as well attempt to fix the lamp before getting a replacement next day. Where to start? If you're anything like me - you've had painful experiences of expecting the problem to be somewhere it isn't. So the second step (after realizing that something is not working) is to isolate it to as small a search space as possible. It makes sense to start with the lamp, but I'd first suggest checking the plug used or maybe the extension cable. If the plug is dead - getting a replacement would just waste time.
+
+To isolate the issue it's important to test the surrounding interfaces with as similar a process as the problematic one. Maybe the extension cable is fine for a low-power device but the connection is too flaky for higher voltage draw of a lamp. Try plugging the lamp into another socket. Plug another device into the same socket and check that it works. After doing those steps we will be confident - that indeed the lamp is the problem. Now if you're the engineer behind the lamp - you would want to isolate the fault further. Is it the chord, the lighting element, the voltage regulating circuit or some other part?
+
+To do the specific isolation you will need some understanding of the underlying systems. If your model of lamp is a wire and a button - you can only isolate the problem to the whole lamp. And in our example that would be sufficient. But if we talk about code - that would be the same as identifying a bug in a library call. Sure you can submit a ticket to the maintainers, but how long will it take to get them to fix it? How would you fix the issue your users face right now?
+
+So isolation slowly morphs into understanding. If you follow the logic of whatever you're debugging to one the fault in one tiny component - you understood the issue. You know the minimal effort required to fix it. Maybe you were able to dissasemble the lamp and saw a blown capacitor in our example.
+
+Once we understood the issue - it's time to fix it. With the blown capacitor example - the solution seems quite simle - resoder a new capacitor with as close specifications as the original one we could find. But how well will the fix last? Did we really understand the underlying issue?
+
+Because even after isolating the bug to one component - we still didn't gain the understanding of what went wrong. If the faulty capacitor was an unfortunately produced component - then a new one that is closer to the specifications required by the lamp circuit will work for years. But maybe it was a misdesigned system that puts too much load on the capacitor and the new one will blow after just a few on-off cycles?
+
+Quite often the root cause is much more difficult to understand when compared to alleviating the result. How many times did a restart of the system fix your problems? The root cause is very unlikely to be "to long since last restart", it's likely some component being ever so slightly off so with time - the faults accumulate to spill into the problem you see.
+
+The best course of action I know for gaining true insight into the root cause is modelling the system you're debugging. Draw the circuit diagram for the lamp, estimate expected voltages in steady state, remember that the real world is messy, so check the tolerances of the circuit - double check your work, get someone else to look over it.
+
+Of course the final step is to check your fix. If you replace the seemingly blown capacitor on someone else's lamp - don't give the lamp back and say it's fixed until you see it working yourself.
+
+So to summarize fixing an issue generally has the following steps:
+1. Identify that something is wrong
+2. Isolate the problem to as small a region as you are able to
+3. Model the behavior, gain insight into why something is off. This can be as trivial as realizing there is a typo in the source code to requiring loads of theoretical knowledge of underlying systems, abstractions and implementations.
+4. Find a solution that either eliviates the effect or fixes the root cause
+5. Validate that the solution makes the system work as expected
