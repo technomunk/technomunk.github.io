@@ -2,8 +2,8 @@
 
 - [x] A: Assembly
 - [x] B: Benchmarking
-- [ ] C: Compilers
-- [ ] D: Declarative programming? | Debugging
+- [x] C: Compilers
+- [ ] D: Debugging
 - [ ] E: Encryption? | Email
 - [ ] F: Functional programming?
 - [ ] G: GPUs
@@ -19,10 +19,10 @@
 - [ ] Q: Queues? | Quantum Computing
 - [ ] R: RegEx | Recursion
 - [ ] S: Semantics & Style
-- [ ] T: Testing? | Type Theory
+- [ ] T: Testing? | Type Theory | Time abstraction
 - [ ] U: Unions?
 - [ ] V: Vectorization
 - [ ] W: Web?
 - [ ] X: XML
-- [ ] Y: YAGNI (You Ain't Gonna Need It)?
+- [ ] Y: YAGNI (You Ain't Gonna Need It)? | VHDL
 - [ ] Z: Z-buffers?
