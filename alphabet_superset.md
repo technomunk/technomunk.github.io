@@ -3,8 +3,8 @@
 - [x] A: Assembly
 - [x] B: Benchmarking
 - [x] C: Compilers
-- [ ] D: Debugging
-- [ ] E: Encryption? | Email
+- [x] D: Debugging
+- [ ] E: Encryption? | Email | Encoding
 - [ ] F: Functional programming?
 - [ ] G: GPUs
 - [ ] H: Hashing
