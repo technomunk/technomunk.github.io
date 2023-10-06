@@ -11,8 +11,13 @@ import MainLayout from "@layouts/MainLayout.astro"
     </main>
     <nav class="center">
         {
-            posts.map(p => (
-                <Card title={p.getHeadings()[0].text} description={p.frontmatter.description} href={p.url!} />
+            posts.map((p) => (
+                <Card
+                    title={p.frontmatter.title}
+                    description={p.frontmatter.description}
+                    publishDate={p.frontmatter.publishedOn}
+                    href={p.url!}
+                />
             ))
         }
     </nav>

@@ -1,11 +1,17 @@
 ---
-const { title, description } = Astro.props.frontmatter
+const { title, description, publishedOn } = Astro.props.frontmatter
 import MainLayout from "@layouts/MainLayout.astro"
 
 import "@styles/blog.sass"
 import "@styles/syntax-hl.sass"
+
+const publishDate = new Date(publishedOn).toDateString()
 ---
 
-<MainLayout {title} {description}>
+<MainLayout title={`Technomunk on: ${title}`} {description}>
+    <div class="center">
+        <header>{title}</header>
+        <p class="subnote">Published on: {publishDate}</p>
+    </div>
     <slot />
 </MainLayout>
