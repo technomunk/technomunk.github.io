@@ -1,0 +1,49 @@
+---
+title: 'Technomunk on: Email'
+description: 'The old guard of online protocols'
+layout: '@layouts/BlogLayout.astro'
+publishedOn: 2023-10-06
+---
+
+import {Diagram} from "astro-diagram"
+
+# Email
+
+Using elecronic mail online is taken for granted. It's the most reliable method to reach someone. But do you know how it works? You may be surprised how little it changed since its inception. In the span of time where we went measuring internet speed from bits tranferred pers second to whole gigabytes email stayed pretty much the exact same.
+
+Unlike traditional snail mail - messages are not individual envelopes. They are blobs of data that get copied throughout the process of sending of receiving the message. Interestingly the 2 actions use different protocols. The sending one is called **S**imple **M**ail **T**ransfer **P**rotocol, although hopefully the service you're using is running **E**xtended SMTP - as plain SMTP does not support encryption.
+
+SMTP is not as simple as one may assume. The client typically sends a message to a relay agent (likely the server running your mailbox), which then forwards the message to other relevant servers until it reaches the recipient mailbox server. After which - the recipient client can download the message using a retreival protocol. Without encryption - all intermediate hops will see the sent data as plain text.
+
+<Diagram code={`
+sequenceDiagram
+    Client ->> Relay: Mail <this> to Server
+    Relay  ->> Client: OK
+    Relay  ->> Server: Mail <this> to Server
+    Server ->> Relay: OK
+`}
+/>
+
+Retreival protocols are not as standardized, becuase a common usecase is using a mail server along with its own client (think of GMail or Outlook). However there are 2 widely used standard ones - **P**ost **O**ffice **Protocol** 3 and **I**nternet **M**esssage **A**ccess **P**rotocol. POP3 is the old standard that is sufficient for simple text retrieval - the client connect to the server, authenticates itself, asks the server to list available messages and retreive new ones (or the ones the user is trying to view). It treats messages as atomic blocks of data - it does not support retreiving only the text data or only the attachment data. Becuase of this - IMAP is more widespread, as it models the messages as trees of data, which allows client to skip downloading pictures and attachments until necessary.
+
+<Diagram code={`
+sequenceDiagram
+    Client ->> Server: connect
+    Client ->> Server: login <credentials>
+    activate Server
+    Server ->> Client: OK LOGIN completed
+    Client ->> Server: select <mailbox>
+    Server ->> Client: 2 EXISTS, 1 RECENT
+    Client ->> Server: fetch 1 body[text]
+    Server ->> Client: <message> OK FETCH completed
+    Client ->> Server: store 1 +flags \Seen
+    Server ->> Client: OK +FLAGS completed
+    Client ->> Server: logout
+    Server ->> Client: OK LOGOUT completed
+    deactivate Server
+    Client ->> Server: disconnect
+`} />
+
+IMAP also offloads some of the work onto the server, for example it has a notion of message state, so the server can remember whether a messsage was read. If you're using a third party email client on 2 separate machines - and all messages viewed on one machine are still marked as unread - chances are it uses POP3.
+
+Just like most of the internet protocols used today - SMTP, POP3 and IMAP were developed in the 70s and 80s, updated in the 90s and remain close to their original design.

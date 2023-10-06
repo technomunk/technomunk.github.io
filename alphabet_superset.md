@@ -8,7 +8,7 @@
 - [ ] F: Functional programming?
 - [ ] G: GPUs
 - [ ] H: Hashing
-- [ ] I: Iteration? | Introspection?
+- [ ] I: Iteration? | Introspection? | Interfaces?
 - [ ] J: Java? | JIT
 - [ ] K: Kernel? | Knapsack?
 - [ ] L: Lists?
@@ -21,8 +21,8 @@
 - [ ] S: Semantics & Style
 - [ ] T: Testing? | Type Theory | Time abstraction
 - [ ] U: Unions?
-- [ ] V: Vectorization
+- [ ] V: Vectorization | VHDL
 - [ ] W: Web?
 - [ ] X: XML
-- [ ] Y: YAGNI (You Ain't Gonna Need It)? | VHDL
+- [ ] Y: YAGNI (You Ain't Gonna Need It)?
 - [ ] Z: Z-buffers?
