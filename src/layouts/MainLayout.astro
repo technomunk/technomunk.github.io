@@ -2,11 +2,15 @@
 interface Props {
     title: string
     description: string
+    navigation?: boolean
 }
 
 const { title, description } = Astro.props
 
+const navigation = Astro.props.navigation ?? true
+
 import avatarImg from "@assets/img/avatar.jpg"
+import Navigation from "@components/Navigation.astro"
 import "@styles/main.sass"
 ---
 
@@ -31,6 +35,7 @@ import "@styles/main.sass"
         <slot name="head" />
     </head>
     <body>
+        {navigation && <Navigation />}
         <slot />
     </body>
 </html>
