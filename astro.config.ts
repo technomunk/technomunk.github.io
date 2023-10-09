@@ -2,12 +2,13 @@ import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 
 import remarkHighlight from './src/plugins/remark/highlight';
+import remarkRemoveRunts from './src/plugins/remark/remove-runts';
 
 // https://astro.build/config
 export default defineConfig({
     markdown: {
         syntaxHighlight: false,
-        remarkPlugins: [remarkHighlight],
+        remarkPlugins: [remarkHighlight, remarkRemoveRunts],
     },
     integrations: [mdx()],
     site: 'https://www.technomunk.com',
