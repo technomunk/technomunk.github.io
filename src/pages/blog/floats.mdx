@@ -1,0 +1,20 @@
+---
+title: 'Technomunk on: Floating point numbers'
+description: 'The unintuitive complexity for an intuitive idea'
+layout: '@layouts/BlogLayout.astro'
+publishedOn: 2023-10-15
+---
+
+If you ever worked with numbers on computers - you likely noticed the stark difference between integers, which make sense and behave as expected. However whenever real numbers are required - suddenly there are multiple choices for representation. There are fractions, decimals and floats. What are these weird names?
+
+Fractions should make sense to you if you remember number classes from math. It's a pair of integers - a numerator and denumerator and work just like you'd expect. Decimal and float numbers are approximations of real numbers that function similarly. Let's focus on floats for now.
+
+Floats are a shorthand for <def>floating point number</def>. Sometimes you will see `double` - which stands for <def>double precision float</def>, while usual floats are therefore single precision (take up half as much memory - 32 bits).
+
+What is the floating point you may be wondering? Remember scientific notation? Numbers like `10^8 * 3` - which is an approximation of the speed of light in meters per second. Because the number is so large compared to other speeds - we care about the number of decimal places more than the exact value. The floating comes from the fact that we could represent the same value by "floating" the fractional point by changing the exponent - `10^9 * 0.3`, so the point "floats".
+
+Floats are the exact same concept that uses the base 2 for the exponential representation, so a value like 256 is represented as `2^8 * 1`. And a number like 192 can be represented as `2^8 * 0.11 (base 2)`. Let me take a quick detour if you are not used to decimal notation for binary. If you remember radixes - `0.25` is a shorthand for saying `0 * 10^0 + 2 * 10^-1 + 5 * 10^-2` or alternatively `0 + 2/10 + 5/100`. In binary - it's the same concept except the number we raise to different powers is 2. So `0.11` is a shorthand for `0*2^0 + 1*2^-1 + 1*2^-2` - `0 + 1/2 + 1/4`. So `0.11` in base 2 is a fraction `3/4`, which should hopefully make the 192 representation make sense now.
+
+With me so far? If not - I suggest playing with numbers (using fully expanded notation) in different bases.
+
+A decimal notation is a shorthand for fractional notation - `0.11` is really `11/100` and because the denumerator has to be a power of 10 - there are fractions that are not representable exactly. Everyone is familiar with `1/3` requiring an infinitely long decimal representation. 2 as a denumerator results in even more fractions being unrepresentable exactly - `0.1` has to be approximated as a fraction of a power of 2. And this is the exact reason why some calculators show some noise after adding a couple of tenths together.
