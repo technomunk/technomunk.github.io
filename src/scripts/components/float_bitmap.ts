@@ -22,7 +22,7 @@ class FloatBitmap extends HTMLDivElement {
         this.bitElements = this.createBitCells()
         {
             const span = document.createElement("span")
-            span.textContent = "~="
+            span.textContent = "="
             this.appendChild(span)
         }
         this.decimalElement = this.createDecimalCell()
