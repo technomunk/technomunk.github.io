@@ -4,8 +4,8 @@
 - [x] B: Benchmarking
 - [x] C: Compilers
 - [x] D: Debugging
-- [ ] E: Encryption? | Email | Encoding
-- [ ] F: Functional programming?
+- [x] E: Email
+- [-] F: Floats
 - [ ] G: GPUs
 - [ ] H: Hashing
 - [ ] I: Iteration? | Introspection? | Interfaces?
