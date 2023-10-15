@@ -35,7 +35,8 @@ float-bitmap
     display: block
 
     &>.bit
-        padding: 0
+        padding-left: 1px
+        padding-right: 1px
         text-align: center
         cursor: pointer
 
@@ -47,6 +48,14 @@ float-bitmap
         &.exponent
             background-color: #ffa8a8
             &+:not(.exponent)
+                margin-left: 4px
+
+        &.hidden
+            background-color: #ececec
+            color: #333333
+            font-style: italic
+            cursor: auto
+            &+:not(.hidden)
                 margin-left: 4px
 
         &.mantissa

@@ -1,10 +1,19 @@
 import { Choice } from "@lib/util"
 
 const BIT_CHOICE = new Choice("0", "1")
+const BIAS = 150  // -127 of actual bias + 23 insignificant bits
+
+interface Bits {
+    sign: string
+    exponent: string
+    mantissa: string
+}
 
 class FloatBitmap extends HTMLDivElement {
     readonly bitElements: Array<HTMLElement>
-    readonly decimalElement: HTMLElement
+    readonly decimalElement: HTMLInputElement
+
+    static HIDDEN_BIT_INDEX = 9
 
     constructor() {
         super()
@@ -19,12 +28,33 @@ class FloatBitmap extends HTMLDivElement {
         this.updateValue()
     }
 
-    get bits(): string {
-        return this.bitElements.map(e => e.textContent).join("")
+    gatherBits(): Bits {
+        const bitContents = this.bitElements.map(e => e.textContent)
+        return {
+            sign: bitContents[0]!,
+            exponent: bitContents.slice(1, 9).join(""),
+            mantissa: bitContents.slice(9).join(""),
+        }
+    }
+
+    set hiddenBit(value: "0" | "1" | "x") {
+        this.bitElements[FloatBitmap.HIDDEN_BIT_INDEX].textContent = value
     }
 
     updateValue() {
-        let value = convertBits(this.bits)
+        const bits = this.gatherBits()
+        if (bits.exponent == "00000000") {
+            this.hiddenBit = "0"
+            bits.mantissa = "0" + bits.mantissa.slice(1)
+        } else if (bits.exponent == "11111111") {
+            this.hiddenBit = "1"
+            bits.mantissa = bits.mantissa.slice(1)
+        } else {
+            this.hiddenBit = "1"
+            bits.mantissa = "1" + bits.mantissa.slice(1)
+        }
+
+        let value = convertBits(bits)
         if (typeof value === "number") {
             value = value.toString()
         }
@@ -33,12 +63,14 @@ class FloatBitmap extends HTMLDivElement {
 
     protected createBitCells(): Array<HTMLElement> {
         const result = []
-        for (let i = 0; i < 32; ++i) {
+        for (let i = 0; i < 33; ++i) {
             let styleClass: string
             if (i == 0) {
                 styleClass = "sign"
             } else if (i <= 8) {
                 styleClass = "exponent"
+            } else if (i == 9) {
+                styleClass = "hidden"
             } else {
                 styleClass = "mantissa"
             }
@@ -53,13 +85,15 @@ class FloatBitmap extends HTMLDivElement {
         cell.classList.add(styleClass, "bit")
         cell.textContent = BIT_CHOICE.random()
         cell.title = styleClass
-        cell.addEventListener(
-            "click",
-            (_) => {
-                cell.textContent = (cell.textContent == "0") ? "1" : "0";
-                this.updateValue()
-            },
-        )
+        if (styleClass != "hidden") {
+            cell.addEventListener(
+                "click",
+                (_) => {
+                    cell.textContent = (cell.textContent == "0") ? "1" : "0";
+                    this.updateValue()
+                },
+            )
+        }
 
         this.appendChild(cell)
         return cell
@@ -76,37 +110,25 @@ class FloatBitmap extends HTMLDivElement {
     }
 }
 
-function convertBits(bits: string): number | string {
-    const sign = bits[0]
-    const exponent = parseInt(bits.slice(1, 9), 2)
-    const mantissa = parseInt(bits.slice(9), 2)
+function convertBits(bits: Bits): number | string {
+    const exponent = parseInt(bits.exponent, 2)
+    const mantissa = parseInt(bits.mantissa, 2)
 
-    let value = (sign == "0") ? -mantissa : mantissa
+    let value = (bits.sign == "1") ? -mantissa : mantissa
 
-    switch (exponent) {
-        case 0:
-            // possibly subnormal value
-            if (mantissa == 0) {
-                if (sign == "0") {
-                    return "-0"
-                } else {
-                    return 0
-                }
-            }
-            return value * Math.pow(2, -127)
-        case 255:
-            if (mantissa != 0) {
-                return NaN
-            } else if (sign == "0") {
-                return -Infinity
-            } else {
-                return Infinity
-            }
-        default:
-            const extraBit = (sign == "0") ? -(1 << 24) : (1 << 24)
-            return (value + extraBit) * Math.pow(2, exponent - 127)
+    if (exponent == 255) {
+        if (mantissa != 0) {
+            return NaN
+        } else if (bits.sign == "1") {
+            return -Infinity
+        } else {
+            return Infinity
+        }
     }
-
+    if (exponent == 0 && mantissa == 0) {
+        return value * Math.pow(2, -BIAS + 1)
+    }
+    return value * Math.pow(2, exponent - BIAS)
 }
 
 customElements.define("float-bitmap", FloatBitmap, { extends: "div" })
