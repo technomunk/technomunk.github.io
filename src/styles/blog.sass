@@ -1,5 +1,5 @@
 @use './font'
-    
+
 @keyframes highlightVarView
     0%
         background-color: #fcfc55
@@ -40,27 +40,19 @@ float-bitmap
         text-align: center
         cursor: pointer
 
-        &.sign
-            background-color: #d2ffbd
-            &+:not(.sign)
-                margin-left: 4px
+        &.sign+:not(.sign)
+            margin-left: 4px
 
-        &.exponent
-            background-color: #ffa8a8
-            &+:not(.exponent)
-                margin-left: 4px
+        &.exponent+:not(.exponent)
+            margin-left: 4px
 
         &.hidden
-            background-color: #ececec
-            color: #333333
-            font-style: italic
             cursor: auto
             &+:not(.hidden)
                 margin-left: 4px
 
-        &.mantissa
-            background-color: #b6fdff
-
+        &.mantissa+:not(.mantissa)
+            margin-left: 4px
 
     &>.decimal
         font: inherit
@@ -71,6 +63,24 @@ float-bitmap
         &::-webkit-outer-spin-button,&::-webkit-outer-spin-button
             -webkit-appearance: none
             margin: 0
+
+.sign
+    background-color: #d2ffbd
+
+.exponent
+    background-color: #ffa8a8
+
+.hidden
+    background-color: #ececec
+    color: #333333
+    font-style: italic
+
+.mantissa
+    background-color: #b6fdff
+
+.subnote>span
+    margin: 5px
+    padding: 2px 5px
 
 code,.interpreter,code *,.interpreter *
     @include font.monospace
@@ -87,12 +97,12 @@ pre,.interpreter
         white-space: pre
     &>*
         flex-grow: 1
-    padding: 0
-    height: max-content
-    display: flex
-    justify-content: stretch
-    width: 100%
-    background: #e6e6e6
+        padding: 0
+        height: max-content
+        display: flex
+        justify-content: stretch
+        width: 100%
+        background: #e6e6e6
 
 button:disabled
     background-color: grey

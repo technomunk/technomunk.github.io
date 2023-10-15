@@ -5,7 +5,16 @@ interface Props {
 
 const props = Astro.props
 ---
-<float-bitmap class={props.class} />
+
+<div class={props.class}>
+    <float-bitmap></float-bitmap>
+    <span class="subnote">
+        <span class="sign">sign bit</span>
+        <span class="exponent">exponent bits</span>
+        <span class="hidden">hidden bit</span>
+        <span class="mantissa">mantissa (significand) bits</span>
+    </span>
+</div>
 
 <script>
     import "../scripts/components/float_bitmap"

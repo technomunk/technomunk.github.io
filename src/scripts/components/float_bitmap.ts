@@ -15,13 +15,14 @@ class FloatBitmap extends HTMLDivElement {
 
     static HIDDEN_BIT_INDEX = 9
 
+    // TODO: show the exponent and mantissa values in decimal representation as well
     constructor() {
         super()
 
         this.bitElements = this.createBitCells()
         {
             const span = document.createElement("span")
-            span.textContent = " = "
+            span.textContent = "~="
             this.appendChild(span)
         }
         this.decimalElement = this.createDecimalCell()
