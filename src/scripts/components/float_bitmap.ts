@@ -43,7 +43,7 @@ class FloatBitmap extends HTMLDivElement {
             this.hiddenBit = "0"
             bits.mantissa = "0" + bits.mantissa.slice(1)
         } else if (bits.exponent == "11111111") {
-            this.hiddenBit = "1"
+            this.hiddenBit = "x"
             bits.mantissa = bits.mantissa.slice(1)
         } else {
             this.hiddenBit = "1"
