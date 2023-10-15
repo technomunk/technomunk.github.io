@@ -8,7 +8,7 @@ import "@styles/syntax-hl.sass"
 const publishDate = new Date(publishedOn).toDateString()
 ---
 
-<MainLayout title={`Technomunk on: ${title}`} {description}>
+<MainLayout {title} {description}>
     <div class="center">
         <header>{title}</header>
         <p class="subnote">Published on: {publishDate}</p>
