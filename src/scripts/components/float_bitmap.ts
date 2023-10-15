@@ -19,13 +19,8 @@ class FloatBitmap extends HTMLDivElement {
     constructor() {
         super()
 
-        this.bitElements = this.createBitCells()
-        {
-            const span = document.createElement("span")
-            span.textContent = "="
-            this.appendChild(span)
-        }
-        this.decimalElement = this.createDecimalCell()
+        this.bitElements = this.collectBitCells()
+        this.decimalElement = this.querySelector("input")!
         this.updateValue()
     }
 
@@ -62,52 +57,24 @@ class FloatBitmap extends HTMLDivElement {
         this.decimalElement.value = value
     }
 
-    protected createBitCells(): Array<HTMLElement> {
+    protected collectBitCells(): Array<HTMLElement> {
         const result = []
-        for (let i = 0; i < 33; ++i) {
-            let styleClass: string
-            if (i == 0) {
-                styleClass = "sign"
-            } else if (i <= 8) {
-                styleClass = "exponent"
-            } else if (i == 9) {
-                styleClass = "hidden"
-            } else {
-                styleClass = "mantissa"
-            }
-            result.push(this.createBitCell(styleClass))
+        for (const element of this.querySelectorAll(".bit")) {
+            this.setupBitCell(element as HTMLSpanElement)
+            result.push(element as HTMLSpanElement)
         }
         return result
     }
 
-    protected createBitCell(styleClass: string): HTMLElement {
-        const cell = document.createElement("span")
-
-        cell.classList.add(styleClass, "bit")
+    protected setupBitCell(cell: HTMLElement) {
         cell.textContent = BIT_CHOICE.random()
-        cell.title = styleClass
-        if (styleClass != "hidden") {
-            cell.addEventListener(
-                "click",
-                (_) => {
-                    cell.textContent = (cell.textContent == "0") ? "1" : "0";
-                    this.updateValue()
-                },
-            )
+        if (!cell.parentElement!.classList.contains("hidden")) {
+            cell.onclick = (ev) => {
+                ev.preventDefault()
+                cell.textContent = (cell.textContent == "0") ? "1" : "0";
+                this.updateValue()
+            }
         }
-
-        this.appendChild(cell)
-        return cell
-    }
-
-    protected createDecimalCell(): HTMLInputElement {
-        const cell = document.createElement("input")
-
-        cell.classList.add("decimal")
-        cell.inputMode = "numeric"
-
-        this.appendChild(cell)
-        return cell
     }
 }
 

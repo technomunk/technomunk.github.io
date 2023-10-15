@@ -34,25 +34,21 @@ float-bitmap
     padding: 5px
     display: block
 
-    &>.bit
-        padding-left: 1px
-        padding-right: 1px
-        text-align: center
+    & .bit
         cursor: pointer
 
-        &.sign+:not(.sign)
-            margin-left: 4px
+    &>.group
+        padding: 0px 4px
+        -webkit-user-select: none
+        -moz-user-select: none
+        -ms-user-select: none
+        user-select: none
 
-        &.exponent+:not(.exponent)
-            margin-left: 4px
+        &+.group
+            margin-left: 5px
 
-        &.hidden
+        &.hidden>.bit
             cursor: auto
-            &+:not(.hidden)
-                margin-left: 4px
-
-        &.mantissa+:not(.mantissa)
-            margin-left: 4px
 
     &>.decimal
         font: inherit

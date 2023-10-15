@@ -1,13 +1,31 @@
 ---
+
 interface Props {
     class?: string
 }
 
 const props = Astro.props
+import { repeat } from '@lib/util';
+
 ---
 
 <div class={props.class}>
-    <float-bitmap></float-bitmap>
+    <float-bitmap>
+        <span class="sign group" title="sign">
+            <span class="sign bit" title="sign">0</span>
+        </span>
+        <span class="exponent group" title="exponent">
+            {repeat(8).map(_ => (<span class="bit">0</span>))}
+        </span>
+        <span class="hidden group" title="hidden">
+            <span class="bit">0</span>
+        </span>
+        <span class="mantissa group" title="mantissa">
+            {repeat(23).map(_ => (<span class="bit">0</span>))}
+        </span>
+        =
+        <input class="decimal" readonly/>
+    </float-bitmap>
     <span class="subnote">
         <span class="sign">sign bit</span>
         <span class="exponent">exponent bits</span>

@@ -43,3 +43,11 @@ export function any(...collections: Array<Iterable<boolean>>): boolean {
     }
     return false
 }
+
+export function repeat(amount: number): Array<null> {
+    const result = new Array(amount)
+    for (let i = 0; i < amount; ++i) {
+        result[i] = null
+    }
+    return result
+}
