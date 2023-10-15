@@ -23,9 +23,11 @@ function highlightNode(node: Code | InlineCode, fallbackLang?: string) {
 /** Custom code highlight plugin */
 export default function remarkHighlight(options = {}) {
     return (tree: Root, file: any) => {
-        visit(
-            tree,
-            ["code", "inlineCode"],
-            (node) => highlightNode(node as Code | InlineCode, file.data.astro.frontmatter.fallbackLang))
+        if (file.data.astro.frontmatter.highlight !== false) {
+            visit(
+                tree,
+                ["code", "inlineCode"],
+                (node) => highlightNode(node as Code | InlineCode, file.data.astro.frontmatter.fallbackLang))
+        }
     }
 }

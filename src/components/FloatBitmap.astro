@@ -1,0 +1,12 @@
+---
+interface Props {
+    class?: string
+}
+
+const props = Astro.props
+---
+<float-bitmap class={props.class} />
+
+<script>
+    import "../scripts/components/float_bitmap"
+</script>
