@@ -37,3 +37,61 @@ import { repeat } from '@lib/util';
 <script>
     import "../scripts/components/float_bitmap"
 </script>
+
+<style lang="sass">
+@use "@styles/font.sass"
+
+float-bitmap
+    @include font.monospace
+    border: 2px solid grey
+    padding: 5px
+    display: block
+
+    & .bit
+        cursor: pointer
+
+    &>.group
+        padding: 0px 4px
+        -webkit-user-select: none
+        -moz-user-select: none
+        -ms-user-select: none
+        user-select: none
+
+        &+.group
+            margin-left: 5px
+
+        &.hidden>.bit
+            cursor: auto
+
+    &>.decimal
+        font: inherit
+        text-align: right
+        border: none
+        width: 220px
+        -moz-appearance: textfield
+        &::-webkit-outer-spin-button,&::-webkit-outer-spin-button
+            -webkit-appearance: none
+            margin: 0
+
+    @media (max-width: 1000px)
+        flex-direction: column
+
+
+.sign
+    background-color: #d2ffbd
+
+.exponent
+    background-color: #ffa8a8
+
+.hidden
+    background-color: #ececec
+    color: #333333
+    font-style: italic
+
+.mantissa
+    background-color: #b6fdff
+
+.subnote>span
+    margin: 5px
+    padding: 2px 5px
+</style>
