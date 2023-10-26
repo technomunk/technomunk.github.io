@@ -1,4 +1,5 @@
-@use './font'
+@use '@styles/font'
+@use '@styles/color'
 
 @keyframes highlightVarView
     0%
@@ -26,7 +27,7 @@ header
 
 code
     color: #24292e
-    background: #e6e6e6
+    background: darken(color.$background, 5%)
 
 button:disabled
     background-color: grey

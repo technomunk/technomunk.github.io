@@ -1,4 +1,5 @@
-@use "@styles/font.sass"
+@use "@styles/font"
+@use "@styles/color"
 
 code,.interpreter,code *,.interpreter *
     @include font.monospace
@@ -13,7 +14,7 @@ pre,.interpreter
 .interpreter
     display: flex
     color: #24292e
-    background: #e6e6e6
+    background: darken(color.$background, 5%)
 
     @media (max-width: 1000px)
         flex-direction: column
