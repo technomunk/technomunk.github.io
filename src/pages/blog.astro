@@ -2,6 +2,9 @@
 const posts = await Astro.glob("./blog/*.mdx")
 import Card from "@components/Card.astro"
 import MainLayout from "@layouts/MainLayout.astro"
+import { dateCompare } from "@lib/util"
+
+posts.sort((a, b) => dateCompare(b.frontmatter.publishedOn, a.frontmatter.publishedOn))
 ---
 
 <MainLayout title="Technomunk's Blog" description="Technomunk's personal blog">
