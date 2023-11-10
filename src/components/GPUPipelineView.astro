@@ -3,7 +3,11 @@
 ---
 
 <gpu-pipeline>
-    <canvas id="vertex"></canvas>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
+        <circle cx=".25" cy=".25" r=".05" fill="black" />
+        <circle cx=".5" cy=".75" r=".05" fill="black" />
+        <circle cx=".75" cy=".25" r=".05" fill="black" />
+    </svg>
     <canvas id="primitive"></canvas>
     <canvas id="raster"></canvas>
     <canvas id="fragment"></canvas>
@@ -12,3 +16,17 @@
 <script>
     import "@scripts/components/gpu_pipeline"
 </script>
+
+<style lang="sass">
+    canvas,svg
+        width: 250px
+        height: 250px
+        border: 1px solid black
+        margin: 10px
+        display: inline-block
+
+        &>circle
+            cursor: move
+            &.dragging
+                cursor: grabbing
+</style>

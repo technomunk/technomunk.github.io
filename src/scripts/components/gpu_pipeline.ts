@@ -1,37 +1,51 @@
+import { makeSVGMovable } from "@lib/draggable"
 import { error } from "@lib/util"
 
 type CanvasWithContext = {
     canvas: HTMLCanvasElement
     context: CanvasRenderingContext2D
 }
+type Vertex = [number, number]
 
 class GPUPipeline extends HTMLElement {
-    vertices: Array<[number, number]> = [[-.5, -.5], [0, .5], [.5, -.5]]
-
-    vertex: CanvasWithContext
+    vertex: SVGElement
     primitive: CanvasWithContext
     raster: CanvasWithContext
     fragment: CanvasWithContext
 
-    pointSize = 8
     pixelSize = 8
 
     constructor() {
         super()
 
-        this.vertex = this._setupCanvas("vertex")
+        this.vertex = this._setupVertexControls()
         this.primitive = this._setupCanvas("primitive")
         this.raster = this._setupCanvas("raster")
         this.fragment = this._setupCanvas("fragment")
 
-        this.draw()
+        window.addEventListener("load", () => {
+            this.primitive.canvas.width = this.primitive.canvas.clientWidth
+            this.primitive.canvas.height = this.primitive.canvas.clientHeight
+            this.raster.canvas.width = this.raster.canvas.clientWidth
+            this.raster.canvas.height = this.raster.canvas.clientHeight
+            this.fragment.canvas.width = this.fragment.canvas.clientWidth
+            this.fragment.canvas.height = this.fragment.canvas.clientHeight
+            this.draw()
+        })
     }
 
     draw() {
-        this._drawVertex()
-        this._drawPrimitive()
-        this._drawRaster()
-        this._drawFragment()
+        const vertices = this._collectVertices()
+        this._drawLines(vertices)
+        this._drawPixels(vertices)
+    }
+
+    _setupVertexControls(): SVGElement {
+        const vertex = this.querySelector("svg") || error("Could not find vertices element") 
+        for (const child of vertex.querySelectorAll("circle")) {
+            makeSVGMovable(child, () => this.draw())
+        }
+        return vertex
     }
 
     _setupCanvas(canvas_id: string): CanvasWithContext {
@@ -42,49 +56,58 @@ class GPUPipeline extends HTMLElement {
         return { canvas, context }
     }
 
-    _drawVertex() {
-        for (const [rx, ry] of this.vertices) {
-            const [x, y] = relativeToElement(rx, ry, this.vertex.canvas)
-            this.vertex.context.beginPath()
-            this.vertex.context.ellipse(x, y, this.pointSize, this.pointSize, 0, 0, 2 * Math.PI)
-            this.vertex.context.fill()
+    _collectVertices(): Array<Vertex> {
+        const vertices: Array<Vertex> = []
+        for (const child of this.vertex.children) {
+            vertices.push([parseFloat(child.getAttribute("cx") || "0"), parseFloat(child.getAttribute("cy") || "0")])
         }
+        return vertices
     }
 
-    _drawPrimitive() {
-        for (let i = 0; i < this.vertices.length; ++i) {
-            const [x1, y1] = relativeToElement(...this.vertices[i], this.primitive.canvas)
-            const [x2, y2] = relativeToElement(...this.vertices[(i + 1) % this.vertices.length], this.primitive.canvas)
-
+    _drawLines(vertices: Array<Vertex>) {
+        this.primitive.context.clearRect(0, 0, this.primitive.canvas.width, this.primitive.canvas.height)
+        for (let i = 0; i < vertices.length; ++i) {
+            const [x1, y1] = relativeToCanvas(...vertices[i], this.primitive.canvas)
+            const [x2, y2] = relativeToCanvas(...vertices[(i + 1) % vertices.length], this.primitive.canvas)
+            
             this.primitive.context.beginPath()
             this.primitive.context.moveTo(x1, y1)
             this.primitive.context.lineTo(x2, y2)
             this.primitive.context.stroke()
         }
     }
+    
+    _drawPixels(vertices: Array<Vertex>, colorFn: (x: number, y: number) => string = uv) {
+        this.raster.context.clearRect(0, 0, this.primitive.canvas.width, this.primitive.canvas.height)
+        this.fragment.context.clearRect(0, 0, this.fragment.canvas.width, this.fragment.canvas.height)
 
-    _drawRaster() {
-        for (let y = 0; y < this.raster.canvas.height; y += this.pixelSize) {
-            for (let x = 0; x < this.raster.canvas.width; x += this.pixelSize) {
-                const [rx, ry] = elementToRelative(x + this.pixelSize / 2, y + this.pixelSize / 2, this.raster.canvas)
-                if (isInsideTriangle(rx, ry, this.vertices)) {
+        const [minRX, minRY, maxRX, maxRY] = minmax(vertices)
+        const [minX, minY] = relativeToCanvas(minRX, minRY, this.raster.canvas)
+        const [maxX, maxY] = relativeToCanvas(maxRX, maxRY, this.raster.canvas)
+
+        for (let y = minY - minY % this.pixelSize; y < maxY; y += this.pixelSize) {
+            for (let x = minX - minX % this.pixelSize; x < maxX; x += this.pixelSize) {
+                const [rx, ry] = canvasToRelative(x + this.pixelSize / 2, y + this.pixelSize / 2, this.raster.canvas)
+                if (isInsideTriangle(rx, ry, vertices)) {
                     this.raster.context.beginPath()
                     this.raster.context.rect(x, y, this.pixelSize, this.pixelSize)
                     this.raster.context.fill()
-                }
-            }
-        }
-    }
 
-    _drawFragment(colorFn: (x: number, y: number) => string = uv) {
-        for (let y = 0; y < this.fragment.canvas.height; y += this.pixelSize) {
-            for (let x = 0; x < this.fragment.canvas.width; x += this.pixelSize) {
-                const [rx, ry] = elementToRelative(x + this.pixelSize / 2, y + this.pixelSize / 2, this.fragment.canvas)
-                if (isInsideTriangle(rx, ry, this.vertices)) {
                     this.fragment.context.fillStyle = colorFn(rx, ry)
                     this.fragment.context.beginPath()
                     this.fragment.context.rect(x, y, this.pixelSize, this.pixelSize)
                     this.fragment.context.fill()
+                }
+            }
+        }
+    }
+    
+    _drawFragment(vertices: Array<Vertex>, colorFn: (x: number, y: number) => string = uv) {
+        this.fragment.context.clearRect(0, 0, this.primitive.canvas.width, this.primitive.canvas.height)
+        for (let y = 0; y < this.fragment.canvas.height; y += this.pixelSize) {
+            for (let x = 0; x < this.fragment.canvas.width; x += this.pixelSize) {
+                const [rx, ry] = canvasToRelative(x + this.pixelSize / 2, y + this.pixelSize / 2, this.fragment.canvas)
+                if (isInsideTriangle(rx, ry, vertices)) {
                 }
             }
         }
@@ -102,14 +125,27 @@ function isInsideTriangle(x: number, y: number, triangle: Array<[number, number]
 
     return b1 === b2 && b2 === b3
 }
-function relativeToElement(x: number, y: number, element: HTMLElement): [number, number] {
-    const rect = element.getBoundingClientRect()
-    return [(x + 1) / 2 * rect.width, (1 - y) / 2 * rect.height]
+
+function relativeToCanvas(x: number, y: number, canvas: HTMLCanvasElement): [number, number] {
+    return [x * canvas.width, y * canvas.height]
 }
 
-function elementToRelative(x: number, y: number, element: HTMLCanvasElement): [number, number] {
-    const rect = element.getBoundingClientRect()
-    return [x / rect.width * 2 - 1, 1 - y / rect.height * 2]
+function canvasToRelative(x: number, y: number, canvas: HTMLCanvasElement): [number, number] {
+    return [x / canvas.width, y / canvas.height]
+}
+
+function minmax(vertices: Array<Vertex>): [number, number, number, number] {
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const [x, y] of vertices) {
+        minX = Math.min(minX, x)
+        minY = Math.min(minY, y)
+        maxX = Math.max(maxX, x)
+        maxY = Math.max(maxY, y)
+    }
+    return [minX, minY, maxX, maxY]
 }
 
 function uv(x: number, y: number): string {
