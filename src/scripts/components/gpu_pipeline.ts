@@ -51,8 +51,6 @@ class GPUPipeline extends HTMLElement {
     _setupCanvas(canvas_id: string): CanvasWithContext {
         const canvas = this.querySelector(`canvas#${canvas_id}`) as HTMLCanvasElement
         const context = canvas.getContext("2d") || error(`Could not get context for canvas#${canvas_id}`)
-        context.fillStyle = "black"
-        context.strokeStyle = "black"
         return { canvas, context }
     }
 
@@ -66,6 +64,7 @@ class GPUPipeline extends HTMLElement {
 
     _drawLines(vertices: Array<Vertex>) {
         this.primitive.context.clearRect(0, 0, this.primitive.canvas.width, this.primitive.canvas.height)
+        this.primitive.context.strokeStyle = "black"
         for (let i = 0; i < vertices.length; ++i) {
             const [x1, y1] = relativeToCanvas(...vertices[i], this.primitive.canvas)
             const [x2, y2] = relativeToCanvas(...vertices[(i + 1) % vertices.length], this.primitive.canvas)
@@ -79,6 +78,7 @@ class GPUPipeline extends HTMLElement {
     
     _drawPixels(vertices: Array<Vertex>, colorFn: (x: number, y: number) => string = uv) {
         this.raster.context.clearRect(0, 0, this.primitive.canvas.width, this.primitive.canvas.height)
+        this.raster.context.strokeStyle = "#666"
         this.fragment.context.clearRect(0, 0, this.fragment.canvas.width, this.fragment.canvas.height)
 
         const [minRX, minRY, maxRX, maxRY] = minmax(vertices)
@@ -89,14 +89,10 @@ class GPUPipeline extends HTMLElement {
             for (let x = minX - minX % this.pixelSize; x < maxX; x += this.pixelSize) {
                 const [rx, ry] = canvasToRelative(x + this.pixelSize / 2, y + this.pixelSize / 2, this.raster.canvas)
                 if (isInsideTriangle(rx, ry, vertices)) {
-                    this.raster.context.beginPath()
-                    this.raster.context.rect(x, y, this.pixelSize, this.pixelSize)
-                    this.raster.context.fill()
+                    this.raster.context.strokeRect(x, y, this.pixelSize, this.pixelSize)
 
                     this.fragment.context.fillStyle = colorFn(rx, ry)
-                    this.fragment.context.beginPath()
-                    this.fragment.context.rect(x, y, this.pixelSize, this.pixelSize)
-                    this.fragment.context.fill()
+                    this.fragment.context.fillRect(x, y, this.pixelSize, this.pixelSize)
                 }
             }
         }
