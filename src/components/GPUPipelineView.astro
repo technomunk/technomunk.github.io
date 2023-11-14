@@ -4,9 +4,9 @@
 
 <gpu-pipeline>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
-        <circle cx=".25" cy=".25" r=".05" fill="black" />
-        <circle cx=".5" cy=".75" r=".05" fill="black" />
-        <circle cx=".75" cy=".25" r=".05" fill="black" />
+        <circle cx=".25" cy=".25" r=".05" fill="black"></circle>
+        <circle cx=".5" cy=".75" r=".05" fill="black"></circle>
+        <circle cx=".75" cy=".25" r=".05" fill="black"></circle>
     </svg>
     <canvas id="primitive"></canvas>
     <canvas id="raster"></canvas>
@@ -18,15 +18,24 @@
 </script>
 
 <style lang="sass">
-    canvas,svg
-        width: 250px
-        height: 250px
-        border: 1px solid black
-        margin: 10px
-        display: inline-block
+    gpu-pipeline
+        display: flex
+        width: fit-content
+        margin: auto
+        gap: 3vmax
+        flex-direction: row
 
-        &>circle
-            cursor: move
-            &.dragging
-                cursor: grabbing
+        &>canvas,&>svg
+            width: 20vmax
+            height: 20vmax
+            border: 1px solid black
+            display: inline-block
+
+            &>circle
+                cursor: move
+                &.dragging
+                    cursor: grabbing
+
+        @media (max-aspect-ratio: 1/1)
+            flex-direction: column
 </style>

@@ -1,5 +1,5 @@
 import { makeSVGMovable } from "@lib/draggable"
-import { error } from "@lib/util"
+import { error, setCanvasSize } from "@lib/util"
 
 type CanvasWithContext = {
     canvas: HTMLCanvasElement
@@ -23,15 +23,16 @@ class GPUPipeline extends HTMLElement {
         this.raster = this._setupCanvas("raster")
         this.fragment = this._setupCanvas("fragment")
 
-        window.addEventListener("load", () => {
-            this.primitive.canvas.width = this.primitive.canvas.clientWidth
-            this.primitive.canvas.height = this.primitive.canvas.clientHeight
-            this.raster.canvas.width = this.raster.canvas.clientWidth
-            this.raster.canvas.height = this.raster.canvas.clientHeight
-            this.fragment.canvas.width = this.fragment.canvas.clientWidth
-            this.fragment.canvas.height = this.fragment.canvas.clientHeight
-            this.draw()
-        })
+        window.addEventListener("load", () => this.resizeCanvases())
+        window.addEventListener("resize", () => this.resizeCanvases())
+    }
+
+    resizeCanvases() {
+        setCanvasSize(this.primitive.canvas, this.vertex.clientWidth, this.vertex.clientHeight)
+        setCanvasSize(this.raster.canvas, this.vertex.clientWidth, this.vertex.clientHeight)
+        setCanvasSize(this.fragment.canvas, this.vertex.clientWidth, this.vertex.clientHeight)
+        console.log("resizing")
+        this.draw()
     }
 
     draw() {
@@ -77,7 +78,7 @@ class GPUPipeline extends HTMLElement {
     }
     
     _drawPixels(vertices: Array<Vertex>, colorFn: (x: number, y: number) => string = uv) {
-        this.raster.context.clearRect(0, 0, this.primitive.canvas.width, this.primitive.canvas.height)
+        this.raster.context.clearRect(0, 0, this.raster.canvas.width, this.raster.canvas.height)
         this.raster.context.strokeStyle = "#666"
         this.fragment.context.clearRect(0, 0, this.fragment.canvas.width, this.fragment.canvas.height)
 

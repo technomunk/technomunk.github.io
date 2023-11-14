@@ -57,3 +57,14 @@ export function dateCompare(a?: Date | string, b?: Date | string): number {
     b = (b == undefined) ? new Date() : new Date(b)
     return a.getTime() - b.getTime()
 }
+
+export function setCanvasSize(canvas: HTMLCanvasElement, width: number, height: number) {
+    if (canvas.style.width.endsWith("px")) {
+        canvas.style.width = `${width}px`
+    }
+    if (canvas.style.width.endsWith("px")) {
+        canvas.style.height = `${height}px`
+    }
+    canvas.width = width * window.devicePixelRatio
+    canvas.height = height * window.devicePixelRatio
+}
