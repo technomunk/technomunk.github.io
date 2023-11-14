@@ -1,0 +1,27 @@
+---
+title: 'Graphics'
+description: 'Explaining pixels when they should light up millions of times a second'
+layout: '@layouts/BlogLayout.astro'
+publishedOn: 2023-11-14
+highlight: false
+---
+
+import GPUPipelineView from "@components/GPUPipelineView.astro"
+
+<GPUPipelineView />
+
+Have you ever wondered how the computer makes the screen display whatever it displays? If you think about it - there are at least a couple of millions of pixels on any modern screen, which need to be updated 60+ times a second. That is around 100 Million operations, just to ensure the pixels display something, not figuring out what exactly needs to be displayed. Now modern processors are certainly not slow, but figuring out what colors each pixel needs to display is still a lot of work, but playing back videos hardly taxes the CPU, how is that possible?
+
+Well a lot of work gets offloaded to a <def>Graphics Processing Unit</def> (historically also known as Graphics Coprocessor or Graphics Accelerator). These components are either dedicated portion of the chip that contains the CPU, part of a system-on-a-chip or a standalone unit. These coprocessors are indeed independent processors with their own instruction sets, registers and occasionally even their own RAM.
+
+And these GPUs are very much optimized around calculating how to light up the pixels on a screen. An interesting opportunity arises - one may notice that there are a lot of pixels that might require the exact same instructions. And GPUs take advantage of that - they perform the same instruction with a lot of data (typically 16 or 32 streams of data), which allows designing chips with very high data throughput - a single "core" can figure how to light up a whole portion of a screen.
+
+Now programming for GPUs is a little tricky. To understand why - it is useful to understand the history behind their development. These coprocessors started out as 2D and 3D accelerators. 2D would typically handle some simple image transformation - shifting the image by a few pixels, simple cropping, scaling if you were lucky and of course - displaying an image on the screen. Note that display interface is its own can of worms that I won't delve into in this post.
+
+With advent of 3D games (especially Quake, which calculated the lighting in a 3D environment) - 2D was insufficient to help much, so the CPUs would work out how to transform virtual 3D space into something that can be presented on the screen (it's a lot of linear algebra and some geometry). So 3D accelerators appeared in late 1990s, which would handle some of the linear algebra calculations instead of the CPU, which would become more a delegator - telling the 3D accelerator to make the transformations, then figuring out the lighting and then telling the 2D accelerator to show an image on a screen. Following 3D accelerators could also simulate basic lighting in a 3D environment - the the CPU was mostly occupied with setting everything up so that the accelerator could do its thing.
+
+Over time the 2D and 3D accelerators got merged into a single unit - the GPU. And a lot of 2D processing happens to be a special case of 3D transformation - for which there was already dedicated hardware on the 3D accelerator. And that paradigm is reflected in how the GPUs are told what to display. Even two-dimensional things like text or other UI elements are set in some virtual 3D space and then rendered by the GPU.
+
+Now representing objects in 3D space is rather involved and there are multiple possible approaches. You might be familiar with vector images - where the "image" is a set of abstract constructions. For example "there is a blue circle in the middle and a diagonal line crossing through it". These images can be scaled without loss of fidelity - because it's quite easy to figure out how to draw a bigger circle or line. 3D is kind of like that - the GPUs work on polygons made of triangles - the simplest useful object in 3D space (as lines have no width). So the CPU sets up some triangles and tells the GPU how to transform them on the screen. Then the GPU figures out which pixels the transformed triangle covers - <def>it rasterizes the triangle</def>. Finally it also calculates how to light up those pixels. And it can either simulate realistic lighting or do other arbitrary calculations (for example look up a 2D image and project it onto the triangle).
+
+Modern APIs allow us to tell the GPU quite precicely how to transform the triangles and what to calculate for each pixel covered by any given triangle by writing custom programs called "shaders".
