@@ -9,7 +9,7 @@ interface Bits {
     mantissa: string
 }
 
-class FloatBitmap extends HTMLDivElement {
+class FloatBitmap extends HTMLElement {
     readonly bitElements: Array<HTMLElement>
     readonly decimalElement: HTMLInputElement
 
@@ -99,4 +99,4 @@ function convertBits(bits: Bits): number | string {
     return value * Math.pow(2, exponent - BIAS)
 }
 
-customElements.define("float-bitmap", FloatBitmap, { extends: "div" })
+customElements.define("float-bitmap", FloatBitmap)

@@ -11,20 +11,20 @@
     "astro": "astro"
   },
   "devDependencies": {
-    "@astrojs/mdx": "^1.1.0",
-    "@astrojs/ts-plugin": "^1.1.3",
-    "@types/hast": "^3.0.1",
-    "@types/mdast": "^4.0.0",
-    "@types/vfile": "^4.0.0",
-    "astro": "^3.1.0",
-    "astro-diagram": "^0.7.0",
-    "prettier-plugin-astro": "^0.12.0",
-    "rehype": "^13.0.1",
-    "remark": "^15.0.1",
-    "remark-lint": "^9.1.2",
-    "sass": "^1.67.0",
-    "typescript": "^5.2.2",
-    "unist-util-visit": "^5.0.0",
-    "vitest": "^0.34.5"
+    "@astrojs/mdx": "*",
+    "@astrojs/ts-plugin": "*",
+    "@types/hast": "*",
+    "@types/mdast": "*",
+    "@types/vfile": "*",
+    "astro": "*",
+    "astro-diagram": "*",
+    "prettier-plugin-astro": "*",
+    "rehype": "*",
+    "remark": "*",
+    "remark-lint": "*",
+    "sass": "*",
+    "typescript": "*",
+    "unist-util-visit": "*",
+    "vitest": "*"
   }
 }

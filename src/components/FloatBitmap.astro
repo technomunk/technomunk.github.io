@@ -1,12 +1,10 @@
 ---
-
 interface Props {
     class?: string
 }
 
 const props = Astro.props
-import { repeat } from '@lib/util';
-
+import { repeat } from "@lib/util"
 ---
 
 <div class={props.class}>
@@ -15,16 +13,16 @@ import { repeat } from '@lib/util';
             <span class="sign bit" title="sign">0</span>
         </span>
         <span class="exponent group" title="exponent">
-            {repeat(8).map(_ => (<span class="bit">0</span>))}
+            {repeat(8).map((_) => <span class="bit">0</span>)}
         </span>
         <span class="hidden group" title="hidden">
             <span class="bit">0</span>
         </span>
         <span class="mantissa group" title="mantissa">
-            {repeat(23).map(_ => (<span class="bit">0</span>))}
+            {repeat(23).map((_) => <span class="bit">0</span>)}
         </span>
-        =
-        <input class="decimal" readonly/>
+         =
+        <input class="decimal" readonly />
     </float-bitmap>
     <span class="subnote">
         <span class="sign">sign bit</span>
@@ -35,63 +33,62 @@ import { repeat } from '@lib/util';
 </div>
 
 <script>
-    import "../scripts/components/float_bitmap"
+    import "@scripts/components/float_bitmap"
 </script>
 
 <style lang="sass">
-@use "@styles/font.sass"
+    @use "@styles/font.sass"
 
-float-bitmap
-    @include font.monospace
-    border: 2px solid grey
-    padding: 5px
-    display: block
+    float-bitmap
+        @include font.monospace
+        border: 2px solid grey
+        padding: 5px
+        display: block
 
-    & .bit
-        cursor: pointer
+        & .bit
+            cursor: pointer
 
-    &>.group
-        padding: 0px 4px
-        -webkit-user-select: none
-        -moz-user-select: none
-        -ms-user-select: none
-        user-select: none
+        &>.group
+            padding: 0px 4px
+            -webkit-user-select: none
+            -moz-user-select: none
+            -ms-user-select: none
+            user-select: none
 
-        &+.group
-            margin-left: 5px
+            &+.group
+                margin-left: 5px
 
-        &.hidden>.bit
-            cursor: auto
+            &.hidden>.bit
+                cursor: auto
 
-    &>.decimal
-        font: inherit
-        text-align: right
-        border: none
-        width: 220px
-        -moz-appearance: textfield
-        &::-webkit-outer-spin-button,&::-webkit-outer-spin-button
-            -webkit-appearance: none
-            margin: 0
+        &>.decimal
+            font: inherit
+            text-align: right
+            border: none
+            width: 220px
+            -moz-appearance: textfield
+            &::-webkit-outer-spin-button,&::-webkit-outer-spin-button
+                -webkit-appearance: none
+                margin: 0
 
-    @media (max-width: 1000px)
-        flex-direction: column
+        @media (max-width: 1000px)
+            flex-direction: column
 
+    .sign
+        background-color: #d2ffbd
 
-.sign
-    background-color: #d2ffbd
+    .exponent
+        background-color: #ffa8a8
 
-.exponent
-    background-color: #ffa8a8
+    .hidden
+        background-color: #ececec
+        color: #333333
+        font-style: italic
 
-.hidden
-    background-color: #ececec
-    color: #333333
-    font-style: italic
+    .mantissa
+        background-color: #b6fdff
 
-.mantissa
-    background-color: #b6fdff
-
-.subnote>span
-    margin: 5px
-    padding: 2px 5px
+    .subnote>span
+        margin: 5px
+        padding: 2px 5px
 </style>
