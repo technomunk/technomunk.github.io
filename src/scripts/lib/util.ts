@@ -68,3 +68,7 @@ export function setCanvasSize(canvas: HTMLCanvasElement, width: number, height: 
     canvas.width = width * window.devicePixelRatio
     canvas.height = height * window.devicePixelRatio
 }
+
+export function clamp(value: number, min = 0, max = 1): number {
+    return Math.max(Math.min(value, max), min)
+}
