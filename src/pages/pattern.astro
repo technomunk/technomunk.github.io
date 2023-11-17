@@ -9,8 +9,11 @@ import "@styles/shapes.sass"
 	<main>
 		<canvas id="background"></canvas>
 		<canvas id="main"></canvas>
-		<input id="color" type="color"></input>
-		<button id="save">Save</button>
+		<div class="controls">
+			<input id="color" type="color"></input>
+			<button id="clear">Clear</button>
+			<button id="save">Save</button>
+		</div>
 		<a hidden id="save" href="" download="pattern.png"/>
 	</main>
 </MainLayout>
@@ -45,13 +48,16 @@ input,button
 	width: 10vmin
 	height: 4vmin
 
-input#color
+div.controls
 	position: absolute
+	display: flex
+	width: 50vmin
 	top: calc(50% + 26vmin)
-	left: calc(50% - 15vmin)
+	left: calc(50% - 25vmin)
+	justify-content: space-evenly
+	gap: 1vmin
+	flex-flow: row wrap
 
-button#save
-	position: absolute
-	top: calc(50% + 26vmin)
-	left: calc(50% + 5vmin)
+	&>*
+		flex-basis: 1
 </style>

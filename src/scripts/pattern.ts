@@ -9,22 +9,26 @@ class PatternCreator {
     background: CanvasWithContext
     canvas: CanvasWithContext
     color: HTMLInputElement
-    saveButton: HTMLButtonElement
     saveLink: HTMLLinkElement
 
     pointerId: number | undefined
     rectStart: [number, number] | undefined
-    lastImage: ImageData
+    history: Array<ImageData>
+    historyIndex = -1
 
     constructor() {
         this.background = setupCanvas("background")
         this.canvas = setupCanvas("main")
         this.color = document.querySelector("input#color") as HTMLInputElement
-        this.saveButton = document.querySelector("button#save") as HTMLButtonElement
         this.saveLink = document.querySelector("a#save") as HTMLLinkElement
         this.canvas.context.fillStyle = this.color.value
-        this.lastImage = this.grabCanvasImage()
+        this.history = []
         this.setupControls()
+
+        loadCookieToCanvas(this.canvas.context, () => {
+            this.drawBackground()
+            this.pushHistory()
+        })
 
         window.addEventListener("resize", () => {
             const image = this.grabCanvasImage()
@@ -41,24 +45,21 @@ class PatternCreator {
             e.preventDefault()
             this.canvas.canvas.setPointerCapture(e.pointerId)
             this.pointerId = e.pointerId
-            this.lastImage = this.grabCanvasImage()
             this.rectStart = eventCoords(e)
         })
         this.canvas.canvas.addEventListener("pointermove", e => {
             if (e.pointerId == this.pointerId) {
                 e.preventDefault()
                 if (this.rectStart) {
-                    let [x, y] = eventCoords(e)
-                    x = clamp(x, 0, this.canvas.canvas.width)
-                    y = clamp(y, 0, this.canvas.canvas.height)
-                    this.drawRect(x, y)
+                    this.drawRect(e)
                 }
             }
         })
         this.canvas.canvas.addEventListener("pointerup", e => {
             if (e.pointerId == this.pointerId) {
-                this.drawRect(...eventCoords(e))
-                this.lastImage = this.grabCanvasImage()
+                this.drawRect(e)
+                this.pushHistory()
+                saveCanvasToCookie(this.canvas.canvas)
                 this.rectStart = undefined
                 this.pointerId = undefined
             }
@@ -69,7 +70,46 @@ class PatternCreator {
             this.canvas.context.fillStyle = this.color.value
         })
 
-        this.saveButton.addEventListener("click", () => this.save())
+        const saveButton = document.querySelector("button#save") as HTMLButtonElement
+        saveButton.addEventListener("click", () => this.save())
+
+        const clearButton = document.querySelector("button#clear") as HTMLButtonElement
+        clearButton.addEventListener("click", () => {
+            this.canvas.context.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height)
+            this.pushHistory()
+            this.drawBackground()
+        })
+
+        window.addEventListener("keydown", e => {
+            if (e.ctrlKey) {
+                switch (e.key) {
+                    case "z":
+                        this.undo()
+                        break
+                    case "y":
+                        this.redo()
+                        break
+                }
+            }
+        })
+    }
+
+    undo() {
+        this.historyIndex = Math.max(-1, this.historyIndex - 1)
+        this.redraw()
+    }
+
+    redo() {
+        this.historyIndex = Math.min(this.historyIndex + 1, this.history.length - 1)
+        this.redraw()
+    }
+
+    pushHistory() {
+        if (++this.historyIndex == this.history.length) {
+            this.history.push(this.grabCanvasImage())
+        } else {
+            this.history[this.historyIndex] = this.grabCanvasImage()
+        }
     }
 
     save() {
@@ -83,10 +123,34 @@ class PatternCreator {
         this.saveLink.click()
     }
 
-    drawRect(x: number, y: number) {
-        this.canvas.context.putImageData(this.lastImage, 0, 0)
-        this.canvas.context.fillRect(...this.rectStart!, x - this.rectStart![0], y - this.rectStart![1])
+    redraw() {
+        if (this.historyIndex == -1) {
+            this.canvas.context.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height)
+        } else {
+            this.canvas.context.putImageData(this.history[this.historyIndex], 0, 0)
+        }
 
+        this.drawBackground()
+    }
+
+    drawRect(event: PointerEvent) {
+        let [x, y] = eventCoords(event)
+        x = clamp(x, 0, this.canvas.canvas.width)
+        y = clamp(y, 0, this.canvas.canvas.height)
+
+        let w = x - this.rectStart![0]
+        let h = y - this.rectStart![1]
+
+        if (event.shiftKey) {
+            w = h = Math.min(w, h)
+        }
+
+        if (this.historyIndex == -1) {
+            this.canvas.context.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height)
+        } else {
+            this.canvas.context.putImageData(this.history[this.historyIndex], 0, 0)
+        }
+        this.canvas.context.fillRect(...this.rectStart!, w, h)
         this.drawBackground()
     }
 
@@ -96,8 +160,6 @@ class PatternCreator {
 
     drawBackground() {
         const image = this.grabCanvasImage()
-
-        console.log(Math.floor(this.background.canvas.width / image.width))
 
         const offsetX = image.width - ((this.background.canvas.width - image.width) / 2) % image.width
         const offsetY = image.height - ((this.background.canvas.height - image.height) / 2) % image.height
@@ -120,6 +182,21 @@ function setupCanvas(id: string): CanvasWithContext {
 
 function eventCoords(event: PointerEvent): [number, number] {
     return [event.offsetX * window.devicePixelRatio, event.offsetY * window.devicePixelRatio]
+}
+
+function saveCanvasToCookie(canvas: HTMLCanvasElement) {
+    localStorage.setItem("pattern-image", canvas.toDataURL())
+}
+
+function loadCookieToCanvas(context: CanvasRenderingContext2D, onload?: () => void) {
+    const data = localStorage.getItem("pattern-image")
+    if (!data) return false
+    const image = new Image()
+    image.src = data
+    image.onload = () => {
+        context.drawImage(image, 0, 0)
+        onload && onload()
+    }
 }
 
 window.onload = () => {
