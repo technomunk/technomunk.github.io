@@ -5,7 +5,11 @@ type CanvasWithContext = {
     context: CanvasRenderingContext2D
 }
 
-class PatternCreator {
+const ANIMATION_TIME = 1_000
+const ZOOM_FACTOR = 4
+
+class PatternCreator extends HTMLElement {
+    mainElement: HTMLElement
     background: CanvasWithContext
     canvas: CanvasWithContext
     color: HTMLInputElement
@@ -16,11 +20,17 @@ class PatternCreator {
     history: Array<ImageData>
     historyIndex = -1
 
+    zoomStart = 0
+    zoomingOut = true
+
     constructor() {
+        super()
+
         this.background = setupCanvas("background")
         this.canvas = setupCanvas("main")
-        this.color = document.querySelector("input#color") as HTMLInputElement
-        this.saveLink = document.querySelector("a#save") as HTMLLinkElement
+        this.mainElement = this.querySelector("div#main") as HTMLDivElement
+        this.color = this.querySelector("input#color") as HTMLInputElement
+        this.saveLink = this.querySelector("a#save") as HTMLLinkElement
         this.canvas.context.fillStyle = this.color.value
         this.history = []
         this.setupControls()
@@ -70,15 +80,18 @@ class PatternCreator {
             this.canvas.context.fillStyle = this.color.value
         })
 
-        const saveButton = document.querySelector("button#save") as HTMLButtonElement
+        const saveButton = this.querySelector("button#save") as HTMLButtonElement
         saveButton.addEventListener("click", () => this.save())
 
-        const clearButton = document.querySelector("button#clear") as HTMLButtonElement
+        const clearButton = this.querySelector("button#clear") as HTMLButtonElement
         clearButton.addEventListener("click", () => {
             this.canvas.context.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height)
             this.pushHistory()
             this.drawBackground()
         })
+
+        const zoomButton = this.querySelector("button#zoom") as HTMLButtonElement
+        zoomButton.addEventListener("click", () => this.toggleZoom())
 
         window.addEventListener("keydown", e => {
             if (e.ctrlKey) {
@@ -158,15 +171,68 @@ class PatternCreator {
         return this.canvas.context.getImageData(0, 0, this.canvas.canvas.width, this.canvas.canvas.height)
     }
 
-    drawBackground() {
-        const image = this.grabCanvasImage()
+    toggleZoom() {
+        const now = performance.now()
+        if (now - this.zoomStart > ANIMATION_TIME) {
+            this.zoomStart = performance.now()
+        }
+        if (this.zoomingOut) {
+            this.zoomingOut = false
+            requestAnimationFrame(() => this.zoomOut())
+        } else {
+            this.zoomingOut = true
+            this.mainElement.hidden = false
+            requestAnimationFrame(() => this.zoomIn())
+        }
+    }
 
-        const offsetX = image.width - ((this.background.canvas.width - image.width) / 2) % image.width
-        const offsetY = image.height - ((this.background.canvas.height - image.height) / 2) % image.height
+    zoomIn() {
+        if (!this.zoomingOut) return
+        const now = performance.now()
+        const t = clamp((now - this.zoomStart) / ANIMATION_TIME)
+        const zoomFactor = 1 + (1 - t) * (ZOOM_FACTOR - 1)
 
-        for (let y = -offsetY; y < this.background.canvas.height; y += image.height) {
-            for (let x = -offsetX; x < this.background.canvas.width; x += image.width) {
-                this.background.context.putImageData(image, x, y)
+        this.mainElement.style.opacity = t.toString()
+        this.drawBackground(zoomFactor)
+        
+        if (t < 1) {
+            requestAnimationFrame(() => this.zoomIn())
+        }
+    }
+    
+    zoomOut() {
+        if (this.zoomingOut) return
+        const now = performance.now()
+        const t = clamp((now - this.zoomStart) / ANIMATION_TIME)
+        const zoomFactor = 1 + t * (ZOOM_FACTOR - 1)
+
+        this.mainElement.style.opacity = (1 - t).toString()
+        this.drawBackground(zoomFactor)
+
+        if (t < 1) {
+            requestAnimationFrame(() => this.zoomOut())
+        } else {
+            this.mainElement.hidden = true
+        }
+    }
+
+    drawBackground(zoom = 1) {
+        const image = (zoom == 1) ? this.grabCanvasImage() : undefined
+
+        const cw = this.canvas.canvas.width
+        const ch = this.canvas.canvas.height
+        const offsetX = cw - ((this.background.canvas.width - cw) / 2) % cw
+        const offsetY = ch - ((this.background.canvas.height - ch) / 2) % ch
+
+        this.background.context.clearRect(0, 0, this.background.canvas.width, this.background.canvas.height)
+
+        for (let y = -offsetY; y < this.background.canvas.height; y += ch / zoom) {
+            for (let x = -offsetX; x < this.background.canvas.width; x += cw / zoom) {
+                if (zoom == 1) {
+                    this.background.context.putImageData(image!, x, y)
+                } else {
+                    this.background.context.drawImage(this.canvas.canvas, x, y, cw / zoom, ch / zoom)
+                }
             }
         }
     }
@@ -199,6 +265,4 @@ function loadCookieToCanvas(context: CanvasRenderingContext2D, onload?: () => vo
     }
 }
 
-window.onload = () => {
-    new PatternCreator()
-}
+customElements.define("pattern-creator", PatternCreator)
