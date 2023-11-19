@@ -1,0 +1,46 @@
+<svg-editor>
+    <svg xmlns="http://www.w3.org/2000/svg" id="canvas" viewBox="0 0 1 1"></svg>
+    <div class="controls">
+        <input id="color" type="color" />
+        <button id="clear">Clear</button>
+        <button id="save">Save</button>
+    </div>
+    <a hidden id="save" href="" download="pattern.png"></a>
+</svg-editor>
+
+
+<script>
+    import "@scripts/components/svg_editor"
+</script>
+
+<style lang="sass">
+    svg-editor
+        display: block
+        position: absolute
+        width: max-content
+        height: fit-content
+        top: 50%
+        left: 50%
+        transform: translate(-50%, -50%)
+            
+
+    svg#canvas
+        width: 50vmin
+        height: 50vmin
+        background: #fff
+
+    input,button
+        width: 10vmin
+        height: 4vmin
+
+    div.controls
+        margin-top: 1vmin
+        display: flex
+        width: 50vmin
+        justify-content: space-evenly
+        gap: 1vmin
+        flex-flow: row wrap
+
+        &>*
+            flex-basis: 1
+</style>
