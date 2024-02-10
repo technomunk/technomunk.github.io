@@ -4,13 +4,15 @@ interface Props {
     description?: string
     publishDate?: string
     href: string
+    tags?: string[]
 }
-const { title, description, publishDate, href } = Astro.props
+const { title, description, publishDate, href, tags } = Astro.props
 ---
 
 <a class="card" {href}>
     {publishDate && <div class="date">{new Date(publishDate).toDateString()}</div>}
     <h2>{title} &rarr;</h2>
+    {tags && <div class="tags">{tags.join(", ")}</div>}
     {description}
     <slot />
 </a>

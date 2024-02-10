@@ -8,7 +8,7 @@ Instructions for building the website.
 
 ### 🔗 Requirements
 
-- [npm](https://www.npmjs.com/)
+- [nodejs](https://nodejs.org/en/download)
 - [yarn](https://yarnpkg.com/)
 <!-- - [Rust](https://www.rust-lang.org/tools/install) -->
 <!-- - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) -->
