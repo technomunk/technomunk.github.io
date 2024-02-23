@@ -4,6 +4,7 @@ import { ViewRect, CanvasViewAdapter } from "@lib/webgl/view"
 
 import JULIA_SHADER from "@shader/julia.fs"
 import MANDELBROT_SHADER from "@shader/mandelbrot.fs"
+import { Ref, SERIALIZER_INTEGER, tryBindByQuery } from "@lib/ref"
 
 const MANDELBROT_CONTEXT_SETTINGS = {
     alpha: false,
@@ -12,7 +13,7 @@ const MANDELBROT_CONTEXT_SETTINGS = {
 }
 
 type JuliaConfig = {
-    limit: number,
+    limit: Ref<number>,
     seed: [number, number],
 }
 
@@ -37,7 +38,7 @@ class JuliaRenderer {
         this.renderer.draw({
             uPos: [this.view.minX, this.view.minY],
             uStep: [this.view.width / this.canvas.width, this.view.height / this.canvas.height],
-            uLim: config.limit,
+            uLim: config.limit.value,
             uSeed: config.seed,
         })
     }
@@ -77,7 +78,7 @@ class MandelbrotView {
 
 class JuliaView extends HTMLCanvasElement {
     readonly renderer: JuliaRenderer
-    readonly config: JuliaConfig = { limit: 32, seed: [0, .7885] }
+    readonly config: JuliaConfig = { limit: new Ref(32), seed: [0, .7885] }
 
     constructor() {
         super()
@@ -93,6 +94,7 @@ class JuliaView extends HTMLCanvasElement {
 
     protected _setup() {
         this.updateViewRatio()
+        this.config.limit.addObserver(() => this.drawFrame())
     }
 
     updateViewRatio() {
@@ -129,10 +131,12 @@ class JuliaWithMandelbrotMap {
         julia.renderer.resize(window.innerWidth, window.innerHeight)
         julia.renderer.view.height = 2
         julia.updateViewRatio()
-    
+
+        tryBindByQuery("input#limit", julia.config.limit, SERIALIZER_INTEGER)
+
         const mandelbrot = document.querySelector("canvas#map") as HTMLCanvasElement
         const adapter = new JuliaWithMandelbrotMap(julia, mandelbrot)
-    
+
         window.addEventListener("resize", () => adapter.resizeAndDraw(window.innerWidth, window.innerHeight))
         adapter.requestFrame()
     }

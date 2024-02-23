@@ -72,3 +72,7 @@ export function setCanvasSize(canvas: HTMLCanvasElement, width: number, height: 
 export function clamp(value: number, min = 0, max = 1): number {
     return Math.max(Math.min(value, max), min)
 }
+
+export function identity<T>(value: T): T {
+    return value
+}
