@@ -28,6 +28,35 @@ export class Ref<T> {
         }
     }
 
+
+    bindToInput(input: string | HTMLInputElement, serializer: Serializer<T>) {
+        if (typeof input === "string") {
+            input = document.querySelector(input) as HTMLInputElement
+        }
+        if (input instanceof HTMLInputElement) {
+            this._bindToInput(input, serializer)
+        } else {
+            console.warn("Could not bind reference")
+        }
+    }
+
+    protected _bindToInput(input: HTMLInputElement, serializer: Serializer<T>) {
+        const defaultValue = this.value
+        const listener = () => {
+            if (input.value === "") {
+                this.value = defaultValue
+                input.value = serializer.serialize(defaultValue)
+            } else {
+                this.value = serializer.parse(input.value)
+            }
+    
+        }
+        input.addEventListener("change", listener)
+        input.addEventListener("input", listener)
+        listener()
+        this.addObserver((value) => input.value = serializer.serialize(value))
+    }
+
     protected _informObservers() {
         for (const observer of this._observers) {
             observer(this.value)
@@ -38,29 +67,6 @@ export class Ref<T> {
 interface Serializer<T> {
     serialize(value: T): string
     parse(value: string): T
-}
-
-export function bind<T>(element: HTMLInputElement, ref: Ref<T>, serializer: Serializer<T>) {
-    const defaultValue = ref.value
-    const listener = () => {
-        if (element.value === "") {
-            ref.value = defaultValue
-        } else {
-            ref.value = serializer.parse(element.value)
-        }
-
-    }
-    element.addEventListener("change", listener)
-    element.addEventListener("input", listener)
-    listener()
-    ref.addObserver((value) => element.value = serializer.serialize(value))
-}
-
-export function tryBindByQuery<T>(query: string, ref: Ref<T>, serializer: Serializer<T>) {
-    const element = document.querySelector(query)
-    if (element instanceof HTMLInputElement) {
-        bind(element, ref, serializer)
-    }
 }
 
 export const SERIALIZER_INTEGER: Serializer<number> = {

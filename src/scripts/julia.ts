@@ -4,7 +4,7 @@ import { ViewRect, CanvasViewAdapter } from "@lib/webgl/view"
 
 import JULIA_SHADER from "@shader/julia.fs"
 import MANDELBROT_SHADER from "@shader/mandelbrot.fs"
-import { Ref, SERIALIZER_INTEGER, tryBindByQuery } from "@lib/ref"
+import { Ref, SERIALIZER_INTEGER } from "@lib/ref"
 
 const MANDELBROT_CONTEXT_SETTINGS = {
     alpha: false,
@@ -132,7 +132,7 @@ class JuliaWithMandelbrotMap {
         julia.renderer.view.height = 2
         julia.updateViewRatio()
 
-        tryBindByQuery("input#limit", julia.config.limit, SERIALIZER_INTEGER)
+        julia.config.limit.bindToInput("input#limit", SERIALIZER_INTEGER)
 
         const mandelbrot = document.querySelector("canvas#map") as HTMLCanvasElement
         const adapter = new JuliaWithMandelbrotMap(julia, mandelbrot)
