@@ -3,36 +3,44 @@ import MainLayout from "@layouts/MainLayout.astro"
 import SlideMenu from "@components/SlideMenu.astro"
 import "@styles/materials.sass"
 import "@styles/shapes.sass"
+import "@styles/fullscreen.sass"
+import "@styles/color.sass"
+import "@styles/glass.sass"
 ---
 
 <MainLayout title="Julia sets explorer" description="Interactive Julia sets explorer and visualizer in real time.">
-	<meta content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" name="viewport" slot="head">
-	<main>
-		<canvas id="view-julia" is="julia-view"></canvas>
-	</main>
-	<SlideMenu class="glass chamfer text-center text-lg">
-		<div class="row"><a class="button" href="index.html">Home</a></div>
-		<div class="row">
-			<canvas id="map" width="360" height="240"/>
-		</div>
-		<div class="row">
-			<label for="limit">Limit</label>
-			<input id="limit" type="number" min="1" value="32" max="1024">
-		</div>
-		<div class="row">
-			<label for="speed">Speed</label>
-			<input id="speed" type="range" min="0" max="3" step=".1" value=".5">
-		</div>
-		<div class="row">
-			<button id="toggle_fs">Toggle Fullscreen</button>
-		</div>
-		<div class="row">
-			<button id="redraw">Redraw</button>
-			<button id="reset">Reset</button>
-		</div>
-	</SlideMenu>
+    <meta
+        content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+        name="viewport"
+        slot="head"
+    />
+    <main>
+        <canvas id="view-julia" is="julia-view"></canvas>
+    </main>
+    <SlideMenu class="glass chamfer text-center text-lg themed flex container">
+        <div class="row"><a class="button round no-deco" href="index.html">Home</a></div>
+        <div class="row">
+            <canvas class="chamfer" id="map" width="360" height="240"></canvas>
+        </div>
+        <div class="row">
+            <label for="limit">Limit</label>
+            <input class="round" id="limit" type="number" min="1" value="32" max="1024" />
+        </div>
+        <!-- TODO: animation -->
+        <!-- <div class="row">
+            <label for="speed">Speed</label>
+            <input class="round" id="speed" type="range" min="0" max="3" step=".1" value=".5" />
+        </div>
+        <div class="row">
+            <button class="round" id="toggle_fs">Toggle Fullscreen</button>
+        </div>
+        <div class="row">
+            <button class="round" id="redraw">Redraw</button>
+            <button class="round" id="reset">Reset</button>
+        </div> -->
+    </SlideMenu>
 </MainLayout>
 
 <script>
-	import "@scripts/julia"
+    import "@scripts/julia"
 </script>

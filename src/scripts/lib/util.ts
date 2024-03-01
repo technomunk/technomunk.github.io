@@ -72,3 +72,22 @@ export function setCanvasSize(canvas: HTMLCanvasElement, width: number, height: 
 export function clamp(value: number, min = 0, max = 1): number {
     return Math.max(Math.min(value, max), min)
 }
+
+export function identity<T>(value: T): T {
+    return value
+}
+
+export function bindFnToButton(button: HTMLButtonElement | string, fn: () => any) {
+    if (typeof button === "string") {
+        button = document.querySelector(button) as HTMLButtonElement
+    }
+    if (button instanceof HTMLInputElement) {
+        _bindFnToButton(button, fn)
+    } else {
+        console.warn("Could not bind reference")
+    }
+}
+
+function _bindFnToButton(button: HTMLButtonElement, fn: () => any) {
+    button.addEventListener("click", () => fn())
+}

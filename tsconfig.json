@@ -14,6 +14,7 @@
       "@lib/*": ["src/scripts/lib/*"],
       "@scripts/*": ["src/scripts/*"],
       "@styles/*": ["src/styles/*"],
+      "@shader/*": ["src/shader/*"],
     }
   }
 }

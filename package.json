@@ -25,6 +25,7 @@
     "sass": "*",
     "typescript": "*",
     "unist-util-visit": "*",
+    "vite-plugin-glsl": "*",
     "vitest": "*"
   }
 }
