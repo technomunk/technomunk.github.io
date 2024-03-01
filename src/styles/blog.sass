@@ -1,6 +1,8 @@
 @use '@styles/font'
 @use '@styles/color'
 
+$background: #fdfdf2
+
 @keyframes highlightVarView
     0%
         background-color: #fcfc55
@@ -14,7 +16,6 @@
 
     100%
         background-color: #eeb9ff
-
 header
     font-weight: bolder
     text-align: center
@@ -27,7 +28,7 @@ header
 
 code
     color: #24292e
-    background: darken(color.$background, 5%)
+    background: darken($background, 5%)
 
 pre
     & code
