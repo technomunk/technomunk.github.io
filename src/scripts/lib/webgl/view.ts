@@ -33,7 +33,7 @@ export class ViewRect {
      * @param y vertical coordinate (top to bottom)
      */
     public relativeToActual(x: number, y: number): [number, number] {
-        return [(x - .5) * this.width, (.5 - y) * this.height]
+        return [this.x + (x - .5) * this.width, this.y + (.5 - y) * this.height]
     }
 
     /** Convert actual coordinates to normalized (relative) to this view

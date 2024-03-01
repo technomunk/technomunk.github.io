@@ -1,4 +1,4 @@
-import { error } from "@lib/util"
+import { bindFnToButton, error } from "@lib/util"
 import FragmentRenderer from "@lib/webgl/fragment"
 import { ViewRect, CanvasViewAdapter } from "@lib/webgl/view"
 
@@ -54,6 +54,11 @@ class MandelbrotView {
     readonly context: CanvasRenderingContext2D
     readonly background: CanvasImageSource
     readonly view: ViewRect = new ViewRect(-.5, 0, 3.3, 2.2)
+    targetSize = 10
+    targetStyle = "red"
+    protected _selectOnMove = false
+    protected _target: [number, number] = [.5, .5]
+    protected _observers: Array<(point: [number, number]) => void> = []
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
@@ -68,10 +73,65 @@ class MandelbrotView {
                 uStep: [this.view.width / canvas.width, this.view.height / canvas.height],
             }
         )
+        this._setupSelection()
     }
 
     draw() {
         this.context.drawImage(this.background, 0, 0)
+        this._drawTarget()
+    }
+
+    addObserver(observer: (point: [number, number]) => void) {
+        this._observers.push(observer)
+    }
+
+    get target(): [number, number] {
+        return this.view.relativeToActual(...this._target)
+    }
+    set target(value: [number, number]) {
+        this._target = this.view.actualToRelative(...value)
+    }
+
+    protected _drawTarget() {
+        const centerX = this.canvas.width * this._target[0]
+        const centerY = this.canvas.height * this._target[1]
+        const halfSize = this.targetSize / 2
+        this.context.strokeStyle = this.targetStyle
+        this.context.beginPath()
+        this.context.moveTo(centerX - halfSize, centerY)
+        this.context.lineTo(centerX + halfSize, centerY)
+        this.context.moveTo(centerX, centerY - halfSize)
+        this.context.lineTo(centerX, centerY + halfSize)
+        this.context.stroke()
+    }
+
+    protected _setupSelection() {
+        this.canvas.addEventListener("pointerdown", (event) => {
+            this._selectOnMove = true
+            this._select(event.offsetX, event.offsetY)
+        })
+        this.canvas.addEventListener("pointermove", (event) => {
+            if (this._selectOnMove) {
+                this._select(event.offsetX, event.offsetY)
+            }
+        })
+        const cancelSelection = () => { this._selectOnMove = false }
+        this.canvas.addEventListener("pointerleave", cancelSelection)
+        this.canvas.addEventListener("pointercancel", cancelSelection)
+        this.canvas.addEventListener("pointerout", cancelSelection)
+        this.canvas.addEventListener("pointerup", cancelSelection)
+    }
+
+    protected _select(x: number, y: number) {
+        const point = this.view.relativeToActual(x / this.canvas.width, 1 - y / this.canvas.height)
+        this.target = point
+        this._informObserversOfSelection(point)
+    }
+
+    protected _informObserversOfSelection(point: [number, number]) {
+        for (const observer of this._observers) {
+            observer(point)
+        }
     }
 }
 
@@ -110,6 +170,7 @@ class JuliaWithMandelbrotMap {
     constructor(julia: JuliaView, mandelbrot: HTMLCanvasElement) {
         this.julia = julia
         this.mandelbrot = new MandelbrotView(mandelbrot)
+        this._setupMandelbrotObservation()
     }
 
     drawFrame() {
@@ -123,6 +184,17 @@ class JuliaWithMandelbrotMap {
 
     resizeAndDraw(width: number, height: number) {
         this.julia.renderer.resize(width, height)
+        this.requestFrame()
+    }
+
+    protected _setupMandelbrotObservation() {
+        this.mandelbrot.addObserver(this._setJuliaViewToPoint.bind(this))
+    }
+
+    protected _setJuliaViewToPoint(point: [number, number]) {
+        console.debug(point)
+        this.mandelbrot.draw()
+        this.julia.config.seed = point
         this.requestFrame()
     }
 
@@ -142,5 +214,6 @@ class JuliaWithMandelbrotMap {
     }
 }
 
+// bindFnToButton("button#toggle_fs", toggleFullScreen)
 customElements.define("julia-view", JuliaView, { extends: "canvas" })
 window.addEventListener("load", JuliaWithMandelbrotMap.setup, { once: true })

@@ -76,3 +76,18 @@ export function clamp(value: number, min = 0, max = 1): number {
 export function identity<T>(value: T): T {
     return value
 }
+
+export function bindFnToButton(button: HTMLButtonElement | string, fn: () => any) {
+    if (typeof button === "string") {
+        button = document.querySelector(button) as HTMLButtonElement
+    }
+    if (button instanceof HTMLInputElement) {
+        _bindFnToButton(button, fn)
+    } else {
+        console.warn("Could not bind reference")
+    }
+}
+
+function _bindFnToButton(button: HTMLButtonElement, fn: () => any) {
+    button.addEventListener("click", () => fn())
+}
