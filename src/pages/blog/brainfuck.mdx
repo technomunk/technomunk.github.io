@@ -21,7 +21,7 @@ For reading or writing data Brainfuck has 4 operators: **+** for incrementing, *
 
 So putting it all together the following will read a character from input and print the next ASCII character: `,+.`
 
-However with these operators it would be impossible to write the same program as we did in the [post on assembly](../assembly). We are missing conditional operators, which brings us to the final 2 operators: **[** which will skip to the associated closing brace if the value at current cell is 0 and **]** which will jump back to the associated opening brace if the value is non-zero. And that's it! Any other character is treated as a comment and should be ignored.
+However with these operators it would be impossible to write the same program as we did in the [post on assembly](../assembly). We are missing conditional operators, which brings us to the final 2 operators: **[** which will skip to the associated closing brace if the value at current cell is 0 and **]**. Which will jump back to the associated opening brace if the value is non-zero. And that's it! Any other character is treated as a comment and should be ignored.
 
 <BnfkInterpreter cells="8" names="from Technomunk;blog;world;dear reader" code={`+++++ +++               Set Cell #0 to 8 to setup multiplying the following cells by 8
 [

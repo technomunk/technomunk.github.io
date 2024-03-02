@@ -41,7 +41,7 @@ print(nth_fibonacci(int(input())))
 
 Let's start with something simpler: a single *expression* `(+ 1 2)`. As you might suspect it evaluates to 3. And that's pretty much all an expression is - a sequence of instructions that evaluates to some value. Most languages allow nesting expressions together `(+ (read) (read))`. The summation is now invoking another expression (reading from input) for each of its arguments. And this nesting is why source code is usually represented as a *syntax tree* when working with it - sometimes it's sufficient to identify that "oh, this is an expression, but our syntax doesn't allow an expression here". When in doubt - expressions are whatever the language allows you to put on the right hand side of assignment.
 
-But speaking of assignment - is it an expression? Or a function definition? Is our first set of brackets an expression? Well they don't *evaluate* to anything, so maybe not. They are just a statement - a block of code that tells what the program should do. So our first statement syntax tree looks something like:
+But speaking of assignment - is it an expression? What about a function definition? Is our first set of brackets an expression? Well they don't *evaluate* to anything, so maybe not. They are just a statement - a block of code that tells what the program should do. So our first statement syntax tree looks something like:
 ```ast
 statement (function definition) { name: "nth_fibonacci", parameters: ["n"], doc: "Calculate the Nth Fibonacci number." }
     expression (if)
@@ -60,7 +60,7 @@ statement (function definition) { name: "nth_fibonacci", parameters: ["n"], doc:
                     value 2
 ```
 
-Arguably the statement does evaluate to something - modifying the global state to define a new function that can be called. And in fact that exactly how Lisp works! So every set of brackets is an expression!
+Arguably the statement does evaluate to something - modifying the global state to define a new function that can be called. And in fact that's exactly how Lisp works! So every set of brackets is an expression!
 
 Alright, we have a weird looking data structure that we have no idea how to create (and I will delve into parsing some other time), what next? How does having this tree help us? Imagine we're writing an interpreter and we had the parser that would provide us the syntax tree. How would we go about evaluating an expression?
 
