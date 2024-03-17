@@ -1,0 +1,11 @@
+{
+    "title": "Bottica: the sassy discord bot",
+    "description": "A personal discord bot, providing entertainment on mine and my friends' servers.",
+    "aspiration": "Work on a small-scope project, focusing on quick delivery and user experience. Additionally work on my user experience design skills.",
+    "technologies": [
+        "python",
+        "discord_api"
+    ],
+    "lastActivity": "2023-07-15",
+    "status": "Completed"
+}

@@ -1,0 +1,5 @@
+{
+    "display": "DynamoDB",
+    "type": "software",
+    "hint": "AWS DynamoDB distributed database"
+}

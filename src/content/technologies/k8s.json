@@ -1,0 +1,5 @@
+{
+    "display": "K8S",
+    "type": "software",
+    "hint": "The Kubernetes docker management software suite"
+}

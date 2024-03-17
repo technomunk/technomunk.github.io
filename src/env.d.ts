@@ -1,3 +1,4 @@
+/// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
 
 // https://github.com/UstymUkhman/vite-plugin-glsl/blob/main/test/shaders.d.ts

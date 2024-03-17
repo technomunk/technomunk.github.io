@@ -2,7 +2,7 @@
 const posts = await Astro.glob("./blog/*.mdx")
 import MainLayout from "@layouts/MainLayout.astro"
 import BlogOverview from "@components/BlogOverview.astro"
-import { dateCompare } from "@lib/util"
+import { dateCompare } from "@lib/dateutil"
 
 posts.sort((a, b) => dateCompare(b.frontmatter.publishedOn, a.frontmatter.publishedOn))
 ---

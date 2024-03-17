@@ -1,8 +1,34 @@
 ---
-import { Image } from "astro:assets"
-import avatarImg from "@assets/img/avatar.jpg"
 import MainLayout from "@layouts/MainLayout.astro"
 import "@styles/avatar.sass"
+import "@styles/resume.sass"
+
+import { getCollection } from "astro:content"
+import { dateCompare } from "@lib/dateutil"
+
+const assignments = await getCollection("assignments")
+assignments.sort((a, b) => dateCompare(b.data.startDate, a.data.startDate))
+
+const projects = await getCollection("projects")
+projects.sort((a, b) => dateCompare(b.data.lastActivity, a.data.lastActivity))
+
+const technologies = new Map()
+for (const technology of await getCollection("technologies")) {
+    technologies.set(technology.id, technology.data)
+}
+
+function findOrDefaultTech(tech: string) {
+    const d = technologies.get(tech.toLowerCase())
+    if (d == undefined) {
+        console.warn(`${tech} technology not found`)
+        return {
+            display: tech,
+            hint: tech,
+            type: "unknown",
+        }
+    }
+    return d
+}
 ---
 
 <MainLayout title="Technomunk's Resume" description="Overview of Technomunk's work">
@@ -12,7 +38,7 @@ import "@styles/avatar.sass"
         <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
     </header>
     <main>
-        <p class="text-center"> Welcome to the overview of my development work assignments and projects.</p>
+        <p class="text-center">Welcome to the overview of my development work assignments and projects.</p>
         <table>
             <caption>Assignments</caption>
             <thead>
@@ -24,30 +50,29 @@ import "@styles/avatar.sass"
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">Senior Integration developer @ Billogram</th>
-                    <td>Guiding, tutoring and assisting the team to ensure the maintenance and delivery of file integrations towards customers that are not able to make use of the core product API. My responsabilities primarily consisted of facilitating the team member's technical growth. Incoming work prioritization, wholistic design and architecture. Implementation, testing and quality assurance of the integrations as any augmentations to the core product to fit customer needs.</td>
-                    <td>Python, Jira, git, Mermaid, AWS (DynamoDB, SNS, SQS, S3), Kubernetees, GitHub Actions, HTTP, REST, Microservies</td>
-                    <td>August 2023 - current</td>
-                </tr>
-                <tr>
-                    <th scope="row">Integration developer @ Billogram</th>
-                    <td>Maintenance and development of file integrations towards customers that are not able to make use of the core product API. My responsabilities primarily consisted of solution design and architecture, implementation, testing and quality assurance of the integrations as any augmentations to the core product to fit customer needs.</td>
-                    <td>Python, git, AWS (DynamoDB, SNS, SQS, S3), HTTP, REST, Microservies</td>
-                    <td>August 2021 - August 2023</td>
-                </tr>
-                <tr>
-                    <th scope="row">Developer @ Mutate</th>
-                    <td>Research and development of a game engine as well as a user generated content platform. My responsabilities primarily consisted of developing new functionality. Designing, implementing, testing and optimizing core systems and tools. Highlights include game loop, netcode (including physics synchronization), world building and asset processing tooling, dynamic off-grid voxel physics, entire animation system as well as procedural animation, third party scripting framework development, backend rework and delivery optimization.</td>
-                    <td>C++, x86 assembly, C#, GLSL, Vulkan, Clang & MSVC compilers, git, VTune, Conan, AWS (KMS), UDP, HTTP</td>
-                    <td>May 2019 - January 2021</td>
-                </tr>
-                <tr>
-                    <th scope="row">Backend developer @ THS Armada</th>
-                    <td>Backend development for the annual career fair at KTH, as well as the associated app. Primary responsabilities consisted of designing and developing features requested by recruiters at the fair. The highlight was designing the backend and frontend interaction between existing backend servers and a brand new mobile app for that year.</td>
-                    <td>Python, Django, git, WireShark, HTTP, Postman</td>
-                    <td>April 2017 - November 2017</td>
-                </tr>
+                {
+                    assignments.map((a) => (
+                        <tr>
+                            <th scope="row">
+                                {a.data.title} @ {a.data.employer}
+                            </th>
+                            <td>{a.data.description}</td>
+                            <td>
+                                {a.data.technologies
+                                    .sort()
+                                    .map(findOrDefaultTech)
+                                    .map((t) => (
+                                        <div title={t.hint} class={t.type + " tag"}>
+                                            {t.display}
+                                        </div>
+                                    ))}
+                            </td>
+                            <td>
+                                {a.data.startDate} to {a.data.endDate}
+                            </td>
+                        </tr>
+                    ))
+                }
             </tbody>
         </table>
         <table>
@@ -56,88 +81,32 @@ import "@styles/avatar.sass"
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Idea</th>
-                    <th scope="col">Goals</th>
+                    <th scope="col">Aspiration</th>
                     <th scope="col">Technology</th>
                     <th scope="col">Status</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">Technomunk website</th>
-                    <td>This very website you're viewing right now</td>
-                    <td>Create something that is easily shareable that I can continuously build up over many years. Additionally learn finishing projects when they are good enough instead of getting stuck trying to perfect one.</td>
-                    <td>TypeScript, SASS, Astro, Vite</td>
-                    <td>Active</td>
-                </tr>
-                <tr>
-                    <th scope="row">Exploramap app</th>
-                    <td>Exploration gamification cross-platform application based on GPS data and OpenStreetMap data.</td>
-                    <td>Dive into mobile and cross-platform development. Focus on design and user experience and build something that could evolve into a side-business.</td>
-                    <td>Dart, Flutter, Kotlin, Gradle, Android, GLSL</td>
-                    <td>Semi-active</td>
-                </tr>
-                <tr>
-                    <th scope="row">Advent of code participation</th>
-                    <td>Regular participation in the annual advent-of-code event.</td>
-                    <td>Get an opportunity to learn a brand new programming language every year as well as keep my problem solving skills shartp.</td>
-                    <td>Julia, Clojure (lisp), Erlang</td>
-                    <td>Event-based activity</td>
-                </tr>
-                <tr>
-                    <th scope="row">Rustbucket</th>
-                    <td>Physics centric vehicle based phantasy sandbox game written in the immerging entity-component-system design framework.</td>
-                    <td>Dive deeper into physics as well as stay connected with game-development community.</td>
-                    <td>Rust, Bevy, GLSL</td>
-                    <td>On hold</td>
-                </tr>
-                <tr>
-                    <th scope="row">Bottica: the sassy discord bot</th>
-                    <td>A personal discord bot, providing entertainment on mine and my friends servers.</td>
-                    <td>Work on a small-scope project, focusing on quick delivery and user experience. Additionally work on my user experience design skills.</td>
-                    <td>Python, Discord API</td>
-                    <td>Completed</td>
-                </tr>
-                <tr>
-                    <th scope="row">Cookbook</th>
-                    <td>System-driven recipe server supporting actual cookie recipes as well as other recipe-based domains (games, production lines, etc). Started as a way to explore the Go language, but was abandoned when I realized Go was not well-suited for the project.</td>
-                    <td>Go and its ecosystem, JavaScript</td>
-                    <td>Abandoned (until I find motivation to completely restart the project from the start)</td>
-                </tr>
-                <tr>
-                    <th scope="row">GNET</th>
-                    <td>Message-based networking library for real-time applications, supporting reliable out-of-order delivery mixed with unreliable best-effort delivery, congestion avoidance, rate-limitting and bit-packing over UDP.</td>
-                    <td>Dive deep into networking and create something I could use for future projects.</td>
-                    <td>C++, UDP, POSIX, Rust</td>
-                    <td>Completed C++ version, abandoned a rewrite in Rust</td>
-                </tr>
-                <tr>
-                    <th scope="row">GEngine</th>
-                    <td>Game engine written in C++ with Vulkan as the graphics API. I ran out of steam after implementing basic scene organization and rendering logic.</td>
-                    <td>Learn Vulkan and modern graphics APIs.</td>
-                    <td>C++, Vulkan, GLSL</td>
-                    <td>Abandoned due to the realization of the scope of the proejct</td>
-                </tr>
-                <tr>
-                    <th scope="row">Trains!</th>
-                    <td>A game strongly inspired by Sid Mier's Railroads, written from scratch using C++ standard library and OpenGL. Highligh included writing a bespoke SIMD-optimized linear algebra library. Unfortunately the project died due to a drive failure and I did not use a version control system at the time.</td>
-                    <td>Learn graphics processing and game development</td>
-                    <td>C++, OpenGL, GLSL, x86 assembly</td>
-                    <td>Dead due to harddrive failure. Hard life lesson on the usefulness of backups.</td>
-                </tr>
-                <tr>
-                    <th scope="row">Minecraft mod (was called "Create", but not the great mod that was developed around 2022)</th>
-                    <td>Minecraft mod adding more blocks to the base game with custom hitboxes and graphical effects. Culminanted in data-driven generation system where users could add new blocks with custom looks, properties and hitboxes by creating a json file. The idea became redundant once Minecraft 1.0 was released along with more powerful resource-packs.</td>
-                    <td>Learn collaborative programming and working with end-users</td>
-                    <td>Java, Minecraft Forge</td>
-                    <td>Redundant due to the mentioned release</td>
-                </tr>
-                <tr>
-                    <th scope="row">Miscellaneous</th>
-                    <td>I regularly write quick solutions or implement random ideas I get. This can be prototyping an idea that leads to a project (for example the cookbook server or the exploramap app), brainstorming a solution to a problem (voxelization, working out algebra), playing a coding-centric game (Screeps AI, bitburner, Farmer Was Replaced), contributing to an open source project with a bugfix or a minor feature improvement or just trying to entertain myself. These are too numerous and too small to list in detail.</td>
-                    <td>Self-entertainment, experimentation or solving a problem specific to me.</td>
-                    <td>C, C++, Rust, MiPS, x86 and Bespoke assembly, Lua, JavaScript, Java, TypeScript, Erlang, Elixir, Python, fish-shell just to name the languages used off the top of my head</td>
-                    <td>Sporadically active</td>
-                </tr>
+                {
+                    projects.map((p) => (
+                        <tr>
+                            <th scope="row">{p.data.title}</th>
+                            <td>{p.data.description}</td>
+                            <td>{p.data.aspiration}</td>
+                            <td>
+                                {p.data.technologies
+                                    .sort()
+                                    .map(findOrDefaultTech)
+                                    .map((t) => (
+                                        <div title={t.hint} class={t.type + " tag"}>
+                                            {t.display}
+                                        </div>
+                                    ))}
+                            </td>
+                            <td>{p.data.status}</td>
+                        </tr>
+                    ))
+                }
             </tbody>
         </table>
     </main>

@@ -1,0 +1,15 @@
+{
+    "title": "Exploramap App",
+    "description": "Exploration gamification cross-platform application based on GPS data and OpenStreetMap data.",
+    "aspiration": "Dive into mobile and cross-platform development. Focus on design and user experience and build something that could evolve into a side-business.",
+    "technologies": [
+        "dart",
+        "flutter",
+        "kotlin",
+        "gradle",
+        "android",
+        "glsl"
+    ],
+    "lastActivity": "2024-01-25",
+    "status": "Semi-active"
+}

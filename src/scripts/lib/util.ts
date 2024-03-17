@@ -52,12 +52,6 @@ export function repeat(amount: number): Array<null> {
     return result
 }
 
-export function dateCompare(a?: Date | string, b?: Date | string): number {
-    a = (a == undefined) ? new Date() : new Date(a)
-    b = (b == undefined) ? new Date() : new Date(b)
-    return a.getTime() - b.getTime()
-}
-
 export function setCanvasSize(canvas: HTMLCanvasElement, width: number, height: number) {
     if (canvas.style.width.endsWith("px")) {
         canvas.style.width = `${width}px`
@@ -90,4 +84,13 @@ export function bindFnToButton(button: HTMLButtonElement | string, fn: () => any
 
 function _bindFnToButton(button: HTMLButtonElement, fn: () => any) {
     button.addEventListener("click", () => fn())
+}
+
+export type Bounds<T> = [T, T]
+export function randRange(min: number, max: number): number {
+	return min + Math.random() * (max - min)
+}
+
+export function isMobile(): boolean {
+	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }

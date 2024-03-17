@@ -1,0 +1,5 @@
+{
+    "display": "Clojure (lisp)",
+    "type": "language",
+    "hint": "The Clojure programming language. (Effectively common lisp running on JVM)"
+}

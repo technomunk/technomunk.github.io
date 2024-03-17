@@ -1,0 +1,5 @@
+{
+    "display": "GitHub Actions",
+    "type": "software",
+    "hint": "The CI/CD workflow definitions for GitHub repositories"
+}

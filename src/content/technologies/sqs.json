@@ -1,0 +1,5 @@
+{
+    "display": "SQS",
+    "type": "software",
+    "hint": "The AWS Simple Queue Service"
+}

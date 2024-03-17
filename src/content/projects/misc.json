@@ -1,0 +1,23 @@
+{
+    "title": "Miscellaneous",
+    "description": "I regularly write quick solutions or implement random ideas I get. This can be prototyping an idea that leads to a project (for example the cookbook server or the exploramap app), brainstorming a solution to a problem (voxelization, working out algebra), playing a coding-centric game (Screeps AI, bitburner, Farmer Was Replaced), contributing to an open source project with a bugfix or a minor feature improvement or just trying to entertain myself. These are too numerous and too small to list in detail.",
+    "aspiration": "Self-entertainment, experimentation or solving a problem specific to me.",
+    "technologies": [
+        "c",
+        "c++",
+        "rust",
+        "mipsasm",
+        "x86asm",
+        "bespoke_assembly",
+        "lua",
+        "javascript",
+        "java",
+        "typescript",
+        "erlang",
+        "elixir",
+        "python",
+        "fishshell"
+    ],
+    "lastActivity": "2000-10-10",
+    "status": "Sporadically active"
+}

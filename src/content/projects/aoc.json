@@ -1,0 +1,13 @@
+{
+    "title": "Advent of code participation",
+    "description": "Regular participation in the annual advent-of-code event.",
+    "aspiration": "Get an opportunity to learn a brand new programming language every year as well as keep my problem solving skills sharp.",
+    "technologies": [
+        "julia",
+        "clojure",
+        "erlang",
+        "python"
+    ],
+    "lastActivity": "2023-12-25",
+    "status": "Event-based activity"
+}

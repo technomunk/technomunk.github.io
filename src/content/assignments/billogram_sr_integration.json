@@ -1,0 +1,28 @@
+{
+    "title": "Senior Integration Developer",
+    "employer": "Billogram",
+    "description": "Guiding, tutoring and assisting the team to ensure the maintenance and delivery of file integrations towards customers that are not able to make use of the core product API. My responsabilities primarily consisted of facilitating the team member's technical growth. Incoming work prioritization, wholistic design and architecture. Implementation, testing and quality assurance of the integrations as any augmentations to the core product to fit customer needs.",
+    "startDate": "2023-08",
+    "endDate": "today",
+    "technologies": [
+        "Python",
+        "git",
+        "AWS",
+        "DynamoDB",
+        "SNS",
+        "SQS",
+        "S3",
+        "HTTP",
+        "REST",
+        "Microservices",
+        "Iterative_Development",
+        "Agile",
+        "DDD",
+        "TDD",
+        "Jira",
+        "GitHub_Actions",
+        "K8S",
+        "Mermaid",
+        "linux"
+    ]
+}
