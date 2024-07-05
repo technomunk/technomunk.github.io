@@ -187,33 +187,109 @@ class JuliaWithMandelbrotMap {
         this.requestFrame()
     }
 
+    setJuliaPoint(point: [number, number]) {
+        this.mandelbrot.target = point
+        this._setJuliaViewToPoint(point)
+    }
+
     protected _setupMandelbrotObservation() {
         this.mandelbrot.addObserver(this._setJuliaViewToPoint.bind(this))
     }
 
     protected _setJuliaViewToPoint(point: [number, number]) {
-        console.debug(point)
         this.mandelbrot.draw()
         this.julia.config.seed = point
         this.requestFrame()
     }
+}
 
-    static setup() {
-        const julia = document.querySelector("#view-julia") as JuliaView
-        julia.renderer.resize(window.innerWidth, window.innerHeight)
-        julia.renderer.view.height = 2
-        julia.updateViewRatio()
+class JuliaAnimator {
+    readonly representation: JuliaWithMandelbrotMap
 
-        julia.config.limit.bindToInput("input#limit", SERIALIZER_INTEGER)
+    orbitFocus: [number, number] = [0, 0]
+    orbitRadius = .7885
+    orbitPeriodMS = 60_000
 
-        const mandelbrot = document.querySelector("canvas#map") as HTMLCanvasElement
-        const adapter = new JuliaWithMandelbrotMap(julia, mandelbrot)
+    protected _isPlaying = false
+    protected _animationStartTime = 0
 
-        window.addEventListener("resize", () => adapter.resizeAndDraw(window.innerWidth, window.innerHeight))
-        adapter.requestFrame()
+    constructor(representation: JuliaWithMandelbrotMap) {
+        this.representation = representation
     }
+
+    get isPlaying(): boolean {
+        return this._isPlaying
+    }
+    set isPlaying(value: boolean) {
+        if (value == this._isPlaying) {
+            return
+        }
+        value ? this.start() : this.stop()
+    }
+
+    /** Begin playing animation */
+    start() {
+        if (this._isPlaying) {
+            return
+        }
+
+        this._isPlaying = true
+        this._animationStartTime = performance.now()
+        this._drawFrame()
+    }
+
+    stop() {
+        this._isPlaying = false
+    }
+
+    protected _drawFrame() {
+        if (! this._isPlaying) {
+            return
+        }
+        const dt = performance.now() - this._animationStartTime
+        const periodTime = (dt % this.orbitPeriodMS) / this.orbitPeriodMS
+        const angle = periodTime * Math.PI * 2
+        const x = this.orbitFocus[0] + this.orbitRadius * Math.cos(angle)
+        const y = this.orbitFocus[1] + this.orbitRadius * Math.sin(angle)
+
+        this.representation.setJuliaPoint([x, y])
+        requestAnimationFrame(() => this._drawFrame())
+    }
+}
+
+function setup() {
+    const julia = document.querySelector("#view-julia") as JuliaView
+    julia.renderer.resize(window.innerWidth, window.innerHeight)
+    julia.renderer.view.height = 2
+    julia.updateViewRatio()
+
+    julia.config.limit.bindToInput("input#limit", SERIALIZER_INTEGER)
+
+    const mandelbrot = document.querySelector("canvas#map") as HTMLCanvasElement
+    const adapter = new JuliaWithMandelbrotMap(julia, mandelbrot)
+    const animator = new JuliaAnimator(adapter)
+
+    adapter.mandelbrot.addObserver(() => animator.stop())
+    
+    window.addEventListener("resize", () => adapter.resizeAndDraw(window.innerWidth, window.innerHeight))
+    adapter.requestFrame()
+    animator.start()
+ 
+    setupButton(animator)
+}
+
+function setupButton(animator: JuliaAnimator) {
+    const button = document.querySelector("button#start-stop") as HTMLButtonElement
+    button.addEventListener("click", () => {
+        animator.isPlaying = !animator.isPlaying
+        button.textContent = animator.isPlaying ? "Stop" : "Start"
+    })
+    button.textContent = animator.isPlaying ? "Stop" : "Start"
+    animator.representation.mandelbrot.addObserver(() => {
+        button.textContent = "Start"
+    })
 }
 
 // bindFnToButton("button#toggle_fs", toggleFullScreen)
 customElements.define("julia-view", JuliaView, { extends: "canvas" })
-window.addEventListener("load", JuliaWithMandelbrotMap.setup, { once: true })
+window.addEventListener("load", setup, { once: true })
