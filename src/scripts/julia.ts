@@ -197,6 +197,7 @@ class JuliaWithMandelbrotMap {
     }
 
     protected _setJuliaViewToPoint(point: [number, number]) {
+        console.debug(point)
         this.mandelbrot.draw()
         this.julia.config.seed = point
         this.requestFrame()
@@ -206,8 +207,8 @@ class JuliaWithMandelbrotMap {
 class JuliaAnimator {
     readonly representation: JuliaWithMandelbrotMap
 
-    orbitFocus: [number, number] = [0, 0]
-    orbitRadius = .7885
+    orbitFocus: [number, number] = [-1, 0]
+    orbitRadius = .275
     orbitPeriodMS = 60_000
 
     protected _isPlaying = false
