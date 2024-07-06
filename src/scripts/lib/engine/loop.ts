@@ -24,7 +24,7 @@ export class Loop {
 
     drawFrame() {
         const now = performance.now()
-        const dt = Math.min((this._lastTime - now) / 1_000, this.maxDT)
+        const dt = Math.min((now - this._lastTime) / 1_000, this.maxDT)
         performance.mark("sim-start")
         this.simulate(dt)
         const measure = performance.measure("simulation", "sim-start")

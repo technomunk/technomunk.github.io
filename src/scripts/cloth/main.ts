@@ -49,7 +49,7 @@ function createScene(): Scene {
     ]
     return new Scene(
         entities,
-        new PerspectiveCamera([0, 1.2, -2]),
+        new PerspectiveCamera([0, 1.2, -1.5]),
     )
 }
 
