@@ -1,7 +1,12 @@
+import { PerspectiveCamera } from "@lib/engine/camera"
+import { Cloth, ClothSimulator } from "@lib/engine/cloth"
+import Entity from "@lib/engine/entity"
+import { Loop } from "@lib/engine/loop"
 import Renderer from "@lib/engine/renderer"
 import Scene from "@lib/engine/scene"
+import { WireCube } from "@lib/engine/shape"
 import { GestureDecoder } from "@lib/gesture"
-import { mat3, mat4, vec3, vec4 } from "gl-matrix"
+import { mat4, vec4 } from "gl-matrix"
 
 
 function setup() {
@@ -9,17 +14,20 @@ function setup() {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
-    const scene = Scene.TEST_SCENE()
+    const scene = createScene()
+    
     const renderer = new Renderer(canvas)
     window.addEventListener("resize", () => {
         renderer.resize(window.innerWidth, window.innerHeight)
         renderer.draw(scene)
     })
-
-    const drawFrame = () => {
-        renderer.draw(scene)
-        requestAnimationFrame(drawFrame)
-    }
+    
+    window.addEventListener("keypress", (e) => {
+        if (e.key == " ") {
+            loop.simulate(0.05)
+        }
+    })
+    const loop = new Loop(scene, renderer)
     const gd = new GestureDecoder(canvas)
     gd.addDragObserver((drag) => {
         const matrix = mat4.create()
@@ -30,7 +38,19 @@ function setup() {
         scene.camera.position.splice(0, 3, result[0], result[1], result[2])
     })
 
-    drawFrame()
+    loop.loop()
+}
+
+function createScene(): Scene {
+    const cloth = new Cloth(50)
+    const entities = [
+        new Entity([0, 0, 0], new WireCube(.5)),
+        new Entity([0, 0, 0], cloth)
+    ]
+    return new Scene(
+        entities,
+        new PerspectiveCamera([0, 1.2, -2]),
+    )
 }
 
 window.addEventListener("load", setup, { once: true })

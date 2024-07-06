@@ -1,9 +1,10 @@
-import type { Mesh } from "./types"
+import type { IndexBuffer, Mesh, PositionBuffer } from "./types"
 
 export class Cube implements Mesh {
     readonly style = "triangle"
-    readonly positions: Float32Array
-    readonly indices: Uint16Array
+    readonly positions: PositionBuffer
+    readonly indices: IndexBuffer
+    isDirty: boolean = true
 
     constructor(size: number) {
         this.positions = Cube.createPositions(size)
@@ -33,8 +34,9 @@ export class Cube implements Mesh {
 
 export class WireCube implements Mesh {
     readonly style = "line"
-    readonly positions: Float32Array
-    readonly indices: Uint16Array
+    readonly positions: PositionBuffer
+    readonly indices: IndexBuffer
+    isDirty: boolean = true
 
     constructor(size: number) {
         this.positions = Cube.createPositions(size)
