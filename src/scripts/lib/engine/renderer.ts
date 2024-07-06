@@ -24,7 +24,14 @@ class MeshStorage {
     }
 
     getOrUpload(mesh: Mesh): MeshOnGPU {
-        return this._meshes.get(mesh) || this._upload(mesh)
+        const gpuMesh = this._meshes.get(mesh)
+        if (gpuMesh != undefined) {
+            if (mesh.isDirty) {
+                this._uploadNewData(mesh, gpuMesh)
+            }
+            return gpuMesh
+        }
+        return this._upload(mesh)
     }
 
     protected _upload(mesh: Mesh): MeshOnGPU {
@@ -39,7 +46,14 @@ class MeshStorage {
         const result: MeshOnGPU = { positions, indices }
 
         this._meshes.set(mesh, result)
+        mesh.isDirty = false
         return result
+    }
+
+    protected _uploadNewData(mesh: Mesh, gpuMesh: MeshOnGPU) {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, gpuMesh.positions)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, mesh.positions, this.gl.STATIC_DRAW)
+        mesh.isDirty = false
     }
 }
 
@@ -161,7 +175,6 @@ export default class Renderer {
 
     protected _setUniforms(entity: Entity) {
         mat4.mul(this.matrices.mvp, this.matrices.vp, entity.calcTransform())
-        // this.gl.uniformMatrix4fv(this.programInfo.uniforms["uMVP"], false, mat4.identity(mat4.create()))
         this.gl.uniformMatrix4fv(this.programInfo.uniforms["uMVP"], false, this.matrices.mvp)
     }
 }
