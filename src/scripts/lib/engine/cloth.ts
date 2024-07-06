@@ -1,3 +1,4 @@
+import { shuffle } from "@lib/util";
 import type Scene from "./scene";
 import type { DrawStyle, IndexBuffer, Mesh, Vec3, PositionBuffer } from "./types";
 
@@ -97,6 +98,7 @@ export class Cloth implements Mesh {
         for (const c of connections) {
             c.length = Math.sqrt(Particle.dist2(particles[c.a], particles[c.b]))
         }
+        shuffle(connections)
         return [particles, connections]
     }
 

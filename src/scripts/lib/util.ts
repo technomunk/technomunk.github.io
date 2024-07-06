@@ -94,3 +94,12 @@ export function randRange(min: number, max: number): number {
 export function isMobile(): boolean {
 	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
+
+export function shuffle<T>(array: Array<T>) {
+    for (let i = 0; i < array.length; ++i) {
+        const ri = Math.floor(Math.random() * array.length)
+        const a = array[i]
+        array[i] = array[ri]
+        array[ri] = a
+    }
+}
