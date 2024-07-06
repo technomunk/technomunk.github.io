@@ -76,9 +76,9 @@ export class Cloth implements Mesh {
         for (let a = 0; a < particlesPerSide; ++a) {
             for (let b = 0; b < particlesPerSide; ++b) {
                 const index = particles.length
-                const x = -1.5 + (a / (particlesPerSide - 1)) * 2
+                const x = -1 + (a / (particlesPerSide - 1)) * 2
                 const z = -1 + (b / (particlesPerSide - 1)) * 2
-                const pin = (a + 1 == particlesPerSide)
+                const pin = (b + 1 == particlesPerSide)
                 particles.push(new Particle(x, 1, z, massPerParticle, pin))
                 if (a > 0) {
                     connections.push({ a: index, b: index - particlesPerSide, length })

@@ -44,7 +44,7 @@ function setup() {
 function createScene(): Scene {
     const cloth = new Cloth(50)
     const entities = [
-        new Entity([0, 0, 0], new WireCube(.5)),
+        // new Entity([0, 0, 0], new WireCube(.5)),
         new Entity([0, 0, 0], cloth)
     ]
     return new Scene(
