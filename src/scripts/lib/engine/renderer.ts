@@ -106,7 +106,8 @@ export default class Renderer {
             if (entity.mesh != undefined) {
                 this._setAttributes(entity.mesh)
                 this._setUniforms(entity)
-                this.gl.drawElements(this.gl.LINES, entity.mesh.indices.length, this.gl.UNSIGNED_SHORT, 0)
+                const style = entity.mesh.style == "line" ? this.gl.LINES : this.gl.TRIANGLES
+                this.gl.drawElements(style, entity.mesh.indices.length, this.gl.UNSIGNED_SHORT, 0)
             }
         }
 

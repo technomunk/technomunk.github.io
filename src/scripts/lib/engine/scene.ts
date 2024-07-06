@@ -1,6 +1,6 @@
 import { PerspectiveCamera, type Camera } from "./camera"
 import Entity from "./entity"
-import { Cube } from "./shape"
+import { WireCube } from "./shape"
 
 
 export default class Scene {
@@ -14,7 +14,7 @@ export default class Scene {
 
     static TEST_SCENE(): Scene {
         const entities = [
-            new Entity([0, 0, 0], new Cube(.5)),
+            new Entity([0, 0, 0], new WireCube(.5)),
         ]
         return new Scene(entities, new PerspectiveCamera(
             [0, 1, -1.2],
