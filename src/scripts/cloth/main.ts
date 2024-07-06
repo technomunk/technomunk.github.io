@@ -6,6 +6,7 @@ import Renderer from "@lib/engine/renderer"
 import Scene from "@lib/engine/scene"
 import { WireCube } from "@lib/engine/shape"
 import { GestureDecoder } from "@lib/gesture"
+import { isMobile } from "@lib/util"
 import { mat4, vec4 } from "gl-matrix"
 
 
@@ -42,7 +43,8 @@ function setup() {
 }
 
 function createScene(): Scene {
-    const cloth = new Cloth(200)
+    const particleCount = isMobile() ? 50 : 200
+    const cloth = new Cloth(particleCount)
     const entities = [
         // new Entity([0, 0, 0], new WireCube(.5)),
         new Entity([0, 0, 0], cloth)
