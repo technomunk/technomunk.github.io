@@ -178,6 +178,8 @@ function createUniformSetter(
             return (v) => gl.uniform4fv(loc, v)
         case gl.FLOAT_MAT3:
             return (v) => gl.uniformMatrix3fv(loc, false, v)
+        case gl.FLOAT_MAT4:
+            return (v) => gl.uniformMatrix4fv(loc, false, v)
         case gl.SAMPLER_2D:
             return (v) => {
                 gl.uniform1i(loc, 0)

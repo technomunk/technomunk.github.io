@@ -18,6 +18,7 @@
     "@types/vfile": "*",
     "astro": "*",
     "astro-diagram": "*",
+    "gl-matrix": "*",
     "prettier-plugin-astro": "*",
     "rehype": "*",
     "remark": "*",
