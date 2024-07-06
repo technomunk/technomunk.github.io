@@ -43,6 +43,13 @@ class Particle {
         this._oldZ = this.curZ
         this.curZ = z
     }
+
+    static dist2(a: Particle, b: Particle): number {
+        const dx = a.curX - b.curX
+        const dy = a.curY - b.curY
+        const dz = a.curZ - b.curZ
+        return dx * dx + dy * dy + dz * dz
+    }
 }
 interface Connection {
     a: number,
@@ -72,7 +79,6 @@ export class Cloth implements Mesh {
     ): [Array<Particle>, Array<Connection>] {
         const particles: Array<Particle> = []
         const connections: Array<Connection> = []
-        const length = 2 / particlesPerSide
         for (let a = 0; a < particlesPerSide; ++a) {
             for (let b = 0; b < particlesPerSide; ++b) {
                 const index = particles.length
@@ -81,12 +87,15 @@ export class Cloth implements Mesh {
                 const pin = (b + 1 == particlesPerSide)
                 particles.push(new Particle(x, 1, z, massPerParticle, pin))
                 if (a > 0) {
-                    connections.push({ a: index, b: index - particlesPerSide, length })
+                    connections.push({ a: index, b: index - particlesPerSide, length: 0 })
                 }
                 if (b > 0) {
-                    connections.push({ a: index, b: index - 1, length })
+                    connections.push({ a: index, b: index - 1, length: 0 })
                 }
             }
+        }
+        for (const c of connections) {
+            c.length = Math.sqrt(Particle.dist2(particles[c.a], particles[c.b]))
         }
         return [particles, connections]
     }
