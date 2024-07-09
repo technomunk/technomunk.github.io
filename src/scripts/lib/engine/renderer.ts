@@ -1,13 +1,12 @@
 import { error } from "@lib/util"
 import type Scene from "./scene"
-import { compileProgram, composeUniformSetters, setUniforms, type UniformSetters } from "@lib/webgl/util"
+import { compileProgram } from "@lib/webgl/util"
 
 import VERTEX_SHADER from "@shader/mvp.vs"
 import FRAGMENT_SHADER from "@shader/solid.fs"
-import type { Mesh } from "./types"
 import { mat4 } from "gl-matrix"
-import type { Camera } from "./camera"
 import type Entity from "./entity"
+import type Mesh from "./mesh"
 
 interface MeshOnGPU {
     positions: WebGLBuffer

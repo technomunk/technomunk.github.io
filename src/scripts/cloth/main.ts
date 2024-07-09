@@ -1,10 +1,10 @@
 import { PerspectiveCamera } from "@lib/engine/camera"
-import { Cloth, ClothSimulator } from "@lib/engine/cloth"
+import { Cloth } from "@lib/engine/cloth"
 import Entity from "@lib/engine/entity"
 import { Loop } from "@lib/engine/loop"
 import Renderer from "@lib/engine/renderer"
 import Scene from "@lib/engine/scene"
-import { WireCube } from "@lib/engine/shape"
+import { IcoSphere } from "@lib/engine/shape"
 import { GestureDecoder } from "@lib/gesture"
 import { isMobile } from "@lib/util"
 import { mat4, vec4 } from "gl-matrix"
@@ -46,8 +46,8 @@ function createScene(): Scene {
     const particleCount = isMobile() ? 50 : 200
     const cloth = new Cloth(particleCount)
     const entities = [
-        // new Entity([0, 0, 0], new WireCube(.5)),
-        new Entity([0, 0, 0], cloth)
+        new Entity([0, 0, 0], (new IcoSphere(.5)).constructMesh("line")),
+        // new Entity([0, 0, 0], cloth),
     ]
     return new Scene(
         entities,

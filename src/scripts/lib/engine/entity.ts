@@ -1,5 +1,6 @@
+import type Mesh from "./mesh"
 import Transform from "./transform"
-import type { Mesh, Vec3 } from "./types"
+import type { Vec3 } from "./types"
 
 /** An object in the scene */
 export default class Entity extends Transform {

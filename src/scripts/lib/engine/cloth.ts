@@ -1,6 +1,7 @@
 import { shuffle } from "@lib/util";
 import type Scene from "./scene";
-import type { DrawStyle, IndexBuffer, Mesh, Vec3, PositionBuffer } from "./types";
+import type { Vec3 } from "./types";
+import Mesh from "./mesh";
 
 class Particle {
     mass: number
@@ -58,20 +59,21 @@ interface Connection {
     length: number,
 }
 
-export class Cloth implements Mesh {
+export class Cloth {
     readonly particles: Array<Particle>
     readonly connections: Array<Connection>
 
-    readonly style: DrawStyle = "line"
-    readonly positions: PositionBuffer
-    readonly indices: IndexBuffer
-    isDirty = true
+    readonly mesh: Mesh
 
     constructor(particlesPerSide: number = 10, density: number = 1) {
         [this.particles, this.connections] = Cloth._allocateParticlesAndConnections(particlesPerSide, density)
-        this.positions = Cloth._allocateVertexBuffer(this.particles)
+        this.mesh = new Mesh(
+            this.particles.length * 3,
+            this.connections.length * 2,
+            "line",
+        )
+        this._setIndices()
         this.updatePositionsBuffer()
-        this.indices = Cloth._allocateIndexBuffer(this.connections)
     }
 
     protected static _allocateParticlesAndConnections(
@@ -104,12 +106,13 @@ export class Cloth implements Mesh {
 
     updatePositionsBuffer() {
         for (let i = 0; i < this.particles.length; ++i) {
-            this.positions[i * 3 + 0] = this.particles[i].curX
-            this.positions[i * 3 + 1] = this.particles[i].curY
-            this.positions[i * 3 + 2] = this.particles[i].curZ
+            this.mesh.positions[i * 3 + 0] = this.particles[i].curX
+            this.mesh.positions[i * 3 + 1] = this.particles[i].curY
+            this.mesh.positions[i * 3 + 2] = this.particles[i].curZ
         }
-        this.isDirty = true
+        this.mesh.isDirty = true
     }
+
     protected static _allocateVertexBuffer(particles: Array<Particle>): Float32Array {
         return new Float32Array(particles.length * 3)
     }
@@ -121,6 +124,13 @@ export class Cloth implements Mesh {
             result[i * 2 + 1] = connections[i].b
         }
         return result
+    }
+
+    protected _setIndices() {
+        for (let i = 0; i < this.connections.length; ++i) {
+            this.mesh.indices[i * 2 + 0] = this.connections[i].a
+            this.mesh.indices[i * 2 + 1] = this.connections[i].b
+        }
     }
 }
 
