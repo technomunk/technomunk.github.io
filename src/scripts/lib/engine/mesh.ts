@@ -1,7 +1,9 @@
+import type { Component } from "./types"
+
 export type MeshStyle = "line" | "triangle"
 
 /** A collection of vertices and triangles or lines for drawing on GPU. */
-export default class Mesh {
+export default class Mesh implements Component {
     readonly positions: Float32Array
     readonly indices: Uint16Array
     readonly style: MeshStyle

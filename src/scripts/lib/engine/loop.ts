@@ -1,47 +1,26 @@
-import { Cloth, ClothSimulator } from "./cloth"
-import type Renderer from "./renderer"
-import type Scene from "./scene"
+import type World from "./world"
 
 export class Loop {
-    readonly scene: Scene
-    readonly simulators: Array<ClothSimulator>
-    readonly renderer: Renderer
+    readonly world: World
 
-    protected _lastTime = 0
-    maxDT = .05
+    protected _lastTime = performance.now()
 
-    constructor(scene: Scene, renderer: Renderer) {
-        this.scene = scene
-        this.simulators = []
-        for (const entity of scene.entities) {
-            if (entity.mesh instanceof Cloth) {
-                this.simulators.push(new ClothSimulator(entity.mesh))
-            }
-        }
-        this.renderer = renderer
-        this._lastTime = performance.now()
+    constructor(world: World) {
+        this.world = world
     }
 
-    drawFrame() {
+    runSystems() {
         const now = performance.now()
-        const dt = Math.min((now - this._lastTime) / 1_000, this.maxDT)
-        performance.mark("sim-start")
-        this.simulate(dt)
-        const measure = performance.measure("simulation", "sim-start")
-        // console.debug(measure)
-        this.renderer.draw(this.scene)
-        this._lastTime = now
-    }
-
-    simulate(dt: number) {
-        for (const simulator of this.simulators) {
-            simulator.simulate(this.scene, dt)
+        const dt = (now - this._lastTime) / 1_000
+        for (const system of this.world.systems) {
+            system.run(dt)
         }
+        this._lastTime = now
     }
 
     loop() {
         requestAnimationFrame(() => {
-            this.drawFrame()
+            this.runSystems()
             this.loop()
         })
     }
