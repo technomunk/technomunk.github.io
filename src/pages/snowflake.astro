@@ -1,0 +1,24 @@
+---
+import MainLayout from "@layouts/MainLayout.astro"
+import SlideMenu from "@components/SlideMenu.astro"
+import "@styles/materials.sass"
+import "@styles/shapes.sass"
+import "@styles/fullscreen.sass"
+import "@styles/color.sass"
+import "@styles/glass.sass"
+---
+
+<MainLayout title="Snowflake generator" description="Diffusion limited aggrigation simulation of snowflake growth.">
+    <meta
+        content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+        name="viewport"
+        slot="head"
+    />
+    <main>
+        <canvas id="snow"></canvas>
+    </main>
+</MainLayout>
+
+<script>
+    import "@scripts/snowflake"
+</script>
