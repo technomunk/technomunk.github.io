@@ -9,4 +9,8 @@ export default class Entity extends Transform {
         super(pos)
         this.components = component
     }
+
+    hasComponent(type: Function): boolean {
+        return this.components.some(component => component instanceof type)
+    }
 }

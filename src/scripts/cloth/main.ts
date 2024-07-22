@@ -21,17 +21,19 @@ function setup() {
     })
     
     const world = createWorld(renderer)
+    const cameraEntity = world.entities.find(entity => entity.hasComponent(PerspectiveCamera))!
+    const camera = cameraEntity.components.find(component => component instanceof PerspectiveCamera)!
 
     const loop = new Loop(world)
     const gd = new GestureDecoder(canvas)
-    // gd.addDragObserver((drag) => {
-    //     const matrix = mat4.create()
-    //     mat4.fromRotation(matrix, -drag.dx * 1e-3, [0, 1, 0])
-    //     mat4.rotate(matrix, matrix, -drag.dy * 1e-3, scene.camera.right)
-    //     const result = vec4.fromValues(...scene.camera.position, 1)
-    //     vec4.transformMat4(result, result, matrix)
-    //     scene.camera.position.splice(0, 3, result[0], result[1], result[2])
-    // })
+    gd.addDragObserver((drag) => {
+        const matrix = mat4.create()
+        mat4.fromRotation(matrix, -drag.dx * 1e-3, [0, 1, 0])
+        mat4.rotate(matrix, matrix, -drag.dy * 1e-3, camera.calcRight(cameraEntity.pos))
+        const result = vec4.fromValues(...cameraEntity.pos, 1)
+        vec4.transformMat4(result, result, matrix)
+        cameraEntity.pos.splice(0, 3, result[0], result[1], result[2])
+    })
 
     loop.loop()
 }
