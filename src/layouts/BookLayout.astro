@@ -1,0 +1,26 @@
+---
+const { title, description } = Astro.props.frontmatter
+import Card from "@components/Card.astro"
+import MainLayout from "@layouts/MainLayout.astro"
+
+import "@styles/blog.sass"
+import "@styles/syntax-hl.sass"
+
+const { frontmatter } = Astro.props
+
+const posts = await Astro.glob(`../pages/rtcg/*.mdx`)
+const previousPost = posts.find((p) => p.frontmatter.index == frontmatter.index - 1)
+const nextPost = posts.find((p) => p.frontmatter.index == frontmatter.index + 1)
+---
+
+<MainLayout title={title} description={description}>
+    <div class="center">
+        <header>{title}</header>
+        <p class="subnote">{description}</p>
+    </div>
+    <div class="center">
+        {previousPost && <Card title={previousPost.frontmatter.title} href={previousPost.url!} back={true}/>}
+        {nextPost && <Card title={nextPost.frontmatter.title} href={nextPost.url!}/>}
+    </div>
+    <slot />
+</MainLayout>

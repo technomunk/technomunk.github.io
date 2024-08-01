@@ -1,0 +1,15 @@
+---
+const posts = await Astro.glob("./rtcg/*.mdx")
+import MainLayout from "@layouts/MainLayout.astro"
+import BookIndex from "@components/BookIndex.astro"
+
+posts.sort((a, b) => a.frontmatter.index - b.frontmatter.index)
+---
+
+<MainLayout title="Real Time Graphics" description="Technomunk's personal blog">
+    <main class="text-center">
+        <h1>Real time computer graphics</h1>
+        <p>A non-technical manual for building up a coherent picture of how computer graphics work.</p>
+    </main>
+    <BookIndex posts={posts} />
+</MainLayout>
