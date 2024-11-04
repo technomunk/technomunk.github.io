@@ -1,5 +1,4 @@
 import { shuffle } from "@lib/util";
-import type World from "./world";
 import type { Component, System, Vec3 } from "./types";
 import Mesh from "./mesh";
 import type Entity from "./entity";
@@ -7,6 +6,7 @@ import type Entity from "./entity";
 class Particle {
     mass: number
     pinned: boolean
+    colliding: boolean
 
     curX: number
     curY: number
@@ -66,8 +66,12 @@ export class Cloth implements Component {
 
     readonly mesh: Mesh
 
-    constructor(particlesPerSide: number = 10, density: number = 1) {
-        [this.particles, this.connections] = Cloth._allocateParticlesAndConnections(particlesPerSide, density)
+    constructor(
+        offset: Vec3 = [0, 0, 0],
+        particlesPerSide: number = 10,
+        density: number = 1,
+    ) {
+        [this.particles, this.connections] = Cloth._allocateParticlesAndConnections(offset, particlesPerSide, density)
         this.mesh = new Mesh(
             this.particles.length * 3,
             this.connections.length * 2,
@@ -78,6 +82,7 @@ export class Cloth implements Component {
     }
 
     protected static _allocateParticlesAndConnections(
+        offset: Vec3,
         particlesPerSide: number,
         massPerParticle: number
     ): [Array<Particle>, Array<Connection>] {
@@ -88,8 +93,8 @@ export class Cloth implements Component {
                 const index = particles.length
                 const x = -1 + (a / (particlesPerSide - 1)) * 2
                 const z = -2 + (b / (particlesPerSide - 1)) * 2
-                const pin = (b + 1 == particlesPerSide)
-                particles.push(new Particle(x, 1, z, massPerParticle, pin))
+                // const pin = (b + 1 == particlesPerSide)
+                particles.push(new Particle(x + offset[0], offset[1], z + offset[2], massPerParticle))
                 if (a > 0) {
                     connections.push({ a: index, b: index - particlesPerSide, length: 0 })
                 }
@@ -135,8 +140,45 @@ export class Cloth implements Component {
     }
 }
 
+export class SphereCollider implements Component {
+    radius: number
+    constructor(radius: number) {
+        this.radius = radius
+    }
+}
+
+class InternalCollider {
+    static NUDGE_FACTOR = 1e-5
+    readonly radius: number
+    readonly pos: Vec3
+
+    constructor(pos: Vec3, radius: number) {
+        this.pos = pos
+        this.radius = radius
+    }
+
+    includes(x: number, y: number, z: number) {
+        const dx = x - this.pos[0]
+        const dy = y - this.pos[1]
+        const dz = z - this.pos[2]
+        return dx*dx + dy*dy + dz*dz < this.radius * this.radius + InternalCollider.NUDGE_FACTOR
+    }
+
+    pushOut(x: number, y: number, z: number): Vec3 {
+        const dx = x - this.pos[0]
+        const dy = y - this.pos[1]
+        const dz = z - this.pos[2]
+
+        const len = Math.sqrt(dx*dx + dy*dy + dz*dz)
+        const multiplier = this.radius / len
+
+        return [this.pos[0] + dx * multiplier, this.pos[1] + dy * multiplier, this.pos[2] + dz * multiplier]
+    }
+}
+
 export class ClothSimSystem implements System {
     readonly cloths: Array<Cloth> = []
+    readonly colliders: Array<InternalCollider> = []
     gravity: Vec3 = [0, -1, 0]
     maxDt = .05
     // timestep = .01
@@ -148,6 +190,9 @@ export class ClothSimSystem implements System {
         for (const component of entity.components) {
             if (component instanceof Cloth) {
                 this.cloths.push(component)
+            }
+            if (component instanceof SphereCollider) {
+                this.colliders.push(new InternalCollider(entity.pos, component.radius))
             }
         }
     }
@@ -166,6 +211,7 @@ export class ClothSimSystem implements System {
 
     simulateCloth(cloth: Cloth, dt: number) {
         this._integrateParticlePositions(cloth, dt)
+        this._resolveCollisions(cloth)
         this._solveConnectionConstraints(cloth)
         cloth.updatePositionsBuffer()
     }
@@ -190,6 +236,26 @@ export class ClothSimSystem implements System {
         }
     }
 
+    protected _resolveCollisions(cloth: Cloth) {
+        for (const p of cloth.particles) {
+            if (p.pinned) {
+                continue
+            }
+
+            for (const c of this.colliders) {
+                if (c.includes(p.curX, p.curY, p.curZ)) {
+                    p.colliding = true
+                    const [x, y, z] = c.pushOut(p.curX, p.curY, p.curZ)
+                    p.curX = x
+                    p.curY = y
+                    p.curZ = z
+                } else {
+                    p.colliding = false
+                }
+            }
+        }
+    }
+
     protected _solveConnectionConstraints(cloth: Cloth) {
         for (const c of cloth.connections) {
             const pa = cloth.particles[c.a]
@@ -204,12 +270,12 @@ export class ClothSimSystem implements System {
             const oy = dy * dFactor
             const oz = dz * dFactor
 
-            if (!pa.pinned) {
+            if (!pa.pinned && !pa.colliding) {
                 pa.curX += ox
                 pa.curY += oy
                 pa.curZ += oz
             }
-            if (!pb.pinned) {
+            if (!pb.pinned && ! pb.colliding) {
                 pb.curX -= ox
                 pb.curY -= oy
                 pb.curZ -= oz
