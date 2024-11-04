@@ -1,8 +1,9 @@
 import { PerspectiveCamera } from "@lib/engine/camera"
-import { Cloth, ClothSimSystem } from "@lib/engine/cloth"
+import { Cloth, ClothSimSystem, SphereCollider } from "@lib/engine/cloth"
 import Entity from "@lib/engine/entity"
 import { Loop } from "@lib/engine/loop"
 import { Renderer, RenderSystem } from "@lib/engine/renderer"
+import { IcoSphere } from "@lib/engine/shape"
 import World from "@lib/engine/world"
 import { GestureDecoder } from "@lib/gesture"
 import { isMobile } from "@lib/util"
@@ -40,11 +41,14 @@ function setup() {
 
 function createWorld(renderer: Renderer): World {
     const world = new World(new RenderSystem(renderer), new ClothSimSystem())
-    
+
+    // const sphere = new IcoSphere(.25).constructMesh("line");
+
     world.addEntity(new Entity([0, 1.2, -1.5], new PerspectiveCamera()))
-    
+    world.addEntity(new Entity([0, 0, 0], new SphereCollider(.5)))
+
     const particleCount = isMobile() ? 50 : 200
-    const cloth = new Cloth(particleCount)
+    const cloth = new Cloth([0, 1, 1], particleCount)
     world.addEntity(new Entity([0, 0, 0], cloth, cloth.mesh))
 
     return world
