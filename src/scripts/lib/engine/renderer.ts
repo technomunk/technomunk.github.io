@@ -1,12 +1,15 @@
 import { error } from "@lib/util"
-import type Scene from "./scene"
+import type World from "./world"
 import { compileProgram } from "@lib/webgl/util"
 
 import VERTEX_SHADER from "@shader/mvp.vs"
 import FRAGMENT_SHADER from "@shader/solid.fs"
 import { mat4 } from "gl-matrix"
 import type Entity from "./entity"
-import type Mesh from "./mesh"
+import Mesh from "./mesh"
+import type { System } from "./types"
+import type Transform from "./transform"
+import { Camera } from "./camera"
 
 interface MeshOnGPU {
     positions: WebGLBuffer
@@ -69,7 +72,7 @@ interface ProgramInfo {
     uniforms: { [name: string]: WebGLUniformLocation },
 }
 
-export default class Renderer {
+export class Renderer {
     protected static RENDERING_CONTEXT_OPTIONS: WebGLContextAttributes = {
         alpha: false,
         antialias: false,
@@ -105,23 +108,21 @@ export default class Renderer {
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
     }
 
-    draw(scene: Scene) {
+    draw(camera: [Transform, Camera], entities: Array<[Transform, Mesh]>) {
         this.gl.clearColor(240 / 255, 174 / 255, 148 / 255, 1)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT)
 
         this.gl.useProgram(this.programInfo.program)
 
-        scene.camera.calcView(this.matrices.view)
-        scene.camera.calcProjection(this.aspectRatio, this.matrices.proj)
+        camera[1].calcView(camera[0].pos, this.matrices.view)
+        camera[1].calcProjection(this.aspectRatio, this.matrices.proj)
         mat4.mul(this.matrices.vp, this.matrices.proj, this.matrices.view)
 
-        for (const entity of scene.entities) {
-            if (entity.mesh != undefined) {
-                this._setAttributes(entity.mesh)
-                this._setUniforms(entity)
-                const style = entity.mesh.style == "line" ? this.gl.LINES : this.gl.TRIANGLES
-                this.gl.drawElements(style, entity.mesh.indices.length, this.gl.UNSIGNED_SHORT, 0)
-            }
+        for (const [transform, mesh] of entities) {
+            this._setAttributes(mesh)
+            this._setUniforms(transform)
+            const style = mesh.style == "line" ? this.gl.LINES : this.gl.TRIANGLES
+            this.gl.drawElements(style, mesh.indices.length, this.gl.UNSIGNED_SHORT, 0)
         }
 
         this.gl.flush()
@@ -172,8 +173,37 @@ export default class Renderer {
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, gpuMesh.indices)
     }
 
-    protected _setUniforms(entity: Entity) {
-        mat4.mul(this.matrices.mvp, this.matrices.vp, entity.calcTransform())
+    protected _setUniforms(transform: Transform) {
+        mat4.mul(this.matrices.mvp, this.matrices.vp, transform.calcTransform())
         this.gl.uniformMatrix4fv(this.programInfo.uniforms["uMVP"], false, this.matrices.mvp)
+    }
+}
+
+
+export class RenderSystem implements System {
+    readonly renderer: Renderer
+
+    camera?: [Transform, Camera]
+    readonly renderedEntities: Array<[Transform, Mesh]> = []
+
+    constructor(renderer: Renderer) {
+        this.renderer = renderer
+    }
+
+    onEntityAdded(entity: Entity): void {
+        for (const component of entity.components) {
+            if (component instanceof Camera) {
+                this.camera = [entity, component]
+            }
+            if (component instanceof Mesh) {
+                this.renderedEntities.push([entity, component])
+            }
+        }
+    }
+
+    run(): void {
+        if (this.camera != undefined) {
+            this.renderer.draw(this.camera, this.renderedEntities)
+        }
     }
 }

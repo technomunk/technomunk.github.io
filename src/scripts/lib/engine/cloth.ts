@@ -1,7 +1,8 @@
 import { shuffle } from "@lib/util";
-import type Scene from "./scene";
-import type { Vec3 } from "./types";
+import type World from "./world";
+import type { Component, System, Vec3 } from "./types";
 import Mesh from "./mesh";
+import type Entity from "./entity";
 
 class Particle {
     mass: number
@@ -59,7 +60,7 @@ interface Connection {
     length: number,
 }
 
-export class Cloth {
+export class Cloth implements Component {
     readonly particles: Array<Particle>
     readonly connections: Array<Connection>
 
@@ -134,24 +135,45 @@ export class Cloth {
     }
 }
 
-export class ClothSimulator {
-    readonly cloth: Cloth
+export class ClothSimSystem implements System {
+    readonly cloths: Array<Cloth> = []
     gravity: Vec3 = [0, -1, 0]
+    maxDt = .05
+    // timestep = .01
+    // maxTimestepsPerFrame = 5
 
-    constructor(cloth: Cloth) {
-        this.cloth = cloth
+    constructor() {}
+
+    onEntityAdded(entity: Entity): void {
+        for (const component of entity.components) {
+            if (component instanceof Cloth) {
+                this.cloths.push(component)
+            }
+        }
     }
 
-    simulate(scene: Scene, dt: number) {
-        this._integrateParticlePositions(dt)
-        this._solveConnectionConstraints()
-        this.cloth.updatePositionsBuffer()
+    run(dt: number) {
+        if (dt > this.maxDt) {
+            dt = this.maxDt
+        }
+        for (const cloth of this.cloths) {
+            this.simulateCloth(cloth, dt)
+        }
+        // const steps = Math.min(Math.ceil(dt / this.timestep), this.maxTimestepsPerFrame)
+        // for (let i = 0; i < steps; ++i) {
+        // }
     }
 
-    protected _integrateParticlePositions(dt: number) {
+    simulateCloth(cloth: Cloth, dt: number) {
+        this._integrateParticlePositions(cloth, dt)
+        this._solveConnectionConstraints(cloth)
+        cloth.updatePositionsBuffer()
+    }
+
+    protected _integrateParticlePositions(cloth: Cloth, dt: number) {
         const dt2 = dt * dt
         const [fx, fy, fz] = this.gravity
-        for (const p of this.cloth.particles) {
+        for (const p of cloth.particles) {
             if (p.pinned) {
                 continue
             }
@@ -168,10 +190,10 @@ export class ClothSimulator {
         }
     }
 
-    protected _solveConnectionConstraints() {
-        for (const c of this.cloth.connections) {
-            const pa = this.cloth.particles[c.a]
-            const pb = this.cloth.particles[c.b]
+    protected _solveConnectionConstraints(cloth: Cloth) {
+        for (const c of cloth.connections) {
+            const pa = cloth.particles[c.a]
+            const pb = cloth.particles[c.b]
             const dx = pa.curX - pb.curX
             const dy = pa.curY - pb.curY
             const dz = pa.curZ - pb.curZ

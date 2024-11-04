@@ -1,10 +1,9 @@
 import { PerspectiveCamera } from "@lib/engine/camera"
-import { Cloth } from "@lib/engine/cloth"
+import { Cloth, ClothSimSystem } from "@lib/engine/cloth"
 import Entity from "@lib/engine/entity"
 import { Loop } from "@lib/engine/loop"
-import Renderer from "@lib/engine/renderer"
-import Scene from "@lib/engine/scene"
-import { IcoSphere } from "@lib/engine/shape"
+import { Renderer, RenderSystem } from "@lib/engine/renderer"
+import World from "@lib/engine/world"
 import { GestureDecoder } from "@lib/gesture"
 import { isMobile } from "@lib/util"
 import { mat4, vec4 } from "gl-matrix"
@@ -15,44 +14,40 @@ function setup() {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
-    const scene = createScene()
     
     const renderer = new Renderer(canvas)
     window.addEventListener("resize", () => {
         renderer.resize(window.innerWidth, window.innerHeight)
-        renderer.draw(scene)
     })
     
-    window.addEventListener("keypress", (e) => {
-        if (e.key == " ") {
-            loop.simulate(0.05)
-        }
-    })
-    const loop = new Loop(scene, renderer)
+    const world = createWorld(renderer)
+    const cameraEntity = world.entities.find(entity => entity.hasComponent(PerspectiveCamera))!
+    const camera = cameraEntity.components.find(component => component instanceof PerspectiveCamera)!
+
+    const loop = new Loop(world)
     const gd = new GestureDecoder(canvas)
     gd.addDragObserver((drag) => {
         const matrix = mat4.create()
         mat4.fromRotation(matrix, -drag.dx * 1e-3, [0, 1, 0])
-        mat4.rotate(matrix, matrix, -drag.dy * 1e-3, scene.camera.right)
-        const result = vec4.fromValues(...scene.camera.position, 1)
+        mat4.rotate(matrix, matrix, -drag.dy * 1e-3, camera.calcRight(cameraEntity.pos))
+        const result = vec4.fromValues(...cameraEntity.pos, 1)
         vec4.transformMat4(result, result, matrix)
-        scene.camera.position.splice(0, 3, result[0], result[1], result[2])
+        cameraEntity.pos.splice(0, 3, result[0], result[1], result[2])
     })
 
     loop.loop()
 }
 
-function createScene(): Scene {
+function createWorld(renderer: Renderer): World {
+    const world = new World(new RenderSystem(renderer), new ClothSimSystem())
+    
+    world.addEntity(new Entity([0, 1.2, -1.5], new PerspectiveCamera()))
+    
     const particleCount = isMobile() ? 50 : 200
     const cloth = new Cloth(particleCount)
-    const entities = [
-        new Entity([0, 0, 0], (new IcoSphere(.5)).constructMesh("line")),
-        // new Entity([0, 0, 0], cloth),
-    ]
-    return new Scene(
-        entities,
-        new PerspectiveCamera([0, 1.2, -1.5]),
-    )
+    world.addEntity(new Entity([0, 0, 0], cloth, cloth.mesh))
+
+    return world
 }
 
 window.addEventListener("load", setup, { once: true })
