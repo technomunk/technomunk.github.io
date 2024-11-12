@@ -1,4 +1,5 @@
 import { error } from "@lib/util"
+import { getImage } from "astro:assets"
 
 /** Compile a shader from the provided source.
  * @param gl The rendering context to compile the shader with.
@@ -195,4 +196,61 @@ function createUniformSetter(
         default:
             error(`Unknown uniform type: 0x${uniformInfo.type.toString(16)}, (${uniformInfo.name})`)
     }
+}
+
+export interface CubemapOptions {
+    textureIndex?: GLenum,
+    onComplete?: () => void,
+}
+
+export function setupCubemap(
+    gl: WebGL2RenderingContext,
+    options: CubemapOptions = {},
+): WebGLTexture {
+    const texture = gl.createTexture() ?? error("Could not allocate cubemap texture")
+    gl.activeTexture(options.textureIndex ?? gl.TEXTURE1)
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+    const faces = [
+        {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+            url: new URL(`/img/x-.png`, import.meta.url),
+        },
+        {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+            url: new URL(`/img/x+.png`, import.meta.url),
+        },
+        {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            url: new URL(`/img/y-.png`, import.meta.url),
+        },
+        {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+            url: new URL(`/img/y+.png`, import.meta.url),
+        },
+        {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+            url: new URL(`/img/z-.png`, import.meta.url),
+        },
+        {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+            url: new URL(`/img/z+.png`, import.meta.url),
+        },
+    ]
+
+    let loadedFaces = 0
+    for (const { target, url } of faces) {
+        gl.texImage2D(target, 0, gl.RGB, 2048, 2048, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
+        const image = new Image()
+        image.src = url.toString()
+        image.addEventListener("load", () => {
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+            gl.texImage2D(target, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image)
+            if ((++loadedFaces == 6) && options.onComplete) {
+                options.onComplete()
+            }
+        })
+    }
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    return texture
 }
