@@ -1,20 +1,10 @@
 import { GestureDecoder } from "@lib/gesture"
+import { Mat3, Vec3 } from "@lib/math"
 import FragmentRenderer from "@lib/webgl/fragment"
 import { composeUniformSetters, setUniforms, setupCubemap } from "@lib/webgl/util"
 
 import PATHTRACE_SHADER from "@shader/pathtrace.fs"
-import { mat3, mat4, vec3 } from "gl-matrix"
 
-function lookIn(dir: vec3, up: vec3 = [0, 1, 0]): mat3 {
-    const x = vec3.cross(vec3.create(), up, dir)
-    vec3.normalize(x, x)
-    const y = vec3.cross(vec3.create(), dir, x)
-    return mat3.fromValues(
-        x[0], x[1], x[2],
-        y[0], y[1], y[2],
-        dir[0], dir[1], dir[2],
-    )
-}
 
 function setup() {
     const ratio = 1
@@ -32,12 +22,12 @@ function setup() {
     renderer.setShader(PATHTRACE_SHADER)
     const setters = composeUniformSetters(renderer.context, renderer.program!)
 
-    const pos = vec3.fromValues(0, 0, -3);
+    let pos = new Vec3(2, .2, -.2);
 
     setUniforms(setters, {
         uResolution: [canvas.width, canvas.height],
         uCamPos: pos,
-        uView: lookIn([0, 0, 1]),
+        uView: Mat3.lookIn(Vec3.ZERO.sub(pos).normalize()),
         uCamFov: Math.PI / 4,
         uSkybox: setupCubemap(renderer.context, { onComplete: () => renderer.draw() }),
     })
@@ -45,10 +35,11 @@ function setup() {
     const gd = new GestureDecoder(canvas)
 
     gd.addDragObserver((d) => {
-        vec3.rotateY(pos, pos, [0, 0, 0], d.dx / window.innerWidth * Math.PI)
+        pos = pos.rotate(Vec3.Y, d.dx / window.innerWidth * Math.PI)
+        pos = pos.rotate(Vec3.cross(pos, Vec3.Y).normalize(), d.dy / window.innerHeight * Math.PI)
         setUniforms(setters, {
             uCamPos: pos,
-            uView: lookIn(vec3.normalize(vec3.create(), vec3.negate(vec3.create(), pos))),
+            uView: Mat3.lookIn(Vec3.ZERO.sub(pos).normalize()),
         })
         renderer.draw()
     })
@@ -57,12 +48,23 @@ function setup() {
         canvas.width = window.innerWidth
         canvas.height = window.innerHeight
         renderer.context.viewport(0, 0, canvas.width, canvas.height)
+        setUniforms(setters, {
+            uResolution: [canvas.width, canvas.height],
+        })
         renderer.draw()
     })
     window.addEventListener("keypress", (e) => {
         if (e.key == " ") {
             renderer.draw()
         }
+    })
+    window.addEventListener("wheel", (e) => {
+        if (e.deltaY < 0 && pos.norm2() < 4) {
+            return
+        }
+        pos.muli(1 + (e.deltaY / 1000))
+        setUniforms(setters, {uCamPos: pos})
+        renderer.draw()
     })
 }
 

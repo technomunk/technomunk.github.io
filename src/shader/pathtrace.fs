@@ -29,24 +29,14 @@ struct RayHit {
 };
 
 const vec4 SPHERE = vec4(0, 0, 0, .5);
+const float REFRACTIVE_INDEX_AIR = 1.00027717;
+const float REFRACTIVE_INDEX_GLASS = 1.025;
 
-
-// Copied from https://github.com/hughsk/glsl-hsv2rgb/blob/master/index.glsl
-// Which in tern was sourced from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
-vec3 hsv2rgb(vec3 c) {
-	vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
 
 vec3 rayDir(in vec2 uv) {
     float ratio = uResolution.x / uResolution.y;
     float angle = tan(uCamFov * .5);
     return uView * normalize(vec3(uv * vec2(angle * ratio, angle), 1));
-}
-
-vec3 debugDir(in vec3 dir) {
-    return (dir + vec3(1)) * .5;
 }
 
 bool intersectRaySphere(inout RayHit hit, in Ray ray, in vec4 sphere) {
@@ -58,18 +48,20 @@ bool intersectRaySphere(inout RayHit hit, in Ray ray, in vec4 sphere) {
 	float discr = b * b - 4.0 * c;
 
 	if (discr > 0.0) {
-		float hitDist = (-b - sqrt(discr)) * 0.5;
-		if (hitDist < hit.dist && hitDist > c_MIN_DIST) {
-			hit.dist = hitDist;
-			hit.point = ray.pos + ray.dir * hitDist;
+		float hitDist = (-b - sqrt(discr)) * .5;
+        if (hitDist < 0.) {
+            hitDist = (-b + sqrt(discr)) * .5;
+        }
+        if (hitDist < hit.dist) {
+            hit.dist = hitDist;
+            hit.point = ray.pos + ray.dir * hitDist;
 			hit.normal = normalize(hit.point - sphere.xyz);
-			return true;
-		}
+            return true;
+        }
 	}
 
 	return false;
 }
-
 
 void main() {
     Ray ray = Ray(uCamPos, rayDir(gl_FragCoord.xy / uResolution * 2. - 1.));
@@ -77,8 +69,15 @@ void main() {
     hit.dist = c_MAX_DIST;
 
     if (intersectRaySphere(hit, ray, SPHERE)) {
-        oColor = texture(uSkybox, reflect(ray.dir, hit.normal)) * vec4(2);
+        ray.pos = hit.point - hit.normal * .1;
+        ray.dir = refract(ray.dir, hit.normal, REFRACTIVE_INDEX_AIR / REFRACTIVE_INDEX_GLASS);
+        ray.pos = hit.point + ray.dir * 1e-2;
+        hit.dist = c_MAX_DIST;
+        if (intersectRaySphere(hit, ray, SPHERE)) {
+            ray.dir = refract(ray.dir, -hit.normal, REFRACTIVE_INDEX_GLASS / REFRACTIVE_INDEX_AIR);
+            oColor = texture(uSkybox, ray.dir) * vec4(3);
+        }
     } else {
-        oColor = texture(uSkybox, ray.dir) * vec4(2);
+        oColor = texture(uSkybox, ray.dir) * vec4(4);
     }
 }
