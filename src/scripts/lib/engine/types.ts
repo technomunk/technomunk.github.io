@@ -1,8 +1,11 @@
-import type Entity from "./entity"
+import type { Entity, World } from './entity';
 
-export type Vec3 = [number, number, number]
-export interface Component {}
+export type Vec3 = [number, number, number];
+
 export interface System {
-    onEntityAdded(entity: Entity): void
-    run(dt: number): void
+	/** Execute the system */
+	run(world: World<Entity>, dt: number): void;
+
+	/** Setup the system, including internally saving queries necessary to run the system */
+	setup?(world: World<Entity>): void;
 }

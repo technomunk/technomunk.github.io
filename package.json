@@ -14,11 +14,13 @@
   "devDependencies": {
     "@astrojs/mdx": "*",
     "@astrojs/ts-plugin": "*",
+    "@biomejs/biome": "*",
     "@types/hast": "*",
     "@types/mdast": "*",
     "astro": "*",
     "astro-diagram": "*",
     "gl-matrix": "*",
+    "miniplex": "*",
     "prettier-plugin-astro": "*",
     "rehype": "*",
     "remark": "*",

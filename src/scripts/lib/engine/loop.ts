@@ -1,27 +1,31 @@
-import type World from "./world"
+import type { Entity, World } from './entity';
+import type { System } from './types';
 
 export class Loop {
-    readonly world: World
+	protected _lastTime = performance.now();
 
-    protected _lastTime = performance.now()
+	constructor(
+		public readonly world: World<Entity>,
+		public systems: System[],
+	) {
+		for (const system of systems) {
+			if (system.setup) system.setup(this.world);
+		}
+	}
 
-    constructor(world: World) {
-        this.world = world
-    }
+	runSystems() {
+		const now = performance.now();
+		const dt = (now - this._lastTime) / 1_000;
+		for (const system of this.systems) {
+			system.run(this.world, dt);
+		}
+		this._lastTime = now;
+	}
 
-    runSystems() {
-        const now = performance.now()
-        const dt = (now - this._lastTime) / 1_000
-        for (const system of this.world.systems) {
-            system.run(dt)
-        }
-        this._lastTime = now
-    }
-
-    loop() {
-        requestAnimationFrame(() => {
-            this.runSystems()
-            this.loop()
-        })
-    }
+	loop() {
+		requestAnimationFrame(() => {
+			this.runSystems();
+			this.loop();
+		});
+	}
 }

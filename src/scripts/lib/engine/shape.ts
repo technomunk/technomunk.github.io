@@ -1,34 +1,36 @@
-import Mesh from "./mesh"
-import type { MeshStyle } from "./mesh"
+import type { MeshStyle } from './mesh';
+
+import { Mesh } from './mesh';
 
 /** The concept of a basic shape. */
 export abstract class Shape {
-    abstract composePositions(): ArrayLike<number>
-    abstract composeTriangleIndices(): ArrayLike<number>
-    abstract composeLineIndices(): ArrayLike<number>
+	abstract composePositions(): ArrayLike<number>;
+	abstract composeTriangleIndices(): ArrayLike<number>;
+	abstract composeLineIndices(): ArrayLike<number>;
 
-    constructMesh(style: MeshStyle): Mesh {
-        switch (style) {
-            case "line":
-                return new Mesh(this.composePositions(), this.composeLineIndices(), "line")
-            case "triangle":
-                return new Mesh(this.composePositions(), this.composeTriangleIndices(), "triangle")
-            default:
-                throw "Not implemented"
-        }
-    }
+	constructMesh(style: MeshStyle): Mesh {
+		switch (style) {
+			case 'line':
+				return new Mesh(this.composePositions(), this.composeLineIndices(), 'line');
+			case 'triangle':
+				return new Mesh(this.composePositions(), this.composeTriangleIndices(), 'triangle');
+			default:
+				throw 'Not implemented';
+		}
+	}
 }
 
 export class Cube extends Shape {
-    size: number
+	size: number;
 
-    constructor(size: number) {
-        super()
-        this.size = size
-    }
+	constructor(size: number) {
+		super();
+		this.size = size;
+	}
 
-    composePositions(): Array<number> {
-        return [
+	composePositions(): Array<number> {
+		// biome-ignore format: this is more readable than default format
+		return [
             -this.size, -this.size, -this.size,  // 0
             -this.size, -this.size, +this.size,  // 1
             -this.size, +this.size, -this.size,  // 2
@@ -38,10 +40,11 @@ export class Cube extends Shape {
             +this.size, +this.size, -this.size,  // 6
             +this.size, +this.size, +this.size,  // 7
         ]
-    }
+	}
 
-    composeLineIndices(): Array<number> {
-        return [
+	composeLineIndices(): Array<number> {
+		// biome-ignore format: this is more readable than default format
+		return [
             0, 1, 0, 2, 0, 4,
             1, 3, 1, 5,
             2, 3, 2, 6,
@@ -50,10 +53,11 @@ export class Cube extends Shape {
             5, 7,
             6, 7,
         ]
-    }
+	}
 
-    composeTriangleIndices(): Array<number> {
-        return [
+	composeTriangleIndices(): Array<number> {
+		// biome-ignore format: this is more readable than default format
+		return [
             0, 2, 1, 1, 2, 3,  // x-
             4, 7, 6, 4, 5, 7,  // x+
             0, 1, 4, 1, 5, 4,  // y-
@@ -61,21 +65,22 @@ export class Cube extends Shape {
             0, 6, 2, 0, 4, 6,  // z-
             1, 3, 7, 3, 7, 5,  // z+
         ]
-    }
+	}
 }
 
 export class IcoSphere extends Shape {
-    radius: number
-    constructor(radius: number) {
-        super()
-        this.radius = radius
-    }
+	radius: number;
+	constructor(radius: number) {
+		super();
+		this.radius = radius;
+	}
 
-    composePositions(): Array<number> {
-        const t = (1 + Math.sqrt(5)) / 2 * this.radius
-        const r = this.radius
+	composePositions(): Array<number> {
+		const t = ((1 + Math.sqrt(5)) / 2) * this.radius;
+		const r = this.radius;
 
-        return [
+		// biome-ignore format: this is more readable than default format
+		return [
             -r, +t, +0,  // 0
             +r, +t, +0,  // 1
             -r, -t, +0,  // 2
@@ -89,10 +94,11 @@ export class IcoSphere extends Shape {
             -t, +0, -r,  // 10
             -t, +0, +r,  // 11
         ]
-    }
+	}
 
-    composeLineIndices(): Array<number> {
-        return [
+	composeLineIndices(): Array<number> {
+		// biome-ignore format: this is more readable than default format
+		return [
             0, 1, 0, 5, 0, 7, 0, 10, 0, 11,
             1, 5, 1, 7, 1, 8, 1, 9,
             2, 3, 2, 4, 2, 6, 2, 10, 2, 11,
@@ -104,9 +110,9 @@ export class IcoSphere extends Shape {
             8, 9,
             10, 11,
         ]
-    }
+	}
 
-    composeTriangleIndices(): Array<number> {
-        throw "Not implemented"
-    }
+	composeTriangleIndices(): Array<number> {
+		throw 'Not implemented';
+	}
 }
