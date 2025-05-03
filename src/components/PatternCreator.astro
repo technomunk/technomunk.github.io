@@ -10,50 +10,56 @@
     </div>
     <button id="zoom">Zoom</button>
     <a hidden id="save" href="" download="pattern.png"></a>
-</div>
-
+</pattern-creator>
 
 <script>
-    import "@scripts/components/pattern_creator"
+    import '@scripts/components/pattern_creator';
 </script>
 
-<style lang="sass">
-    canvas#background
-        width: 100%
-        height: 100%
-        background: #ccc
+<style lang="scss">
+    canvas#background {
+        width: 100%;
+        height: 100%;
+        background: #ccc;
+    }
 
-    canvas#main
-        width: 50vmin
-        height: 50vmin
-        background: #fff
+    canvas#main {
+        width: 50vmin;
+        height: 50vmin;
+        background: #fff;
+    }
 
-    input,button
-        width: 10vmin
-        height: 4vmin
+    input,
+    button {
+        width: 10vmin;
+        height: 4vmin;
+    }
 
-    button#zoom
-        position: absolute
-        top: 2%
-        left: calc(50% - 5vmin)
+    button#zoom {
+        position: absolute;
+        top: 2%;
+        left: calc(50% - 5vmin);
+    }
 
-    div.controls
-        margin-top: 1vmin
-        display: flex
-        width: 50vmin
-        justify-content: space-evenly
-        gap: 1vmin
-        flex-flow: row wrap
+    div.controls {
+        margin-top: 1vmin;
+        display: flex;
+        width: 50vmin;
+        justify-content: space-evenly;
+        gap: 1vmin;
+        flex-flow: row wrap;
 
-        &>*
-            flex-basis: 1
+        & > * {
+            flex-basis: 1;
+        }
+    }
 
-    div#main
-        position: absolute
-        width: max-content
-        height: fit-content
-        top: 50%
-        left: 50%
-        transform: translate(-50%, -50%)
-
+    div#main {
+        position: absolute;
+        width: max-content;
+        height: fit-content;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
 </style>

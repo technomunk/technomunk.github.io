@@ -1,12 +1,14 @@
 ---
+import { Image } from 'astro:assets';
+
+import flapImg from '@assets/img/flap.svg';
+import '@styles/components/slide_menu.scss';
+
 interface Props {
-    class?: string
+    class?: string;
 }
 
-import { Image } from "astro:assets"
-import flapImg from "@assets/img/flap.svg"
-import "@styles/components/slide_menu.sass"
-const props = Astro.props
+const props = Astro.props;
 ---
 
 <slide-menu id="menu" class={props.class}>
@@ -17,5 +19,5 @@ const props = Astro.props
 </button>
 
 <script>
-    import "@scripts/components/slide_menu"
+    import '@scripts/components/slide_menu';
 </script>

@@ -1,8 +1,6 @@
 ---
-import PatternCreator from "@components/PatternCreator.astro"
-import MainLayout from "@layouts/MainLayout.astro"
-import "@styles/materials.sass"
-import "@styles/shapes.sass"
+import PatternCreator from '@components/PatternCreator.astro';
+import MainLayout from '@layouts/MainLayout.astro';
 ---
 
 <MainLayout title="Pattern creator" description="Quick and dirty pattern maker">
@@ -16,11 +14,17 @@ import "@styles/shapes.sass"
     </main>
 </MainLayout>
 
-<style lang="sass">
-    html,body,main
-        width: 100%
-        height: 100%
-        margin: 0
-        padding: 0
-        overflow: hidden
+<style lang="scss">
+    @use '@styles/materials';
+    @use '@styles/shapes';
+
+    html,
+    body,
+    main {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
 </style>

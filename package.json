@@ -1,5 +1,5 @@
 {
-  "name": "steadfast-fusion",
+  "name": "technomunk-pages",
   "type": "module",
   "version": "0.0.1",
   "packageManager": "yarn@1.22.21",
@@ -12,23 +12,23 @@
     "astro": "astro"
   },
   "devDependencies": {
-    "@astrojs/mdx": "*",
-    "@astrojs/ts-plugin": "*",
-    "@biomejs/biome": "*",
-    "@types/hast": "*",
-    "@types/mdast": "*",
-    "astro": "*",
-    "astro-diagram": "*",
-    "gl-matrix": "*",
-    "miniplex": "*",
-    "prettier-plugin-astro": "*",
-    "rehype": "*",
-    "remark": "*",
-    "remark-lint": "*",
-    "sass": "*",
-    "typescript": "*",
-    "unist-util-visit": "*",
-    "vite-plugin-glsl": "*",
-    "vitest": "*"
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/mdx": "^4.2.6",
+    "@astrojs/ts-plugin": "^1.10.4",
+    "@biomejs/biome": "^1.9.4",
+    "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
+    "@types/vfile": "^4.0.0",
+    "astro": "^5.7.10",
+    "astro-diagram": "^0.7.0",
+    "gl-matrix": "^3.4.3",
+    "mermaid": "^11.6.0",
+    "miniplex": "^2.0.0",
+    "prettier-plugin-astro": "^0.14.1",
+    "sass": "^1.87.0",
+    "typescript": "^5.8.3",
+    "unist-util-visit": "^5.0.0",
+    "vite-plugin-glsl": "^1.4.1",
+    "vitest": "^3.1.2"
   }
 }

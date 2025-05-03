@@ -1,34 +1,41 @@
 ---
-import MainLayout from "@layouts/MainLayout.astro"
-import "@styles/avatar.sass"
-import "@styles/resume.sass"
+import type { Assignment } from '@scripts/types/assignment';
+import type { Project } from '@scripts/types/project';
 
-import { getCollection } from "astro:content"
-import { dateCompare } from "@lib/dateutil"
+import { getCollection } from 'astro:content';
 
-const assignments = await getCollection("assignments")
-assignments.sort((a, b) => dateCompare(b.data.startDate, a.data.startDate))
+import MainLayout from '@layouts/MainLayout.astro';
+import { dateCompare } from '@lib/dateutil';
 
-const projects = await getCollection("projects")
-projects.sort((a, b) => dateCompare(b.data.lastActivity, a.data.lastActivity))
-
-const technologies = new Map()
-for (const technology of await getCollection("technologies")) {
-    technologies.set(technology.id, technology.data)
+interface Tech {
+    display: string;
+    hint: string;
+    type: string;
 }
 
-function findOrDefaultTech(tech: string) {
-    const d = technologies.get(tech.toLowerCase())
-    if (d == undefined) {
-        console.warn(`${tech} technology not found`)
+const assignments = (await getCollection('assignments')) as { data: Assignment }[];
+assignments.sort((a, b) => dateCompare(b.data.startDate, a.data.startDate));
+
+const projects = (await getCollection('projects')) as { data: Project }[];
+projects.sort((a, b) => dateCompare(b.data.lastActivity, a.data.lastActivity));
+
+const technologies = new Map<string, Tech>();
+for (const technology of await getCollection('technologies')) {
+    technologies.set(technology.id, technology.data);
+}
+
+const findOrDefaultTech = (tech: string): Tech => {
+    const d = technologies.get(tech.toLowerCase());
+    if (d === undefined) {
+        console.warn(`${tech} technology not found`);
         return {
             display: tech,
             hint: tech,
-            type: "unknown",
-        }
+            type: 'unknown',
+        };
     }
-    return d
-}
+    return d;
+};
 ---
 
 <MainLayout title="Technomunk's Resume" description="Overview of Technomunk's work">
@@ -62,7 +69,7 @@ function findOrDefaultTech(tech: string) {
                                     .sort()
                                     .map(findOrDefaultTech)
                                     .map((t) => (
-                                        <div title={t.hint} class={t.type + " tag"}>
+                                        <div title={t.hint} class={t.type + ' tag'}>
                                             {t.display}
                                         </div>
                                     ))}
@@ -98,7 +105,7 @@ function findOrDefaultTech(tech: string) {
                                     .sort()
                                     .map(findOrDefaultTech)
                                     .map((t) => (
-                                        <div title={t.hint} class={t.type + " tag"}>
+                                        <div title={t.hint} class={t.type + ' tag'}>
                                             {t.display}
                                         </div>
                                     ))}
@@ -112,30 +119,42 @@ function findOrDefaultTech(tech: string) {
     </main>
 </MainLayout>
 
-<style lang="sass">
-    mark
-        font-style: italic
-        background-color: transparent
+<style lang="scss">
+    @use '@styles/avatar';
+    @use '@styles/resume';
 
-    table
-        min-width: 100%
+    mark {
+        font-style: italic;
+        background-color: transparent;
+    }
 
-    table,th,td
-        font-size: 18px
-        border-collapse: collapse
-        border: 1px solid
+    table {
+        min-width: 100%;
+    }
 
-        &>caption
-            font-size: 23px
-            font-weight: bold
-            margin: 1%
+    table,
+    th,
+    td {
+        font-size: 18px;
+        border-collapse: collapse;
+        border: 1px solid;
 
-        &+table
-            margin-top: 1.7%
+        & > caption {
+            font-size: 23px;
+            font-weight: bold;
+            margin: 1%;
+        }
 
-    th
-        font-size: 20px
-        padding: 8px
-    td
-        padding: 5px
+        & + table {
+            margin-top: 1.7%;
+        }
+    }
+
+    th {
+        font-size: 20px;
+        padding: 8px;
+    }
+    td {
+        padding: 5px;
+    }
 </style>

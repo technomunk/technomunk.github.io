@@ -9,7 +9,7 @@ import { compileProgram } from '@lib/webgl/util';
 
 import VERTEX_SHADER from '@shader/mvp.vs';
 import FRAGMENT_SHADER from '@shader/solid.fs';
-import type { Query, With } from 'miniplex';
+import type { With } from 'miniplex';
 
 interface MeshOnGPU {
 	positions: WebGLBuffer;
@@ -93,8 +93,7 @@ export class Renderer {
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl =
-			canvas.getContext('webgl2', Renderer.RENDERING_CONTEXT_OPTIONS) ||
-			error('Could not instantiate drawing context');
+			canvas.getContext('webgl2', Renderer.RENDERING_CONTEXT_OPTIONS) || error('Could not instantiate drawing context');
 		this.programInfo = this._setupProgram(VERTEX_SHADER, FRAGMENT_SHADER, ['iPos'], ['uMVP']);
 		this.storage = new MeshStorage(this.gl);
 		this.matrices = {
@@ -158,8 +157,7 @@ export class Renderer {
 		const uniforms: { [name: string]: WebGLUniformLocation } = {};
 		for (const name of uniformNames) {
 			const location =
-				this.gl.getUniformLocation(program, name) ||
-				error(`Couldn't find the "${name}" uniform location`);
+				this.gl.getUniformLocation(program, name) || error(`Couldn't find the "${name}" uniform location`);
 			uniforms[name] = location;
 		}
 		return {
@@ -188,7 +186,7 @@ export class Renderer {
 export class RenderSystem implements System {
 	constructor(public readonly renderer: Renderer) {}
 
-	run(world: World<Entity>, dt: number): void {
+	run(world: World<Entity>): void {
 		const camera = world.with('pos', 'camera').first;
 		if (!camera) {
 			console.error('No camera to render from');

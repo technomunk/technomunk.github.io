@@ -12,7 +12,7 @@
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"lineWidth": 100
+		"lineWidth": 120
 	},
 	"organizeImports": {
 		"enabled": true
@@ -30,5 +30,20 @@
 		"formatter": {
 			"quoteStyle": "single"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"include": [
+				"*.astro"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off",
+						"useImportType": "off"
+					}
+				}
+			}
+		}
+	]
 }

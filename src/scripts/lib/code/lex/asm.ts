@@ -1,5 +1,6 @@
-import { NAME_RE, NUMBER_RE } from "./common";
 import type { Grammar } from "./lexer";
+
+import { NAME_RE, NUMBER_RE } from "./common";
 
 export const ASM_GRAMMAR: Grammar = new Map([
     [/^[:,]/, "punctuation"],

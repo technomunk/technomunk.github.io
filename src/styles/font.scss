@@ -1,0 +1,69 @@
+@font-face {
+    font-family: Rubik;
+    src: url('/font/rubik.ttf') format('truetype');
+    font-weight: 350;
+    font-variation-settings: 'wght' 350;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Rubik;
+    src: url('/font/rubik_italic.ttf') format('truetype');
+    font-weight: 350;
+    font-variation-settings: 'wght' 330;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: ibmplexmono;
+    src: url('/font/imbplexmono.ttf') format('truetype');
+    font-weight: 400;
+}
+
+@mixin monospace {
+    font-family: ibmplexmono, ui-monospace, SFMono-REgular, 'SF Mono', monospace !important;
+    font-size: 14px;
+
+    @media (min-width: 800px) {
+        font-size: 15px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 16px;
+    }
+}
+
+body {
+    font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 18px;
+    font-variant-ligatures: no-common-ligatures;
+
+    @media (min-width: 800px) {
+        font-size: 20px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 23px;
+    }
+}
+
+header {
+    font-size: 50px;
+}
+
+h1 {
+    font-size: 42px;
+}
+
+h2,
+.text-lg {
+    font-size: 37px;
+}
+
+h3 {
+    font-size: 32px;
+}
+
+.strong {
+    font-weight: bold;
+}

@@ -1,11 +1,12 @@
 ---
-import MainLayout from "@layouts/MainLayout.astro"
-import SlideMenu from "@components/SlideMenu.astro"
-import "@styles/materials.sass"
-import "@styles/shapes.sass"
-import "@styles/fullscreen.sass"
-import "@styles/color.sass"
-import "@styles/glass.sass"
+import MainLayout from '@layouts/MainLayout.astro';
+import SlideMenu from '@components/SlideMenu.astro';
+
+import '@styles/materials.scss';
+import '@styles/shapes.scss';
+import '@styles/fullscreen.scss';
+import '@styles/color.scss';
+import '@styles/glass.scss';
 ---
 
 <MainLayout title="Julia sets explorer" description="Interactive Julia sets explorer and visualizer in real time.">
@@ -33,5 +34,5 @@ import "@styles/glass.sass"
 </MainLayout>
 
 <script>
-    import "@scripts/julia"
+    import '@scripts/julia';
 </script>

@@ -1,0 +1,59 @@
+@use 'theme' as *;
+
+.themed {
+    body {
+        @include theme(background-color, 'color-background');
+    }
+
+    button,
+    .button,
+    input,
+    .input,
+    .container {
+        border: 3px solid;
+        @include theme(border-color, 'color-edge');
+    }
+
+    @media (prefers-color-scheme: dark) {
+
+        button,
+        .button,
+        input,
+        .input,
+        .container {
+            border-width: 2px;
+        }
+    }
+
+    div,
+    button,
+    input,
+    a {
+        @include theme(color, 'color-text');
+    }
+
+    button,
+    .button,
+    input,
+    .input {
+        transition-duration: .2s;
+        transition-property: background-color;
+        @include theme(background-color, 'color-background');
+    }
+
+    button:hover,
+    .button:hover,
+    input:hover,
+    .input:hover {
+        @include theme(background-color, 'color-background');
+    }
+
+    input[type='range'] {
+        background-color: transparent;
+    }
+
+    img {
+        color: initial;
+        background-color: transparent;
+    }
+}

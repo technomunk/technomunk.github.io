@@ -1,14 +1,16 @@
 ---
-import { markSemanticsWithSpans } from '@lib/code/semanitcize'
+import { markSemanticsWithSpans } from '@lib/code/semanitcize';
+
 interface Props {
-    cells: number
-    names: string
-    code: string
+	cells: number;
+	names: string;
+	code: string;
 }
-const { cells, names, code } = Astro.props
-const cellIds = []
+
+const { cells, names, code } = Astro.props;
+const cellIds = [];
 for (let i = 0; i < cells; ++i) {
-    cellIds.push(i)
+	cellIds.push(i);
 }
 ---
 
@@ -35,9 +37,9 @@ for (let i = 0; i < cells; ++i) {
 </bnfk-interpreter>
 
 <script>
-    import "../scripts/components/bnfk_interpreter"
+    import '@scripts/components/bnfk_interpreter';
 </script>
 
-<style lang="sass">
-@use "@styles/interpreter.sass"
+<style lang="scss">
+    @use '@styles/interpreter';
 </style>

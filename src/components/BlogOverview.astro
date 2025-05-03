@@ -1,12 +1,14 @@
 ---
-import { type MDXInstance } from "astro"
-import Card from "@components/Card.astro"
+import type { MDXInstance } from 'astro';
+import type { Frontmatter } from '@scripts/types/blog';
+
+import Card from '@components/Card.astro';
 
 interface Props {
-    posts: MDXInstance<Record<string, any>>[]
+    posts: MDXInstance<Frontmatter>[];
 }
 
-const { posts } = Astro.props
+const { posts } = Astro.props;
 ---
 
 <nav class="center">

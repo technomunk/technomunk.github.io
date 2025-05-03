@@ -1,20 +1,21 @@
 {
-  "extends": "astro/tsconfigs/strict",
-  "compilerOptions": {
-    "plugins": [
-      {
-        "name": "@astrojs/ts-plugin",
-      },
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@assets/*": ["src/assets/*"],
-      "@components/*": ["src/components/*"],
-      "@layouts/*": ["src/layouts/*"],
-      "@lib/*": ["src/scripts/lib/*"],
-      "@scripts/*": ["src/scripts/*"],
-      "@styles/*": ["src/styles/*"],
-      "@shader/*": ["src/shader/*"],
-    }
-  }
+	"extends": "astro/tsconfigs/strict",
+	"compilerOptions": {
+		"plugins": [
+			{
+				"name": "@astrojs/ts-plugin"
+			}
+		],
+		"baseUrl": ".",
+		"paths": {
+			"@assets/*": ["src/assets/*"],
+			"@components/*": ["src/components/*"],
+			"@layouts/*": ["src/layouts/*"],
+			"@lib/*": ["src/scripts/lib/*"],
+			"@plugins/*": ["src/plugins/*"],
+			"@scripts/*": ["src/scripts/*"],
+			"@shader/*": ["src/shader/*"],
+			"@styles/*": ["src/styles/*"]
+		}
+	}
 }
