@@ -89,7 +89,6 @@ export class Shader<Uniforms extends UniformSet = UniformSet> {
 	draw = (buffers: MeshBufferSet, mode: DrawMode = WebGL2RenderingContext.TRIANGLES) => {
 		this.gl.bindVertexArray(buffers.vao);
 		if (buffers.index) {
-			console.log(buffers);
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffers.index.buffer);
 			this.gl.drawElements(mode, buffers.vertexCount, buffers.index.type, 0);
 		} else {

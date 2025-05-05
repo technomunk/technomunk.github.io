@@ -5,11 +5,11 @@ import { MeshBufferSet } from '@lib/engine/render/mesh-buffer';
 import { Shader } from '@lib/engine/render/shader';
 import { error } from '@lib/util';
 
-// import vertex from '@shader/mvp.vs';
-// import fragment from '@shader/normal-as-color.fs';
+import vertex from '@shader/mvp.vs';
+import fragment from '@shader/normal-as-color.fs';
 
-import vertex from '@shader/identity.vs';
-import fragment from '@shader/color.fs';
+// import vertex from '@shader/identity.vs';
+// import fragment from '@shader/color.fs';
 
 type Uniforms = {
 	uVP: mat4; // view projection matrix
@@ -24,6 +24,8 @@ class CampfirePage {
 	readonly viewProjectionMatrix: mat4 = mat4.create();
 	readonly modelMatrix: mat4 = mat4.create();
 
+	rotation = 0;
+
 	constructor(public readonly canvas: HTMLCanvasElement) {
 		this.gl = this.canvas.getContext('webgl2') || error('WebGL2 is not available!');
 		this.shader = new Shader({
@@ -32,14 +34,17 @@ class CampfirePage {
 		});
 		this.shader.use();
 
+		this.gl.enable(this.gl.CULL_FACE);
+		this.gl.cullFace(this.gl.BACK);
+
 		// cube mesh with normals
 		// TODO: figure out typing here
 		// TODO: fix interleaving
-		this.buffers = new MeshBufferSet(this.shader, this.createQuadMesh(), false);
+		this.buffers = new MeshBufferSet(this.shader, this.createCubeMesh(), false);
 		this.updateViewProjectionMatrix();
-		mat4.identity(this.modelMatrix);
 
 		this.resize();
+		this.loop(performance.now());
 	}
 
 	resize() {
@@ -52,23 +57,23 @@ class CampfirePage {
 		this.gl.viewport(0, 0, w, h);
 
 		this.updateViewProjectionMatrix();
-
-		this.draw();
 	}
 
 	draw() {
 		this.gl.clearColor(0, 0, 0.3, 1);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-		// this.shader.setUniforms({
-		// 	uVP: this.viewProjectionMatrix,
-		// }); // per-frame uniforms
-		// // set entity uniforms
-		// this.shader.setUniforms({
-		// 	uModel: this.modelMatrix,
-		// });
+		mat4.fromRotation(this.modelMatrix, this.rotation, [0, 1, 0]);
+
+		this.shader.setUniforms({
+			uVP: this.viewProjectionMatrix,
+		}); // per-frame uniforms
+		// set entity uniforms
+		this.shader.setUniforms({
+			uModel: this.modelMatrix,
+		});
 		// draw entity
-		this.shader.draw(this.buffers, this.gl.TRIANGLE_FAN);
+		this.shader.draw(this.buffers);
 	}
 
 	createQuadMesh(): Mesh {
@@ -175,17 +180,17 @@ class CampfirePage {
 			},
 			new Uint16Array([
 				//x- face
-				0, 1, 2, 2, 1, 3,
+				0, 1, 2, 1, 3, 2,
 				//x+ face
-				4, 5, 6, 6, 5, 7,
+				4, 6, 5, 5, 6, 7,
 				//y- face
-				8, 9, 10, 10, 9, 11,
+				8, 10, 9, 9, 10, 11,
 				//y+ face
 				12, 13, 14, 14, 13, 15,
 				//z- face
 				16, 17, 18, 18, 17, 19,
 				//z+ face
-				20, 21, 22, 22, 21, 23,
+				20, 22, 21, 21, 22, 23,
 			]),
 		);
 	}
@@ -195,8 +200,14 @@ class CampfirePage {
 		const projection = mat4.create();
 		const aspect = this.canvas.width / this.canvas.height;
 		mat4.perspective(projection, Math.PI / 4, aspect, 0.1, 100);
-		mat4.lookAt(view, [0, 0, 2], [0, 0, 0], [0, 1, 0]);
+		mat4.lookAt(view, [0, 3, 5], [0, 0, 0], [0, 1, 0]);
 		return mat4.multiply(this.viewProjectionMatrix, projection, view);
+	}
+
+	loop(time: number) {
+		this.rotation = (time / 10_000) % (Math.PI * 2);
+		this.draw();
+		requestAnimationFrame(this.loop.bind(this));
 	}
 }
 
