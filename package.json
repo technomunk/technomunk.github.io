@@ -30,5 +30,11 @@
     "unist-util-visit": "^5.0.0",
     "vite-plugin-glsl": "^1.4.1",
     "vitest": "^3.1.2"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 4,
+    "singleQuote": true,
+    "printWidth": 100
   }
 }
