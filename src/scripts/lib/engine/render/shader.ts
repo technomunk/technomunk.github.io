@@ -1,4 +1,6 @@
-import type { MeshBufferSet } from './mesh-buffer';
+import type { VertexBuffer } from './buffer';
+import type { MeshBufferSet } from './mesh';
+import { keys } from './typeutil';
 
 export interface TextureWithSampler {
 	texture: WebGLTexture;
@@ -13,9 +15,6 @@ export type UniformValue =
 	| Array<TextureWithSampler>;
 export type UniformSetter<V extends UniformValue = UniformValue> = (value: V) => void;
 export type UniformSet = Record<string, UniformValue>;
-export type UniformSetterSet<U extends UniformSet = UniformSet> = {
-	[K in keyof U]: UniformSetter<U[K]>;
-};
 
 export interface ShaderProps {
 	gl: WebGL2RenderingContext;
@@ -41,12 +40,18 @@ type DrawMode =
 
 export class ShaderError extends Error {}
 
+type AttributeInfo = {
+	readonly loc: GLuint;
+	readonly size: GLuint;
+	readonly type: GLenum;
+};
+
 /** A GPU program along with related information */
-export class Shader<Uniforms extends UniformSet = UniformSet> {
+export class Shader<Uniforms extends UniformSet = UniformSet, A extends string = string> {
 	readonly gl: WebGL2RenderingContext;
 	readonly program: WebGLProgram;
-	readonly uniformSetters: UniformSetterSet<Uniforms>;
-	readonly attributes: Record<string, GLuint>;
+	readonly uniformSetters: Map<keyof Uniforms, UniformSetter>;
+	readonly attributes: Map<A, AttributeInfo>;
 
 	constructor({ gl, src }: ShaderProps) {
 		this.gl = gl;
@@ -79,18 +84,38 @@ export class Shader<Uniforms extends UniformSet = UniformSet> {
 	}
 
 	setUniforms(uniforms: Partial<Uniforms>) {
-		for (const name of Object.keys(uniforms)) {
-			const setter = this.uniformSetters[name];
-			// biome-ignore lint/suspicious/noExplicitAny: Partial<Uniforms> ensures our values are correct
-			setter(uniforms[name] as any);
+		for (const name of keys(uniforms)) {
+			const setter = this.uniformSetters.get(name);
+			if (setter) {
+				setter(uniforms[name] as UniformValue);
+			} else {
+				console.warn(`Uniform ${name} not found in shader`);
+			}
 		}
 	}
 
-	draw = (buffers: MeshBufferSet, mode: DrawMode = WebGL2RenderingContext.TRIANGLES) => {
-		this.gl.bindVertexArray(buffers.vao);
-		if (buffers.index) {
-			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffers.index.buffer);
-			this.gl.drawElements(mode, buffers.vertexCount, buffers.index.type, 0);
+	bindVertexBuffers(buffers: Map<A, VertexBuffer>) {
+		for (const [name, buffer] of buffers) {
+			if (name === 'indices') {
+				this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffer.buffer);
+				continue;
+			}
+
+			const info = this.attributes.get(name);
+			if (!info) continue;
+
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer.buffer);
+			this.gl.enableVertexAttribArray(info.loc);
+			this.gl.vertexAttribPointer(info.loc, buffer.stride, buffer.type, false, 0, 0);
+			this.gl.vertexAttribDivisor(info.loc, 0); // per vertex data
+		}
+	}
+
+	draw = (buffers: MeshBufferSet<A>, mode: DrawMode = WebGL2RenderingContext.TRIANGLES) => {
+		this.bindVertexBuffers(buffers);
+		if (buffers.indices) {
+			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffers.indices.buffer);
+			this.gl.drawElements(mode, buffers.vertexCount, buffers.indices.type, 0);
 		} else {
 			this.gl.drawArrays(mode, 0, buffers.vertexCount);
 		}
@@ -158,9 +183,9 @@ namespace detail {
 	export const createUniformSetters = <U extends UniformSet>(
 		gl: WebGL2RenderingContext,
 		program: WebGLProgram,
-	): UniformSetterSet<U> => {
+	): Map<keyof U, UniformSetter> => {
 		const textureUnit = { value: 0 };
-		const result: Record<string, UniformSetter> = {};
+		const result = new Map<keyof U, UniformSetter>();
 
 		const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 		for (let i = 0; i < uniformCount; ++i) {
@@ -173,22 +198,27 @@ namespace detail {
 			const name = info.name.endsWith('[0]')
 				? info.name.substring(0, info.name.length - 3)
 				: info.name;
-			result[name] = setter as UniformSetter;
+			result.set(name as keyof U, setter as UniformSetter);
 		}
 
-		return result as UniformSetterSet<U>;
+		return result;
 	};
 
-	export const collectAttributeLocations = (gl: WebGL2RenderingContext, program: WebGLProgram) => {
-		const result: Record<string, GLuint> = {};
+	export const collectAttributeLocations = <A extends string>(
+		gl: WebGL2RenderingContext,
+		program: WebGLProgram,
+	) => {
+		const result = new Map<A, AttributeInfo>();
 		const attributeCount = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
 		for (let i = 0; i < attributeCount; ++i) {
 			// biome-ignore lint/style/noNonNullAssertion: we are iterating over the correct range
 			const info = gl.getActiveAttrib(program, i)!;
 			if (isBuiltIn(info)) continue;
-			const loc = gl.getAttribLocation(program, info.name);
-			if (loc < 0) continue;
-			result[info.name] = loc;
+			result.set(info.name as A, {
+				loc: gl.getAttribLocation(program, info.name),
+				size: info.size,
+				type: info.type,
+			});
 		}
 		return result;
 	};

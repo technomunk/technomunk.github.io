@@ -20,9 +20,8 @@ export type TypedArray =
 	| Uint32Array
 	| Float32Array;
 
-export interface AttributeData<T extends TypedArray = TypedArray> {
-	values: T;
-	size: number;
-}
-
-export type AttributeDataSet = Record<string, AttributeData>;
+export const keys = <T extends object>(obj: T): (keyof T)[] => Object.keys(obj) as (keyof T)[];
+export const values = <T extends object>(obj: T): T[keyof T][] =>
+	Object.values(obj) as T[keyof T][];
+export const entries = <T extends object>(obj: T): [keyof T, T[keyof T]][] =>
+	Object.entries(obj) as [keyof T, T[keyof T]][];
