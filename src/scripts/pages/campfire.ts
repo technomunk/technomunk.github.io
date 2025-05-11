@@ -6,6 +6,8 @@ import { Mesh } from '@lib/engine/render/mesh';
 import { Shader } from '@lib/engine/render/shader';
 import { error } from '@lib/util';
 
+import MESH_DATA from '@assets/mesh/campfire.json';
+
 import vertex from '@shader/mvp.vs';
 import fragment from '@shader/bling-phong.fs';
 
@@ -20,6 +22,7 @@ type LightUniforms = {
 	uLightPos: Float32Array; // light positions
 	uLightCol: Float32Array; // light color
 	uLightCount: number; // light color
+	uAmbient: Float32Array; // ambient color
 };
 
 type MaterialUniforms = {
@@ -30,7 +33,7 @@ type MaterialUniforms = {
 type EntityUniforms = { uModel: mat4 } & MaterialUniforms;
 type Uniforms = CameraUniforms & LightUniforms & EntityUniforms;
 
-type Attributes = 'aPos' | 'aNormal';
+type Attributes = 'aPos' | 'aNorm';
 
 class CampfirePage {
 	readonly gl: WebGL2RenderingContext;
@@ -39,16 +42,17 @@ class CampfirePage {
 
 	readonly view: CameraUniforms = {
 		uVP: mat4.create(),
-		uCameraPos: vec3.fromValues(0, 3, 5),
+		uCameraPos: vec3.fromValues(0, 1, 3),
 	};
 	readonly lights: LightUniforms = {
 		uLightPos: new Float32Array([...vec3.fromValues(-1, -10, -1), 0]),
 		uLightCol: new Float32Array([1, 1, 1]),
 		uLightCount: 1,
+		uAmbient: new Float32Array([.1, .1, .1]),
 	};
 	readonly entity: EntityUniforms = {
 		uModel: mat4.create(),
-		uDiffuse: vec3.fromValues(1, 0.5, 0.5),
+		uDiffuse: vec3.fromValues(.8, .8, .8),
 		uSpecular: vec3.fromValues(1, 1, 1),
 		uShininess: 32,
 	};
@@ -63,13 +67,14 @@ class CampfirePage {
 		});
 		this.shader.use();
 
-		this.gl.enable(this.gl.CULL_FACE);
-		this.gl.cullFace(this.gl.BACK);
+		this.gl.enable(this.gl.DEPTH_TEST);
+		// this.gl.enable(this.gl.CULL_FACE);
+		// this.gl.cullFace(this.gl.BACK);
 
 		// cube mesh with normals
 		// TODO: figure out typing here
 		// TODO: fix interleaving
-		this.buffers = detail.createCubeMesh().createVertexBuffers(this.gl);
+		this.buffers = detail.loadCampfireMesh().createVertexBuffers(this.gl);
 		this.updateCamera();
 		this.shader.setUniforms(this.lights);
 
@@ -104,7 +109,7 @@ class CampfirePage {
 		const view = mat4.create();
 		const projection = mat4.create();
 		const aspect = this.canvas.width / this.canvas.height;
-		mat4.perspective(projection, Math.PI / 4, aspect, 0.1, 100);
+		mat4.perspective(projection, Math.PI / 6, aspect, 0.1, 100);
 		mat4.lookAt(view, this.view.uCameraPos, [0, 0, 0], [0, 1, 0]);
 		return mat4.multiply(this.view.uVP, projection, view);
 	}
@@ -161,7 +166,7 @@ namespace detail {
 					},
 				],
 				[
-					'aNormal',
+					'aNorm',
 					{
 						stride: 3,
 						values: new Float32Array(
@@ -212,6 +217,27 @@ namespace detail {
 			]),
 		);
 	};
+
+	export const loadCampfireMesh = () =>
+		new Mesh<Attributes>(
+			[
+				[
+					'aPos',
+					{
+						stride: 3,
+						values: new Float32Array(MESH_DATA.pos),
+					},
+				],
+				[
+					'aNorm',
+					{
+						stride: 3,
+						values: new Float32Array(MESH_DATA.norm),
+					},
+				],
+			],
+			// new Uint16Array(MESH_DATA.idx),
+		);
 }
 
 const setup = () => {

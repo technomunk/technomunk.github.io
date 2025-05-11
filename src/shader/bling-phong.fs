@@ -10,6 +10,7 @@ in vec3 vNormal;
 uniform vec4 uLightPos[MAX_LIGHTS];  // if w is 0 - it's a directional light, if w is 1 - it's a point light
 uniform vec3 uLightCol[MAX_LIGHTS];
 uniform int uLightCount;
+uniform vec3 uAmbient;
 
 // camera
 uniform vec3 uCameraPos;
@@ -41,7 +42,7 @@ void main() {
         vec3 reflectDir = reflect(-lightDir, normal);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), uShininess);
         vec3 specular = spec * lightColor * uSpecular;
-        color += diffuse + specular;
+        color += uAmbient + diffuse + specular;
     }
 
     oColor = vec4(color, 1.0);
