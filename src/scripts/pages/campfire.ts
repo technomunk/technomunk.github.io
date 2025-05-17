@@ -10,6 +10,7 @@ import MESH_DATA from '@assets/mesh/campfire.json';
 
 import vertex from '@shader/mvp.vs';
 import fragment from '@shader/bling-phong.fs';
+import { hexToRgb } from '@lib/engine/color';
 
 // import vertex from '@shader/identity.vs';
 // import fragment from '@shader/color.fs';
@@ -52,7 +53,7 @@ class CampfirePage {
 	};
 	readonly entity: EntityUniforms = {
 		uModel: mat4.create(),
-		uDiffuse: vec3.fromValues(.8, .8, .8),
+		uDiffuse: hexToRgb('#3b270c'),
 		uSpecular: vec3.fromValues(1, 1, 1),
 		uShininess: 32,
 	};
@@ -68,11 +69,10 @@ class CampfirePage {
 		this.shader.use();
 
 		this.gl.enable(this.gl.DEPTH_TEST);
-		// this.gl.enable(this.gl.CULL_FACE);
-		// this.gl.cullFace(this.gl.BACK);
+		this.gl.enable(this.gl.CULL_FACE);
+		this.gl.cullFace(this.gl.BACK);
 
 		// cube mesh with normals
-		// TODO: figure out typing here
 		// TODO: fix interleaving
 		this.buffers = detail.loadCampfireMesh().createVertexBuffers(this.gl);
 		this.updateCamera();
