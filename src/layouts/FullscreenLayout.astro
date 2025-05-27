@@ -1,0 +1,24 @@
+---
+import type { Props as MainLayoutProps } from './MainLayout.astro';
+
+import MainLayout from './MainLayout.astro';
+
+interface Props extends MainLayoutProps {}
+---
+
+<MainLayout {...Astro.props}>
+    <meta
+        name="viewport"
+        content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+        slot="head"
+    />
+    <slot />
+</MainLayout>
+
+<style lang="scss">
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>

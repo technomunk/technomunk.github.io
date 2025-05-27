@@ -1,11 +1,11 @@
 ---
-const { title, description, publishedOn } = Astro.props.frontmatter
-import MainLayout from "@layouts/MainLayout.astro"
+import MainLayout from '@layouts/MainLayout.astro';
 
-import "@styles/blog.sass"
-import "@styles/syntax-hl.sass"
+const { title, description, publishedOn } = Astro.props.frontmatter;
 
-const publishDate = new Date(publishedOn).toDateString()
+const publishDate = new Date(publishedOn).toDateString();
+
+import '@styles/components/code.scss';
 ---
 
 <MainLayout {title} description={`Technomunk on: ${description}`}>

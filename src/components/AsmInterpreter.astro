@@ -1,15 +1,15 @@
 ---
 interface Props {
-    di: string
-    code: string
+    di: string;
+    code: string;
 }
-const { di, code } = Astro.props
-import { markSemanticsWithSpans } from "@lib/code/semanitcize"
+const { di, code } = Astro.props;
+import { markSemanticsWithSpans } from '@lib/code/semanitcize';
 ---
 
 <asm-interpreter {di} class="interpreter">
-    <code set:html={markSemanticsWithSpans(code, "asm")} />
-    <div class="interpreter-menu">
+    <code set:html={markSemanticsWithSpans(code, 'asm')} />
+    <div class="interpreter-menu drawer">
         <div>
             <button id="step">step</button>
             <button id="reset">reset</button>
@@ -18,9 +18,9 @@ import { markSemanticsWithSpans } from "@lib/code/semanitcize"
 </asm-interpreter>
 
 <script>
-    import "../scripts/components/asm_interpreter"
+    import '../scripts/components/asm_interpreter';
 </script>
 
-<style lang="sass">
-    @use "@styles/interpreter.sass"
+<style lang="scss">
+    @use '@styles/components/interpreter';
 </style>

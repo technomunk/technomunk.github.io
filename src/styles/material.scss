@@ -1,0 +1,95 @@
+@use 'palette';
+
+/* Material Design inspired paper style
+ *
+ * @param $background: The background style, has to be one of:
+ *   - main: A solid main background color
+ *   - soft: A solid soft background color
+ *   - gradient: A gradient between primary and accent colors
+ *   - transparent: A transparent background
+ */
+@mixin paper($background: soft, $elevated: true) {
+    color: palette.light(text);
+
+    $border-width: 4px;
+
+    $bg: palette.light-gradient(background, background);
+
+    @if $background ==soft {
+        $bg: palette.light-gradient(soft, soft);
+    }
+
+    @else if $background ==gradient {
+        $bg: palette.light-gradient(background-primary, background-accent);
+    }
+
+    @else if $background ==transparent {
+        $bg: linear-gradient(25deg, transparent, transparent);
+    }
+
+    background: $bg padding-box,
+    palette.light-gradient(primary, accent) border-box;
+    border: $border-width solid transparent;
+    border-radius: 4px;
+
+    box-shadow: none;
+
+    @if $elevated==true {
+        box-shadow: 4px 4px 8px 4px palette.light(shadow);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        color: palette.dark(text);
+        $bg: palette.dark-gradient(background, background);
+
+        @if $background ==soft {
+            $bg: palette.dark-gradient(soft, soft);
+        }
+
+        @else if $background ==gradient {
+            $bg: palette.dark-gradient(background-primary, background-accent);
+        }
+
+        @else if $background ==transparent {
+            $bg: linear-gradient(25deg, transparent, transparent);
+        }
+
+        background: $bg padding-box,
+        palette.dark-gradient(primary, accent) border-box;
+        color: palette.dark(text);
+    }
+}
+
+@mixin chamfer {
+    $border-radius: 20px;
+
+    border-radius: $border-radius;
+}
+
+@mixin glass {
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: grayscale(85%) brightness(300%) blur(8px);
+    border: 1px solid palette.light(background);
+
+    & * {
+        background-color: transparent !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        background-color: transparent;
+        backdrop-filter: grayscale(85%) brightness(60%) blur(8px);
+        border: 1px solid palette.dark(background);
+    }
+}
+
+.paper {
+    @include paper;
+}
+
+.chamfer {
+    @include chamfer;
+}
+
+.glass {
+    @include glass;
+}

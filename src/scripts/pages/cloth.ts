@@ -16,16 +16,19 @@ function setup() {
 	canvas.height = window.innerHeight;
 
 	const renderer = new Renderer(canvas);
+	const renderSystem = new RenderSystem(renderer);
+	const world = new World<Entity>();
+
 	window.addEventListener('resize', () => {
 		renderer.resize(window.innerWidth, window.innerHeight);
+		renderSystem.run(world);
 	});
 
-    // Note that the loop will setup the systems,
-    // which may listen to entity added/removed events to keep track of internal resources
-    // so the world needs to be populated after the loop has been set up
-	const world = new World<Entity>();
-	const loop = new Loop(world, [new RenderSystem(renderer), new ClothSimSystem()]);
-    populateWorld(world);
+	// Note that the loop will setup the systems,
+	// which may listen to entity added/removed events to keep track of internal resources
+	// so the world needs to be populated after the loop has been set up
+	const loop = new Loop(world, [renderSystem, new ClothSimSystem()]);
+	populateWorld(world);
 
 	const gd = new GestureDecoder(canvas);
 	gd.addDragObserver((drag) => {
@@ -40,7 +43,13 @@ function setup() {
 		entity.pos.splice(0, 3, result[0], result[1], result[2]);
 	});
 
-	loop.loop();
+	window.addEventListener('keypress', (event) => {
+		if (event.key === ' ') {
+			loop.isRunning = !loop.isRunning;
+		}
+	});
+
+	loop.isRunning = true;
 }
 
 const populateWorld = (world: World<Entity>) => {
@@ -48,12 +57,10 @@ const populateWorld = (world: World<Entity>) => {
 		pos: [0, 1.2, -1.5],
 		camera: new PerspectiveCamera(),
 	});
-	world.add(
-		{
-			pos: [0, 0, 0],
-			collider: new SphereCollider(0.5),
-		},
-	);
+	world.add({
+		pos: [0, 0, 0],
+		collider: new SphereCollider(0.5),
+	});
 
 	const particleCount = isMobile() ? 50 : 200;
 	const cloth = new Cloth([0, 1, 1], particleCount);

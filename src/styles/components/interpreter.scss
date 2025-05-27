@@ -1,0 +1,116 @@
+@use 'sass:color';
+
+@use '../font';
+@use '../palette';
+@use '../material';
+
+@use 'code';
+
+.interpreter,
+.interpreter * {
+    @include font.monospace;
+}
+
+pre,
+.interpreter {
+    & code {
+        padding: 1em;
+        display: block;
+        overflow-x: auto;
+        border-radius: 2px;
+    }
+}
+
+.interpreter {
+    display: flex;
+
+    @include material.paper($background: transparent);
+
+    @media (max-width: 1000px) {
+        flex-direction: column;
+    }
+
+    & code {
+        flex-grow: 1;
+    }
+
+    &>* {
+        background: padding-box palette.light(soft);
+    }
+}
+
+
+.interpreter-menu {
+    border-left: 4px solid transparent;
+
+    padding: 1em 1.5em;
+    flex-basis: 160px;
+    flex-grow: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    &>* {
+        margin: .2em;
+    }
+
+    & #vars>input {
+        text-align: center;
+    }
+
+    & input {
+        border: none;
+        width: 24px;
+        margin: 0;
+        flex: 24px;
+    }
+
+    & * {
+        background-color: transparent;
+    }
+
+    &>div {
+        display: flex;
+        gap: 1em;
+        justify-content: space-between;
+
+        &>input {
+            padding: 4px;
+
+            &:disabled {
+                color: black;
+            }
+        }
+
+        &>button {
+            flex-basis: 100px;
+            flex-grow: .4;
+        }
+    }
+
+    &>.shelf {
+        display: flex;
+        border: 2px inset;
+        flex-wrap: wrap;
+        gap: 0;
+
+        &>input {
+            text-align: end;
+
+            &.io {
+                margin-right: 1em;
+            }
+        }
+
+        &>* {
+            margin: .2em;
+            padding: 1px 4px;
+        }
+
+        &.hl,
+        &>.hl {
+            animation: highlightVarView .4s ease-out forwards;
+        }
+    }
+}

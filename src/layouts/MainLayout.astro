@@ -1,13 +1,13 @@
 ---
-interface Props {
-    title: string
-    description: string
+import avatarImg from '@assets/img/avatar.jpg';
+import '@styles/global.scss';
+
+export interface Props {
+    title: string;
+    description: string;
 }
 
-const { title, description } = Astro.props
-
-import avatarImg from "@assets/img/avatar.jpg"
-import "@styles/main.sass"
+const { title, description } = Astro.props;
 ---
 
 <html lang="en">

@@ -1,0 +1,132 @@
+@font-face {
+    font-family: Rubik;
+    src: url('/font/rubik.ttf') format('truetype');
+    font-weight: 350;
+    font-variation-settings: 'wght' 350;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Rubik;
+    src: url('/font/rubik_italic.ttf') format('truetype');
+    font-weight: 350;
+    font-variation-settings: 'wght' 330;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: ibmplexmono;
+    src: url('/font/imbplexmono.ttf') format('truetype');
+    font-weight: 400;
+}
+
+@mixin monospace {
+    font-family: ibmplexmono, ui-monospace, SFMono-REgular, 'SF Mono', monospace !important;
+    font-size: 14px;
+
+    @media (min-width: 800px) {
+        font-size: 15px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 16px;
+    }
+}
+
+@mixin text-body {
+    font-size: 18px;
+
+    @media (min-width: 800px) {
+        font-size: 20px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 23px;
+    }
+}
+
+@mixin text-display {
+    font-size: 32px;
+
+    @media (min-width: 800px) {
+        font-size: 37px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 42px;
+    }
+}
+
+@mixin text-giant {
+    font-size: 32px;
+
+    @media (min-width: 800px) {
+        font-size: 37px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 42px;
+    }
+}
+
+@mixin text-large {
+    font-size: 26px;
+
+    @media (min-width: 800px) {
+        font-size: 32px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 37px;
+    }
+}
+
+@mixin text-title {
+    font-size: 24px;
+
+    @media (min-width: 800px) {
+        font-size: 26px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 32px;
+    }
+}
+
+body {
+    font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-variant-ligatures: no-common-ligatures;
+    @include text-body;
+}
+
+input,
+button,
+textarea,
+select {
+    font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-variant-ligatures: no-common-ligatures;
+    @include text-body;
+}
+
+header {
+    @include text-display;
+}
+
+h1,
+.text-giant {
+    @include text-giant;
+}
+
+h2,
+.text-large {
+    @include text-large;
+}
+
+h3,
+.text-title {
+    @include text-title;
+}
+
+.strong {
+    font-weight: bold;
+}

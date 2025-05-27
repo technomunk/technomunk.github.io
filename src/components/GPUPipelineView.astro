@@ -14,28 +14,42 @@
 </gpu-pipeline>
 
 <script>
-    import "@scripts/components/gpu_pipeline"
+    import '@scripts/components/gpu_pipeline';
 </script>
 
-<style lang="sass">
-    gpu-pipeline
-        display: flex
-        width: fit-content
-        margin: auto
-        gap: 3vmax
-        flex-direction: row
+<style lang="scss">
+    @use '@styles/material';
 
-        &>canvas,&>svg
-            width: 20vmax
-            height: 20vmax
-            border: 1px solid black
-            display: inline-block
+    gpu-pipeline {
+        display: flex;
+        width: fit-content;
+        margin: auto;
+        gap: 3vmax;
+        flex-direction: row;
 
-            &>circle
-                cursor: move
-                &.dragging
-                    cursor: grabbing
+        & > canvas,
+        & > svg {
+            width: 20vw;
+            height: 20vw;
+            display: inline-block;
 
-        @media (max-aspect-ratio: 1/1)
-            flex-direction: column
+            @include material.paper($background: background);
+
+            & > circle {
+                cursor: move;
+                &.dragging {
+                    cursor: grabbing;
+                }
+            }
+        }
+
+        @media (max-aspect-ratio: 1/1) {
+            flex-direction: column;
+            & > canvas,
+            & > svg {
+                width: min(300px, 80vw);
+                height: min(300px, 80vw);
+            }
+        }
+    }
 </style>

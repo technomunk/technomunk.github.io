@@ -1,0 +1,52 @@
+---
+interface Props {
+    title: string;
+    description?: string;
+    publishDate?: string;
+    href: string;
+    tags?: string[];
+}
+
+const { title, description, publishDate, href, tags } = Astro.props;
+---
+
+<a class="thumb chamfer" {href}>
+    <slot />
+    {publishDate && <div class="date">{new Date(publishDate).toDateString()}</div>}
+    <h2>{title}</h2>
+    {description}
+    {tags && <div class="tags">{tags.join(', ')}</div>}
+</a>
+
+<style lang="scss">
+    @use 'sass:color';
+
+    @use '@styles/material';
+    @use '@styles/palette';
+
+    a.thumb {
+        text-decoration: none;
+
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        padding: 0.2rem 0.5rem;
+
+        @include material.paper($background: gradient);
+
+        & > h1,
+        h2,
+        h3 {
+            padding: 0;
+            margin: 0.5rem;
+
+            font-style: italic;
+        }
+
+        & > .tags {
+            font-size: 0.8em;
+            font-style: italic;
+            margin-top: auto;
+        }
+    }
+</style>
