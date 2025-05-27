@@ -83,8 +83,8 @@ export class CanvasViewAdapter<TCanvas extends AnyCanvas> {
         const widthToHeight = width / height
         this.view.height *= height / this.canvas.height
         this.view.width = this.view.height * widthToHeight
-        this.canvas.width = width
-        this.canvas.height = height
+        this.canvas.width = width * window.devicePixelRatio
+        this.canvas.height = height * window.devicePixelRatio
     }
 
     /** Pan the image provide number of pixels to the side.

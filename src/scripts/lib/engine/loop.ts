@@ -2,7 +2,9 @@ import type { Entity, World } from './entity';
 import type { System } from './types';
 
 export class Loop {
+	protected _isRunning = false;
 	protected _lastTime = performance.now();
+	protected _animationFrame = 0;
 
 	constructor(
 		public readonly world: World<Entity>,
@@ -22,8 +24,22 @@ export class Loop {
 		this._lastTime = now;
 	}
 
+	get isRunning() {
+		return this._isRunning;
+	}
+	set isRunning(value: boolean) {
+		if (this._isRunning === value) return;
+		this._isRunning = value;
+		if (value) {
+			this.loop();
+		} else {
+			cancelAnimationFrame(this._animationFrame);
+		}
+	}
+
 	loop() {
-		requestAnimationFrame(() => {
+		this._animationFrame = requestAnimationFrame(() => {
+			if (!this.isRunning) return;
 			this.runSystems();
 			this.loop();
 		});

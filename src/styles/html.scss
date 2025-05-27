@@ -1,0 +1,54 @@
+@use 'palette';
+@use 'material';
+@use 'font';
+
+body {
+    margin: max(1rem, 3vmin);
+    color: palette.light(text);
+    background: palette.light(background);
+
+    @media (prefers-color-scheme: dark) {
+        color: palette.dark(text);
+        background: palette.dark(background);
+    }
+}
+
+a {
+    @include font.text-body;
+}
+
+mark,
+.mark {
+    color: palette.light(text-accent);
+
+    @media (prefers-color-scheme: dark) {
+        color: palette.dark(text-accent);
+    }
+}
+
+input,
+textarea,
+select,
+.input {
+    color: palette.light(text);
+
+    @media (prefers-color-scheme: dark) {
+        color: palette.dark(text);
+    }
+
+    border-radius: 8px;
+}
+
+button,
+.button {
+    text-decoration: none;
+    padding: 0.2em;
+    color: palette.light(text);
+
+    @media (prefers-color-scheme: dark) {
+        color: palette.dark(text);
+    }
+
+    @include material.paper($elevated: false);
+    border-radius: 50vmax;
+}

@@ -9,7 +9,7 @@ import { markSemanticsWithSpans } from '@lib/code/semanitcize';
 
 <asm-interpreter {di} class="interpreter">
     <code set:html={markSemanticsWithSpans(code, 'asm')} />
-    <div class="interpreter-menu">
+    <div class="interpreter-menu drawer">
         <div>
             <button id="step">step</button>
             <button id="reset">reset</button>
@@ -22,5 +22,5 @@ import { markSemanticsWithSpans } from '@lib/code/semanitcize';
 </script>
 
 <style lang="scss">
-    @use '@styles/interpreter';
+    @use '@styles/components/interpreter';
 </style>

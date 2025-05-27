@@ -1,17 +1,13 @@
 ---
-import MainLayout from '@layouts/MainLayout.astro';
+import FullscreenLayout from '@layouts/FullscreenLayout.astro';
 ---
 
-<MainLayout title="WIP cloth simulation" description="Particle-backed cloth sim" fullscreen={true}>
+<FullscreenLayout title="WIP cloth simulation" description="Particle-backed cloth sim">
     <main>
-        <canvas id="main"></canvas>
+        <canvas id="main" class="fill"></canvas>
     </main>
-</MainLayout>
+</FullscreenLayout>
 
 <script>
     import '@scripts/pages/cloth';
 </script>
-
-<style lang="scss">
-    @use '@styles/fullscreen';
-</style>

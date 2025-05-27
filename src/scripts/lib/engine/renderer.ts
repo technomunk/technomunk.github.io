@@ -10,6 +10,7 @@ import { compileProgram } from '@lib/webgl/util';
 import VERTEX_SHADER from '@shader/mvp.vs';
 import FRAGMENT_SHADER from '@shader/solid.fs';
 import type { With } from 'miniplex';
+import { Shader } from './render/shader';
 
 interface MeshOnGPU {
 	positions: WebGLBuffer;
@@ -63,7 +64,6 @@ interface RenderMatrices {
 	view: mat4;
 	proj: mat4;
 	vp: mat4;
-	mvp: mat4;
 	model: mat4;
 }
 
@@ -72,6 +72,11 @@ interface ProgramInfo {
 	attributes: { [name: string]: GLint };
 	uniforms: { [name: string]: WebGLUniformLocation };
 }
+
+type ShaderUniforms = {
+	uVP: mat4;
+	uModel: mat4;
+};
 
 export class Renderer {
 	protected static RENDERING_CONTEXT_OPTIONS: WebGLContextAttributes = {
@@ -87,27 +92,30 @@ export class Renderer {
 	};
 
 	readonly gl: WebGL2RenderingContext;
-	readonly programInfo: ProgramInfo;
+	readonly shader: Shader<ShaderUniforms>;
 	readonly storage: MeshStorage;
 	readonly matrices: RenderMatrices;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl =
-			canvas.getContext('webgl2', Renderer.RENDERING_CONTEXT_OPTIONS) || error('Could not instantiate drawing context');
-		this.programInfo = this._setupProgram(VERTEX_SHADER, FRAGMENT_SHADER, ['iPos'], ['uMVP']);
+			canvas.getContext('webgl2', Renderer.RENDERING_CONTEXT_OPTIONS) ||
+			error('Could not instantiate drawing context');
+		this.shader = new Shader<ShaderUniforms>({
+			gl: this.gl,
+			src: { vertex: VERTEX_SHADER, fragment: FRAGMENT_SHADER },
+		});
 		this.storage = new MeshStorage(this.gl);
 		this.matrices = {
 			view: mat4.create(),
 			proj: mat4.create(),
 			vp: mat4.create(),
-			mvp: mat4.create(),
 			model: mat4.create(),
 		};
 	}
 
 	resize(width: number, height: number) {
-		this.gl.canvas.width = width;
-		this.gl.canvas.height = height;
+		this.gl.canvas.width = width * window.devicePixelRatio;
+		this.gl.canvas.height = height * window.devicePixelRatio;
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 	}
 
@@ -115,7 +123,7 @@ export class Renderer {
 		this.gl.clearColor(240 / 255, 174 / 255, 148 / 255, 1);
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-		this.gl.useProgram(this.programInfo.program);
+		this.shader.use();
 
 		camera.camera.calcView(camera.pos, this.matrices.view);
 		camera.camera.calcProjection(this.aspectRatio, this.matrices.proj);
@@ -157,7 +165,8 @@ export class Renderer {
 		const uniforms: { [name: string]: WebGLUniformLocation } = {};
 		for (const name of uniformNames) {
 			const location =
-				this.gl.getUniformLocation(program, name) || error(`Couldn't find the "${name}" uniform location`);
+				this.gl.getUniformLocation(program, name) ||
+				error(`Couldn't find the "${name}" uniform location`);
 			uniforms[name] = location;
 		}
 		return {
@@ -168,18 +177,27 @@ export class Renderer {
 	}
 
 	protected _setAttributes(mesh: Mesh) {
-		const gpuMesh = this.storage.getOrUpload(mesh);
+		const attrInfo = this.shader.attributes.get('aPos');
+		if (!attrInfo) error('No attribute "aPos" found in the shader');
+
+		const gpuMesh = this.storage.getOrUpload(mesh); // todo update
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, gpuMesh.positions);
-		this.gl.vertexAttribPointer(this.programInfo.attributes.aPos, 3, this.gl.FLOAT, false, 0, 0);
-		this.gl.enableVertexAttribArray(this.programInfo.attributes.aPos);
+		this.gl.vertexAttribPointer(
+			attrInfo.loc,
+			3,
+			this.gl.FLOAT,
+			false,
+			0,
+			0,
+		);
+		this.gl.enableVertexAttribArray(attrInfo.loc);
 
 		this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, gpuMesh.indices);
 	}
 
 	protected _setUniforms(pos: Vec3) {
 		mat4.fromTranslation(this.matrices.model, pos);
-		mat4.mul(this.matrices.mvp, this.matrices.vp, this.matrices.model);
-		this.gl.uniformMatrix4fv(this.programInfo.uniforms.uMVP, false, this.matrices.mvp);
+		this.shader.setUniforms({ uVP: this.matrices.vp, uModel: this.matrices.model });
 	}
 }
 

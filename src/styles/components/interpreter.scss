@@ -1,12 +1,12 @@
-@use 'sass:color' as sass-color;
+@use 'sass:color';
 
-@use 'font';
-@use 'color';
-@use 'blog';
+@use '../font';
+@use '../palette';
+@use '../material';
 
-code,
+@use 'code';
+
 .interpreter,
-code *,
 .interpreter * {
     @include font.monospace;
 }
@@ -23,23 +23,26 @@ pre,
 
 .interpreter {
     display: flex;
-    color: #24292e;
-    background: sass-color.adjust(blog.$background, $lightness: -5%, $space: hsl);
+
+    @include material.paper($background: transparent);
 
     @media (max-width: 1000px) {
         flex-direction: column;
     }
 
     & code {
-        white-space: pre;
         flex-grow: 1;
+    }
+
+    &>* {
+        background: padding-box palette.light(soft);
     }
 }
 
+
 .interpreter-menu {
-    border: 4px inset;
-    margin: .5em;
-    background-color: #87ebff;
+    border-left: 4px solid transparent;
+
     padding: 1em 1.5em;
     flex-basis: 160px;
     flex-grow: 1;
@@ -57,11 +60,14 @@ pre,
     }
 
     & input {
-        background-color: #0000;
         border: none;
         width: 24px;
         margin: 0;
         flex: 24px;
+    }
+
+    & * {
+        background-color: transparent;
     }
 
     &>div {
@@ -70,7 +76,6 @@ pre,
         justify-content: space-between;
 
         &>input {
-            background-color: #b2ffcd;
             padding: 4px;
 
             &:disabled {
@@ -81,13 +86,11 @@ pre,
         &>button {
             flex-basis: 100px;
             flex-grow: .4;
-            border: outset;
         }
     }
 
     &>.shelf {
         display: flex;
-        background-color: #b2ffcd;
         border: 2px inset;
         flex-wrap: wrap;
         gap: 0;

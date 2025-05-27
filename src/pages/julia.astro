@@ -1,37 +1,26 @@
 ---
-import MainLayout from '@layouts/MainLayout.astro';
-import SlideMenu from '@components/SlideMenu.astro';
-
-import '@styles/materials.scss';
-import '@styles/shapes.scss';
-import '@styles/fullscreen.scss';
-import '@styles/color.scss';
-import '@styles/glass.scss';
+import FullscreenLayout from '@layouts/FullscreenLayout.astro';
+import DrawerMenu from '@components/DrawerMenu.astro';
 ---
 
-<MainLayout title="Julia sets explorer" description="Interactive Julia sets explorer and visualizer in real time.">
-    <meta
-        content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
-        name="viewport"
-        slot="head"
-    />
+<FullscreenLayout title="Julia sets explorer" description="Interactive Julia sets explorer and visualizer in real time.">
     <main>
-        <canvas id="view-julia" is="julia-view"></canvas>
+        <canvas id="view-julia" is="julia-view" class="fill-parent"></canvas>
     </main>
-    <SlideMenu class="glass chamfer text-center text-lg themed flex container">
-        <div class="row"><a class="button round no-deco" href="index.html">Home</a></div>
-        <div class="row">
+    <DrawerMenu class="glass chamfer text-center text-large drawer">
+        <div class="shelf"><a class="button" href="index.html">Home</a></div>
+        <div class="shelf">
             <canvas class="chamfer" id="map" width="360" height="240"></canvas>
         </div>
-        <div class="row">
+        <div class="shelf">
             <label for="limit">Limit</label>
             <input class="round" id="limit" type="number" min="1" value="32" max="1024" />
         </div>
-        <div class="row">
+        <div class="shelf">
             <button class="round" id="start-stop">Start</button>
         </div>
-    </SlideMenu>
-</MainLayout>
+    </DrawerMenu>
+</FullscreenLayout>
 
 <script>
     import '@scripts/pages/julia';

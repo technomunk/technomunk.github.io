@@ -5,6 +5,7 @@ import { Ref, SERIALIZER_INTEGER } from '@lib/ref';
 
 import JULIA_SHADER from '@shader/julia.fs';
 import MANDELBROT_SHADER from '@shader/mandelbrot.fs';
+import { GestureDecoder } from '@lib/gesture';
 
 const MANDELBROT_CONTEXT_SETTINGS: CanvasRenderingContext2DSettings = {
 	alpha: false,
@@ -56,6 +57,7 @@ class MandelbrotView {
 	readonly view: ViewRect = new ViewRect(-0.5, 0, 3.3, 2.2);
 	targetSize = 10;
 	targetStyle = 'red';
+
 	protected _selectOnMove = false;
 	protected _target: [number, number] = [0.5, 0.5];
 	protected _observers: Array<(point: [number, number]) => void> = [];
@@ -63,7 +65,8 @@ class MandelbrotView {
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
 		this.context =
-			this.canvas.getContext('2d', MANDELBROT_CONTEXT_SETTINGS) ?? error('Failed to get mandelbrot rendering context');
+			this.canvas.getContext('2d', MANDELBROT_CONTEXT_SETTINGS) ??
+			error('Failed to get mandelbrot rendering context');
 		this.background = new OffscreenCanvas(canvas.width, canvas.height);
 		const renderer = new FragmentRenderer(this.background);
 		renderer.drawWithShader(MANDELBROT_SHADER, {
@@ -196,7 +199,6 @@ class JuliaWithMandelbrotMap {
 	}
 
 	protected _setJuliaViewToPoint(point: [number, number]) {
-		console.debug(point);
 		this.mandelbrot.draw();
 		this.julia.config.seed = point;
 		this.requestFrame();
@@ -257,6 +259,13 @@ class JuliaAnimator {
 	}
 }
 
+const setupAnimations = (julia: JuliaView) => {
+	julia.addEventListener('wheel', (event: WheelEvent) => {
+		if (event.deltaY === 0) return;
+		julia.renderer.adapter.zoom(event.x * window.devicePixelRatio, event.y * window.devicePixelRatio, 1 * (1 + event.deltaY / 1000));
+	});
+};
+
 function setup() {
 	const julia = document.querySelector('#view-julia') as JuliaView;
 	julia.renderer.resize(window.innerWidth, window.innerHeight);
@@ -269,9 +278,13 @@ function setup() {
 	const adapter = new JuliaWithMandelbrotMap(julia, mandelbrot);
 	const animator = new JuliaAnimator(adapter);
 
+	setupAnimations(julia);
+
 	adapter.mandelbrot.addObserver(() => animator.stop());
 
-	window.addEventListener('resize', () => adapter.resizeAndDraw(window.innerWidth, window.innerHeight));
+	window.addEventListener('resize', () =>
+		adapter.resizeAndDraw(window.innerWidth, window.innerHeight),
+	);
 	adapter.requestFrame();
 	animator.start();
 

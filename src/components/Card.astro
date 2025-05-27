@@ -1,18 +1,71 @@
 ---
+import { Image } from 'astro:assets';
+
+type ImageSrc =
+    | ImageMetadata
+    | Promise<{
+          default: ImageMetadata;
+      }>;
+
 interface Props {
     title: string;
-    description?: string;
-    publishDate?: string;
+    src: ImageSrc;
+    alt: string;
     href: string;
-    tags?: string[];
 }
-const { title, description, publishDate, href, tags } = Astro.props;
+const { title, src, alt, href } = Astro.props;
 ---
 
-<a class="card" {href}>
-    {publishDate && <div class="date">{new Date(publishDate).toDateString()}</div>}
-    <h2>{title} &rarr;</h2>
-    {tags && <div class="tags">{tags.join(', ')}</div>}
-    {description}
-    <slot />
+<a class="card" href={href}>
+    <Image class="image" src={src} alt={alt} />
+    <h2>{title}</h2>
 </a>
+
+<style lang="scss">
+    @use '@styles/palette';
+    @use '@styles/material';
+
+    a.card {
+        text-decoration: none;
+    }
+    .card {
+        display: flex;
+
+        align-items: stretch;
+        justify-content: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+
+        @include material.paper($background: transparent);
+        @include material.chamfer;
+
+        & > img,
+        & > svg {
+            width: calc(100% / 3);
+            max-width: 256px;
+            flex: 0 0 auto;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            border-right: 4px solid transparent;
+            background: padding-box palette.light(soft);
+        }
+
+        & > h2 {
+            padding: 0.5rem 0.5em;
+            margin: 0;
+            flex: 1;
+            background: padding-box palette.light(soft);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            & > h2 {
+                background: padding-box palette.dark(soft);
+            }
+        }
+    }
+</style>

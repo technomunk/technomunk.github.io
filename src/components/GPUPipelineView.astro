@@ -18,6 +18,8 @@
 </script>
 
 <style lang="scss">
+    @use '@styles/material';
+
     gpu-pipeline {
         display: flex;
         width: fit-content;
@@ -27,10 +29,11 @@
 
         & > canvas,
         & > svg {
-            width: 20vmax;
-            height: 20vmax;
-            border: 1px solid black;
+            width: 20vw;
+            height: 20vw;
             display: inline-block;
+
+            @include material.paper($background: background);
 
             & > circle {
                 cursor: move;
@@ -42,6 +45,11 @@
 
         @media (max-aspect-ratio: 1/1) {
             flex-direction: column;
+            & > canvas,
+            & > svg {
+                width: min(300px, 80vw);
+                height: min(300px, 80vw);
+            }
         }
     }
 </style>

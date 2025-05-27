@@ -2,43 +2,66 @@
 import { Image } from 'astro:assets';
 
 import avatarImg from '@assets/img/avatar.jpg';
-import Card from '@components/Card.astro';
+import clothImg from '@assets/img/cloth.png';
+import juliaImg from '@assets/img/julia.png';
+import blogImg from '@assets/img/blog.svg';
 import MainLayout from '@layouts/MainLayout.astro';
+import Card from '@components/Card.astro';
 ---
 
-<MainLayout title="Technomunk" description="Technomunk's online page with a couple of interactive projects and a blog.">
+<MainLayout
+    title="Technomunk"
+    description="Technomunk's online page with a couple of interactive projects and a blog."
+>
     <header class="strong text-center">
-        <Image class="avatar" src={avatarImg} alt="Avatar" />
+        <Image class="avatar paper float" src={avatarImg} alt="Avatar" />
         <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
     </header>
     <main>
         <p>
-            Salutations! I'm a programmer by trade and passion. Versed in a variety of topics, tools and methodologies.
-            My goal is to be a great universal programmer, capable of solving any problem thrown my way in a concise and
-            performant manner. I've developed backend, frontend, gamedev, networking, tooling, 3d rendering, procedural
-            animation, integrations, mods and much more using all manners of techniques and approaches.
+            Salutations! I'm a programmer by trade and passion. Versed in a variety of topics, tools
+            and methodologies. My goal is to be a great universal programmer, capable of solving any
+            problem thrown my way in a concise and performant manner. I've developed backend,
+            frontend, gamedev, networking, tooling, 3d rendering, procedural animation,
+            integrations, mods and much more using all manners of techniques and approaches.
         </p>
     </main>
-    <div class="center text-center">
-        <h1 class="text-center">Pages:</h1>
-        <nav>
-            <Card title="Online blog" href="/blog" />
-            <Card title="Interactive Julia sets explorer" href="/julia" />
-            <Card title="Pattern making tool" href="/pattern" />
-        </nav>
-        <!-- TODO: move this into the footer -->
-        <address class="card">
-            <h2 class="text-center">Contact details:</h2>
-            <ul>
-                <li><a href="https://github.com/technomunk">Github</a></li>
-                <li><a href="mailto: thegriffones@gmail.com">thegriffones@gmail.com</a></li>
-            </ul>
-        </address>
-    </div>
+    <nav>
+        <h1 class="text-center header">Pages:</h1>
+        <div class="grid">
+            <Card title="Online blog" href="/blog" src={blogImg} alt="Newspaper icon" />
+            <Card
+                title="Cloth simulation"
+                href="/cloth"
+                src={clothImg}
+                alt="An example frame of the cloth simulation"
+            />
+            <Card
+                title="Julia sets visualization"
+                href="/julia"
+                src={juliaImg}
+                alt="An example of Julia set"
+            />
+        </div>
+    </nav>
+    <!-- TODO: move this into the footer -->
+    <address class="footer">
+        <h2 class="text-center header">Contact details:</h2>
+        <ul>
+            <li><a href="https://github.com/technomunk">Github</a></li>
+            <li><a href="mailto: thegriffones@gmail.com">thegriffones@gmail.com</a></li>
+        </ul>
+    </address>
 </MainLayout>
 
 <style lang="scss">
-    @use '@styles/avatar';
+    .avatar {
+        display: block;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        max-width: min(90%, 512px);
+        height: auto;
+    }
     mark {
         font-style: italic;
         background-color: transparent;

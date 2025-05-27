@@ -1,3 +1,5 @@
+import type { Tag } from './lexer';
+
 import { ASM_GRAMMAR } from './asm';
 import { AST_GRAMMAR } from './ast';
 import { BNFK_GRAMMAR } from './bnfk';
@@ -13,6 +15,15 @@ const GRAMMARS = {
 	ast: AST_GRAMMAR,
 };
 
+const SHORT_TOKENS = {
+	comment: 'cmt',
+	keyword: 'kwd',
+	name: 'lbl',
+	punctuation: 'pnc',
+	string: 'str',
+	value: 'val',
+} satisfies Record<Tag, string>;
+
 export type Language = keyof typeof GRAMMARS;
 
 export function highlightTokens(text: string, language: Language): string {
@@ -23,7 +34,9 @@ export function highlightTokens(text: string, language: Language): string {
 			result.push(text.slice(lastPos, token.pos));
 		}
 		lastPos = token.pos + token.len;
-		result.push(`<span class="s-${token.tag}">${text.slice(token.pos, token.pos + token.len)}</span>`);
+		result.push(
+			`<span class="s-${SHORT_TOKENS[token.tag]}">${text.slice(token.pos, token.pos + token.len)}</span>`,
+		);
 	}
 	return result.join('');
 }
