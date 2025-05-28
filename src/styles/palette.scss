@@ -60,3 +60,6 @@ $dark-palette: (
 @function dark-gradient($color1, $color2) {
     @return linear-gradient(25deg, dark($color1), dark($color2));
 }
+
+$light-gradient: linear-gradient(25deg, light(primary), light(accent));
+$dark-gradient: linear-gradient(25deg, dark(primary), dark(accent));

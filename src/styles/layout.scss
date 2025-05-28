@@ -8,7 +8,7 @@
 
 @mixin grid {
   display: grid;
-  grid: auto-flow / repeat(auto-fit, minmax(300px, 1fr));
+  grid: auto-flow / repeat(auto-fit, minmax(330px, 1fr));
   gap: max(1em, 3vmin);
 
   place-items: center;
@@ -31,8 +31,18 @@
 }
 
 body {
-  display: flex;
-  flex-direction: column;
+  margin: 5vh 8vw;
+
+  & p,
+  & address {
+    max-width: 48em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 600px) {
+    text-align: justify;
+  }
 }
 
 .fill {

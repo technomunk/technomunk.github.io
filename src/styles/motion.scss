@@ -1,0 +1,11 @@
+@mixin grow {
+    transition: transform 0.2s cubic-bezier(0.33, 0.33, 0, 1);
+
+    &:hover {
+        transform: scale(1.05, 1) translateY(-4px);
+    }
+
+    &:active {
+        transform: scale(0.95, 0.95) translateY(4px);
+    }
+}

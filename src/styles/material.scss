@@ -43,7 +43,7 @@
     background: $bg padding-box,
     palette.light-gradient(primary, accent) border-box;
     border: $border-width solid transparent;
-    border-radius: 4px;
+    border-radius: 8px;
 
     box-shadow: none;
 
@@ -99,6 +99,10 @@
 
 .paper {
     @include paper;
+}
+
+.surface {
+    @include surface;
 }
 
 .chamfer {

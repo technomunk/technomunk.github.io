@@ -2,16 +2,21 @@
 @use '../material';
 @use '../palette';
 
+code {
+    @include font.monospace;
+    & {
+        @include material.surface;
+    }
+}
+
 code,
 code * {
     white-space: pre;
-    background-color: palette.light(soft);
-    @include font.monospace;
 }
 
 pre {
     padding: .2em;
-    @include material.paper($background: soft);
+    @include material.paper;
 }
 
 @keyframes highlightVarView {

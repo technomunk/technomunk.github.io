@@ -17,7 +17,6 @@ pre,
         padding: 1em;
         display: block;
         overflow-x: auto;
-        border-radius: 2px;
     }
 }
 
@@ -26,17 +25,22 @@ pre,
 
     @include material.paper($background: transparent);
 
+    & code {
+        flex: 0 0 auto;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
     @media (max-width: 1000px) {
         flex-direction: column;
+
+        & code {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
     }
 
-    & code {
-        flex-grow: 1;
-    }
-
-    &>* {
-        background: padding-box palette.light(soft);
-    }
 }
 
 
@@ -50,6 +54,19 @@ pre,
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+
+    @include material.surface;
+
+    & {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+
+        @media (max-width: 1000px) {
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 8px;
+        }
+    }
+
 
     &>* {
         margin: .2em;
