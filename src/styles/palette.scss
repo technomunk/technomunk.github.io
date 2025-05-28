@@ -8,6 +8,7 @@ $darkmode-enabled: false !default;
 $light-palette: (
     text: #161309,
     background: #fffdf5,
+    shadow: #588272,
     soft: #f1ead2,
     primary: #008f58,
     secondary: #eed98c,
@@ -16,6 +17,7 @@ $light-palette: (
 $dark-palette: (
     text: #f6f3e9,
     background: #0a0800,
+    shadow: #7fdeb9,
     soft: #1e1803,
     primary: #70ffc8,
     secondary: #745e11,
@@ -23,10 +25,6 @@ $dark-palette: (
 );
 
 @function light($color) {
-    @if $color ==shadow {
-        @return color.adjust(map.get($light-palette, primary), $lightness: -20%);
-    }
-
     $color-parts: string.split($color, '-', 1);
 
     @if list.length($color-parts)==2 {

@@ -39,6 +39,7 @@ const { title, src, alt, href } = Astro.props;
         text-align: center;
 
         @include material.paper($background: transparent);
+        @include motion.grow;
 
         & {
             @include material.chamfer;

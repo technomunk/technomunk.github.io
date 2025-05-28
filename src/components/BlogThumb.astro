@@ -22,6 +22,7 @@ const { title, description, publishDate, href, tags } = Astro.props;
     @use 'sass:color';
 
     @use '@styles/material';
+    @use '@styles/motion';
     @use '@styles/palette';
 
     a.thumb {
@@ -33,6 +34,10 @@ const { title, description, publishDate, href, tags } = Astro.props;
         padding: 0.2rem 0.5rem;
 
         @include material.paper($background: gradient);
+
+        & {
+            @include motion.grow;
+        }
 
         & > h1,
         h2,

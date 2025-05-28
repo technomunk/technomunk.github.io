@@ -46,14 +46,15 @@
 }
 
 @mixin text-display {
-    font-size: 32px;
+    font-size: 37px;
+    font-weight: 600;
 
     @media (min-width: 800px) {
-        font-size: 37px;
+        font-size: 42px;
     }
 
     @media (min-width: 1200px) {
-        font-size: 42px;
+        font-size: 48px;
     }
 }
 
@@ -108,7 +109,8 @@ select {
     @include text-body;
 }
 
-header {
+header,
+.text-display {
     @include text-display;
 }
 
