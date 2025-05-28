@@ -268,6 +268,8 @@ const setupAnimations = (julia: JuliaView) => {
 
 function setup() {
 	const julia = document.querySelector('#view-julia') as JuliaView;
+	julia.style.width = '100%';
+	julia.style.height = '100%';
 	julia.renderer.resize(window.innerWidth, window.innerHeight);
 	julia.renderer.view.height = 2;
 	julia.updateViewRatio();
