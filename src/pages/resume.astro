@@ -1,10 +1,11 @@
 ---
-import type { Assignment } from '@scripts/types/assignment';
-import type { Project } from '@scripts/types/project';
-
 import { getCollection } from 'astro:content';
 
 import MainLayout from '@layouts/MainLayout.astro';
+
+import type { Assignment } from '@scripts/types/assignment';
+import type { Project } from '@scripts/types/project';
+
 import { dateCompare } from '@lib/dateutil';
 
 interface Tech {
@@ -41,11 +42,13 @@ const findOrDefaultTech = (tech: string): Tech => {
 <MainLayout title="Technomunk's Resume" description="Overview of Technomunk's work">
     <header class="strong text-center">
         <!-- TODO: add an actual image of me face -->
-        <!-- <Image class="avatar" src={avatarImg} alt="Avatar" /> -->
+        <!-- <Avatar src={avatarImg} /> -->
         <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
     </header>
     <main>
-        <p class="text-center">Welcome to the overview of my development work assignments and projects.</p>
+        <p class="text-center">
+            Welcome to the overview of my development work assignments and projects.
+        </p>
         <table>
             <caption>Assignments</caption>
             <thead>
@@ -120,9 +123,6 @@ const findOrDefaultTech = (tech: string): Tech => {
 </MainLayout>
 
 <style lang="scss">
-    @use '@styles/avatar';
-    @use '@styles/resume';
-
     mark {
         font-style: italic;
         background-color: transparent;
@@ -156,5 +156,31 @@ const findOrDefaultTech = (tech: string): Tech => {
     }
     td {
         padding: 5px;
+    }
+
+    .tag {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 2px 5px;
+        margin: 2px;
+        text-align: center;
+        &.software {
+            background: #ecff8e;
+        }
+        &.language {
+            background: #70faff;
+        }
+        &.methodology {
+            background: #ffaad2;
+        }
+        &.standard {
+            background: #95ff9e;
+        }
+        &.skill {
+            background: #e3d3ff;
+        }
+        &.platform {
+            background: #e0e0e0;
+        }
     }
 </style>

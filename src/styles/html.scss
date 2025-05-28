@@ -32,11 +32,11 @@ select,
 .input {
     color: palette.light(text);
 
+    border-radius: 8px;
+
     @media (prefers-color-scheme: dark) {
         color: palette.dark(text);
     }
-
-    border-radius: 8px;
 }
 
 button,
@@ -45,10 +45,13 @@ button,
     padding: 0.2em;
     color: palette.light(text);
 
+    @include material.paper($elevated: false);
+
+    & {
+        border-radius: 50vmax;
+    }
+
     @media (prefers-color-scheme: dark) {
         color: palette.dark(text);
     }
-
-    @include material.paper($elevated: false);
-    border-radius: 50vmax;
 }

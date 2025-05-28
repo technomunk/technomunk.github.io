@@ -1,17 +1,13 @@
 ---
-import MainLayout from '@layouts/MainLayout.astro';
+import FullscreenLayout from '@layouts/FullscreenLayout.astro';
 ---
 
-<MainLayout title="Cozy Campfire" description="Cozy campfire scene using WebGL2" fullscreen={true}>
+<FullscreenLayout title="Cozy Campfire" description="Cozy campfire scene using WebGL2">
     <main>
         <canvas id="main"></canvas>
     </main>
-</MainLayout>
+</FullscreenLayout>
 
 <script>
     import '@scripts/pages/campfire';
 </script>
-
-<style lang="scss">
-    @use "@styles/fullscreen"
-</style>

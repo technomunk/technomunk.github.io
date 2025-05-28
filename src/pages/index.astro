@@ -1,12 +1,12 @@
 ---
-import { Image } from 'astro:assets';
+import Avatar from '@components/Avatar.astro';
+import Card from '@components/Card.astro';
+import MainLayout from '@layouts/MainLayout.astro';
 
 import avatarImg from '@assets/img/avatar.jpg';
+import blogImg from '@assets/img/blog.svg';
 import clothImg from '@assets/img/cloth.png';
 import juliaImg from '@assets/img/julia.png';
-import blogImg from '@assets/img/blog.svg';
-import MainLayout from '@layouts/MainLayout.astro';
-import Card from '@components/Card.astro';
 ---
 
 <MainLayout
@@ -14,7 +14,7 @@ import Card from '@components/Card.astro';
     description="Technomunk's online page with a couple of interactive projects and a blog."
 >
     <header class="strong text-center">
-        <Image class="avatar paper float" src={avatarImg} alt="Avatar" />
+        <Avatar src={avatarImg} />
         <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
     </header>
     <main>
@@ -55,13 +55,6 @@ import Card from '@components/Card.astro';
 </MainLayout>
 
 <style lang="scss">
-    .avatar {
-        display: block;
-        margin: 0 auto 20px;
-        border-radius: 50%;
-        max-width: min(90%, 512px);
-        height: auto;
-    }
     mark {
         font-style: italic;
         background-color: transparent;

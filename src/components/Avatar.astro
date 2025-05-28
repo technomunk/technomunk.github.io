@@ -1,0 +1,25 @@
+---
+import { Image } from 'astro:assets';
+
+export interface Props {
+    src:
+        | ImageMetadata
+        | Promise<{
+              default: ImageMetadata;
+          }>;
+}
+
+const { src } = Astro.props;
+---
+
+<Image class="avatar paper float" src={src} alt="Avatar" />
+
+<style lang="scss">
+    .avatar {
+        display: block;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        max-width: min(90%, 512px);
+        height: auto;
+    }
+</style>

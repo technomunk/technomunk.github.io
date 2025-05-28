@@ -1,22 +1,13 @@
 ---
-import MainLayout from '@layouts/MainLayout.astro';
+import FullscreenLayout from '@layouts/FullscreenLayout.astro';
 ---
 
-<MainLayout title="WIP project" description="Stick around and find out">
-    <meta
-        content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
-        name="viewport"
-        slot="head"
-    />
+<FullscreenLayout title="WIP project" description="Stick around and find out">
     <main>
         <canvas id="main"></canvas>
     </main>
-</MainLayout>
+</FullscreenLayout>
 
 <script>
     import '@scripts/pages/pathtrace';
 </script>
-
-<style lang="scss">
-    @use '@styles/fullscreen';
-</style>
