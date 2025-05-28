@@ -1,5 +1,18 @@
 @use 'palette';
 
+@mixin surface {
+    color: palette.light(text);
+    background: padding-box palette.light(soft);
+    border: 4px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+
+    @media (prefers-color-scheme: dark) {
+        background: padding-box palette.dark(soft);
+        color: palette.dark(text);
+    }
+}
+
 /* Material Design inspired paper style
  *
  * @param $background: The background style, has to be one of:
@@ -75,10 +88,12 @@
         background-color: transparent !important;
     }
 
-    @media (prefers-color-scheme: dark) {
-        background-color: transparent;
-        backdrop-filter: grayscale(85%) brightness(60%) blur(8px);
-        border: 1px solid palette.dark(background);
+    @if palette.$darkmode-enabled ==true {
+        @media (prefers-color-scheme: dark) {
+            background-color: transparent;
+            backdrop-filter: grayscale(85%) brightness(60%) blur(8px);
+            border: 1px solid palette.dark(background);
+        }
     }
 }
 

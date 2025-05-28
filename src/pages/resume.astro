@@ -7,31 +7,32 @@ import type { Assignment } from '@scripts/types/assignment';
 import type { Project } from '@scripts/types/project';
 
 import { dateCompare } from '@lib/dateutil';
+import Table from '@components/Table.astro';
 
-interface Tech {
+interface Skill {
     display: string;
     hint: string;
     type: string;
 }
 
-const assignments = (await getCollection('assignments')) as { data: Assignment }[];
+const assignments = await getCollection('assignments');
 assignments.sort((a, b) => dateCompare(b.data.startDate, a.data.startDate));
 
-const projects = (await getCollection('projects')) as { data: Project }[];
+const projects = await getCollection('projects');
 projects.sort((a, b) => dateCompare(b.data.lastActivity, a.data.lastActivity));
 
-const technologies = new Map<string, Tech>();
-for (const technology of await getCollection('technologies')) {
-    technologies.set(technology.id, technology.data);
+const skills = new Map<string, Skill>();
+for (const skill of await getCollection('skills')) {
+    skills.set(skill.id, skill.data);
 }
 
-const findOrDefaultTech = (tech: string): Tech => {
-    const d = technologies.get(tech.toLowerCase());
+const findOrDefaultSkill = (skill: string): Skill => {
+    const d = skills.get(skill.toLowerCase());
     if (d === undefined) {
-        console.warn(`${tech} technology not found`);
+        console.warn(`${skill} skill not found`);
         return {
-            display: tech,
-            hint: tech,
+            display: skill,
+            hint: skill,
             type: 'unknown',
         };
     }
@@ -49,7 +50,7 @@ const findOrDefaultTech = (tech: string): Tech => {
         <p class="text-center">
             Welcome to the overview of my development work assignments and projects.
         </p>
-        <table>
+        <Table>
             <caption>Assignments</caption>
             <thead>
                 <tr>
@@ -68,9 +69,9 @@ const findOrDefaultTech = (tech: string): Tech => {
                             </th>
                             <td>{a.data.description}</td>
                             <td>
-                                {a.data.technologies
+                                {a.data.skills
                                     .sort()
-                                    .map(findOrDefaultTech)
+                                    .map(findOrDefaultSkill)
                                     .map((t) => (
                                         <div title={t.hint} class={t.type + ' tag'}>
                                             {t.display}
@@ -84,8 +85,8 @@ const findOrDefaultTech = (tech: string): Tech => {
                     ))
                 }
             </tbody>
-        </table>
-        <table>
+        </Table>
+        <Table>
             <caption>Projects</caption>
             <thead>
                 <tr>
@@ -104,9 +105,9 @@ const findOrDefaultTech = (tech: string): Tech => {
                             <td>{p.data.description}</td>
                             <td>{p.data.aspiration}</td>
                             <td>
-                                {p.data.technologies
+                                {p.data.skills
                                     .sort()
-                                    .map(findOrDefaultTech)
+                                    .map(findOrDefaultSkill)
                                     .map((t) => (
                                         <div title={t.hint} class={t.type + ' tag'}>
                                             {t.display}
@@ -118,7 +119,7 @@ const findOrDefaultTech = (tech: string): Tech => {
                     ))
                 }
             </tbody>
-        </table>
+        </Table>
     </main>
 </MainLayout>
 
@@ -132,38 +133,13 @@ const findOrDefaultTech = (tech: string): Tech => {
         min-width: 100%;
     }
 
-    table,
-    th,
-    td {
-        font-size: 18px;
-        border-collapse: collapse;
-        border: 1px solid;
-
-        & > caption {
-            font-size: 23px;
-            font-weight: bold;
-            margin: 1%;
-        }
-
-        & + table {
-            margin-top: 1.7%;
-        }
-    }
-
-    th {
-        font-size: 20px;
-        padding: 8px;
-    }
-    td {
-        padding: 5px;
-    }
-
     .tag {
         display: inline-block;
         border-radius: 20px;
         padding: 2px 5px;
         margin: 2px;
         text-align: center;
+
         &.software {
             background: #ecff8e;
         }

@@ -1,0 +1,30 @@
+{
+    "$schema": "../assignment.schema.json",
+    "title": "Developer",
+    "employer": "Mutate",
+    "description": "Research and development of a game engine as well as a user generated content platform. My responsabilities primarily consisted of developing new functionality. Designing, implementing, testing and optimizing core systems and tools. Highlights include game loop, netcode (including physics synchronization), world building and asset processing tooling, dynamic off-grid voxel physics, entire animation system as well as procedural animation, third party scripting framework development, backend rework and delivery optimization.",
+    "startDate": "2019-05",
+    "endDate": "2021-01",
+    "skills": [
+        "C++",
+        "x86asm",
+        "csharp",
+        "GLSL",
+        "Vulkan",
+        "Clang",
+        "MSVC",
+        "git",
+        "VTune",
+        "Conan",
+        "AWS",
+        "KMS",
+        "UDP",
+        "TCP",
+        "HTTP",
+        "Procedural_Animation",
+        "Performance_Tuning",
+        "GPGPU",
+        "linux",
+        "windows"
+    ]
+}

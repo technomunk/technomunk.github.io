@@ -1,0 +1,19 @@
+{
+    "$schema": "../assignment.schema.json",
+    "title": "Fullstack Developer",
+    "employer": "Vyer",
+    "description": "Focus on extending the WebGL-backed 3D viewer with new features and functionality, as well as maintaining the existing codebase. This includes working on both the frontend and backend components of the application, ensuring a seamless user experience and robust performance.",
+    "startDate": "2025-04",
+    "endDate": "today",
+    "skills": [
+        "WebGL",
+        "Three.js",
+        "git",
+        "React",
+        "TypeScript",
+        "Material_UI",
+        "PostgreSQL",
+        "GraphQL",
+        "linux"
+    ]
+}

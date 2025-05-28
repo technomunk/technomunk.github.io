@@ -36,7 +36,6 @@ export function makeSVGMovable(element: SVGGeometryElement, callback?: () => voi
 }
 
 function getPointerPos(event: MouseEvent, svg: SVGGeometryElement): [number, number] {
-	// TODO: bugfix on firefox
-	const ctm = svg.getScreenCTM() || error('Could not get screen CTM');
-	return [(event.clientX - ctm.e) / ctm.a, (event.clientY - ctm.f) / ctm.d];
+	const rootSvg = svg.ownerSVGElement ?? error('Could not find owner SVG element');
+	return [event.offsetX / rootSvg.clientWidth, event.offsetY / rootSvg.clientHeight];
 }

@@ -1,0 +1,44 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Assignment",
+    "description": "A professional assignment schema for a role",
+    "definitions": {
+        "shortDate": {
+            "type": "string",
+            "pattern": "^(\\d{4}-\\d{2}|today)$"
+        }
+    },
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "title": {
+            "type": "string",
+            "description": "Held title"
+        },
+        "employer": {
+            "type": "string",
+            "description": "Name of the employer"
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the role and responsibilities"
+        },
+        "startDate": {
+            "$ref": "#/definitions/shortDate",
+            "description": "Start date of the assignment"
+        },
+        "endDate": {
+            "$ref": "#/definitions/shortDate",
+            "description": "End date of the assignment"
+        },
+        "skills": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Skills used or acquired during the assignment"
+        }
+    },
+    "additionalProperties": false
+}

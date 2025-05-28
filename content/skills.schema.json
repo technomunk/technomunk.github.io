@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Skills",
+    "description": "A list of skills used in various projects and assignments.",
+    "definitions": {
+        "skill": {
+            "type": "object",
+            "properties": {
+                "display": {
+                    "type": "string",
+                    "description": "Commonly recognized name for the skill."
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "language",
+                        "software",
+                        "platform",
+                        "methodology",
+                        "standard",
+                        "skill"
+                    ],
+                    "description": "Category of the skill."
+                },
+                "hint": {
+                    "type": "string",
+                    "description": "A brief description or hint about the skill."
+                }
+            },
+            "required": [
+                "display",
+                "type"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "patternProperties": {
+        "^[a-zA-Z0-9_+.]+$": {
+            "$ref": "#/definitions/skill"
+        }
+    },
+    "properties": {
+        "$schema": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": false
+}

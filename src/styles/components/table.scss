@@ -1,0 +1,18 @@
+@use '../font';
+@use '../palette';
+@use '../material';
+
+table {
+    @include material.paper($background: transparent);
+
+    &>caption {
+        margin-top: 1em;
+        @include font.text-display;
+    }
+
+    & th,
+    & td {
+        padding: 0.5em;
+        @include material.surface;
+    }
+}

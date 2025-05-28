@@ -1,0 +1,358 @@
+{
+    "$schema": "skills.schema.json",
+    "agile": {
+        "display": "Agile",
+        "type": "methodology",
+        "hint": "The agile methodology of facilitating reactive work"
+    },
+    "android": {
+        "display": "Android",
+        "type": "platform",
+        "hint": "Software development for Android platform"
+    },
+    "astrojs": {
+        "display": "AstroJS",
+        "type": "software",
+        "hint": "The AstroJS site-generation framework"
+    },
+    "aws": {
+        "display": "AWS",
+        "type": "software",
+        "hint": "Amazon Web Services"
+    },
+    "bespoke_assembly": {
+        "display": "Bespoke Assembly",
+        "type": "language",
+        "hint": "Programming in assembly for a computer architecture designed by myself"
+    },
+    "bevy": {
+        "display": "Bevy engine",
+        "type": "software",
+        "hint": "A novel open-source game-engine written in Rust"
+    },
+    "c++": {
+        "display": "C++",
+        "type": "language",
+        "hint": "The C++ programming language"
+    },
+    "c": {
+        "display": "C",
+        "type": "language",
+        "hint": "The C programming language"
+    },
+    "clang": {
+        "display": "Clang",
+        "type": "software",
+        "hint": "The Clang compiler suite"
+    },
+    "clojure": {
+        "display": "Clojure (lisp)",
+        "type": "language",
+        "hint": "The Clojure programming language. (Effectively common lisp running on JVM)"
+    },
+    "conan": {
+        "display": "Conan",
+        "type": "software",
+        "hint": "The Conan package & dependency manager for C++"
+    },
+    "csharp": {
+        "display": "C#",
+        "type": "language",
+        "hint": "Microsoft C# programming language"
+    },
+    "dart": {
+        "display": "Dart",
+        "type": "language",
+        "hint": "The Dart programming language"
+    },
+    "ddd": {
+        "display": "DDD",
+        "type": "methodology",
+        "hint": "Domain Driven Design"
+    },
+    "discord_api": {
+        "display": "Discord API",
+        "type": "software",
+        "hint": "The first-party Discord API"
+    },
+    "django": {
+        "display": "Django",
+        "type": "software",
+        "hint": "The Django backend/ORM web framework"
+    },
+    "dynamodb": {
+        "display": "DynamoDB",
+        "type": "software",
+        "hint": "AWS DynamoDB distributed database"
+    },
+    "ecs": {
+        "display": "ECS",
+        "type": "methodology",
+        "hint": "Entity-Component-System architecture paradigm"
+    },
+    "elixir": {
+        "display": "Elixir",
+        "type": "language",
+        "hint": "The Elixir programming language"
+    },
+    "erlang": {
+        "display": "Erlang",
+        "type": "language",
+        "hint": "The Erlang programming language"
+    },
+    "fishshell": {
+        "display": "Fish (shell)",
+        "type": "language",
+        "hint": "The friendly interactive shell and its language"
+    },
+    "flutter": {
+        "display": "Flutter",
+        "type": "software",
+        "hint": "The Flutter cross-platform development framework"
+    },
+    "git": {
+        "display": "Git",
+        "type": "software",
+        "hint": "The Git version control system software suite"
+    },
+    "github_actions": {
+        "display": "GitHub Actions",
+        "type": "software",
+        "hint": "The CI/CD workflow definitions for GitHub repositories"
+    },
+    "glsl": {
+        "display": "GLSL",
+        "type": "language",
+        "hint": "The OpenGL Shading Language"
+    },
+    "golang": {
+        "display": "Go",
+        "type": "language",
+        "hint": "The Go programming language"
+    },
+    "gpgpu": {
+        "display": "GPGPU",
+        "type": "methodology",
+        "hint": "General Purpose computing on GPUs"
+    },
+    "gradle": {
+        "display": "Gradle",
+        "type": "software",
+        "hint": "The build system for Java & Kotling languages"
+    },
+    "graphql": {
+        "display": "GraphQL",
+        "type": "software",
+        "hint": "The GraphQL API"
+    },
+    "http": {
+        "display": "HTTP",
+        "type": "standard",
+        "hint": "The Hyper Text Transport Protocol standard"
+    },
+    "iterative_development": {
+        "display": "Iterative Development",
+        "type": "methodology",
+        "hint": "The design -> architect -> build -> test iteration methodology"
+    },
+    "java": {
+        "display": "Java",
+        "type": "language",
+        "hint": "The Java programming language"
+    },
+    "javascript": {
+        "display": "JavaScript",
+        "type": "language",
+        "hint": "The JavaScript programming language"
+    },
+    "jira": {
+        "display": "Jira",
+        "type": "software",
+        "hint": "The Jira collaboration and organization tool"
+    },
+    "julia": {
+        "display": "Julia",
+        "type": "language",
+        "hint": "The Julia programming language"
+    },
+    "k8s": {
+        "display": "K8S",
+        "type": "software",
+        "hint": "The Kubernetes docker management software suite"
+    },
+    "kms": {
+        "display": "KMS",
+        "type": "software",
+        "hint": "The AWS Key Management Service"
+    },
+    "kotlin": {
+        "display": "Kotlin",
+        "type": "language",
+        "hint": "The Kotlin programming language"
+    },
+    "linux": {
+        "display": "Linux",
+        "type": "platform",
+        "hint": "Software development for Linux OS family"
+    },
+    "lua": {
+        "display": "Lua",
+        "type": "language",
+        "hint": "The Lua programming language"
+    },
+    "material_ui": {
+        "display": "Material UI",
+        "type": "software",
+        "hint": "The Material UI design framework"
+    },
+    "mermaid": {
+        "display": "Mermaid",
+        "type": "language",
+        "hint": "The Mermaid.JS text-based graph language"
+    },
+    "microservices": {
+        "display": "Microservices",
+        "type": "methodology",
+        "hint": "Solving a bigger problem by breaking it down into tiny ones that are solved by small independent services"
+    },
+    "mipsasm": {
+        "display": "MiPS assembly",
+        "type": "language",
+        "hint": "Assembly programming for a RISC architecture"
+    },
+    "msvc": {
+        "display": "MSVC",
+        "type": "software",
+        "hint": "The Microsoft Visual C compiler suite"
+    },
+    "opengl": {
+        "display": "OpenGL",
+        "type": "software",
+        "hint": "The OpenGL library"
+    },
+    "performance_tuning": {
+        "display": "Performance Tuning",
+        "type": "skill",
+        "hint": "Investigation, profiling and improvement of runtime performance of systems/code"
+    },
+    "posix": {
+        "display": "POSIX",
+        "type": "standard",
+        "hint": "The Portable Operating System Interface standard"
+    },
+    "postgresql": {
+        "display": "PostgreSQL",
+        "type": "software",
+        "hint": "The SQL database system"
+    },
+    "postman": {
+        "display": "Postman",
+        "type": "software",
+        "hint": "The Postman REST utility"
+    },
+    "procedural_animation": {
+        "display": "Procedural Animation",
+        "type": "methodology",
+        "hint": "Driving visual animations with programming instead of manual keyframes"
+    },
+    "python": {
+        "display": "Python",
+        "type": "language",
+        "hint": "The Python programming language"
+    },
+    "react": {
+        "display": "React",
+        "type": "software",
+        "hint": "The React framework"
+    },
+    "rest": {
+        "display": "REST",
+        "type": "standard",
+        "hint": "The REpresentational State Transfer architecture."
+    },
+    "rust": {
+        "display": "Rust",
+        "type": "language",
+        "hint": "The Rust programming language"
+    },
+    "s3": {
+        "display": "S3",
+        "type": "software",
+        "hint": "The AWS Simple Storage Solution"
+    },
+    "sass": {
+        "display": "SASS",
+        "type": "language",
+        "hint": "The Syntactically Awesome Style Sheets language"
+    },
+    "sns": {
+        "display": "SNS",
+        "type": "software",
+        "hint": "The AWS Simple Notification Service"
+    },
+    "sqs": {
+        "display": "SQS",
+        "type": "software",
+        "hint": "The AWS Simple Queue Service"
+    },
+    "tcp": {
+        "display": "TCP",
+        "type": "standard",
+        "hint": "The Transport Control Protocol"
+    },
+    "tdd": {
+        "display": "TDD",
+        "type": "methodology",
+        "hint": "Test Driven Development methodology"
+    },
+    "three.js": {
+        "display": "Three.js",
+        "type": "software",
+        "hint": "The Three.js 3D engine"
+    },
+    "typescript": {
+        "display": "TypeScript",
+        "type": "language",
+        "hint": "The TypeScript programming language"
+    },
+    "udp": {
+        "display": "UDP",
+        "type": "standard",
+        "hint": "The User Datagram Protocol"
+    },
+    "vitejs": {
+        "display": "ViteJS",
+        "type": "software",
+        "hint": "The Vite JavaScript framework"
+    },
+    "vtune": {
+        "display": "VTune",
+        "type": "software",
+        "hint": "Intel VTune profiler"
+    },
+    "vulkan": {
+        "display": "Vulkan",
+        "type": "software",
+        "hint": "The Vulkan library"
+    },
+    "webgl": {
+        "display": "WebGL",
+        "type": "software",
+        "hint": "The WebGL API"
+    },
+    "windows": {
+        "display": "Windows",
+        "type": "platform",
+        "hint": "Software development for Microsoft Windows"
+    },
+    "wireshark": {
+        "display": "WireShark",
+        "type": "software",
+        "hint": "The WireShark network protocol analyzer"
+    },
+    "x86asm": {
+        "display": "x86 assembly",
+        "type": "language",
+        "hint": "Assembly programming for x86 architecture family"
+    }
+}

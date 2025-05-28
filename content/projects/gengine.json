@@ -1,0 +1,14 @@
+{
+    "$schema": "../project.schema.json",
+    "title": "GEngine",
+    "description": "Game engine written in C++ with Vulkan as the graphics API. I ran out of steam after implementing basic scene organization and rendering logic.",
+    "aspiration": "Learn Vulkan (and modern graphics APIs) and game engine development",
+    "skills": [
+        "c++",
+        "vulkan",
+        "glsl",
+        "windows"
+    ],
+    "lastActivity": "2018-10-17",
+    "status": "Abandoned"
+}

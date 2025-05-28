@@ -1,0 +1,14 @@
+{
+    "$schema": "../project.schema.json",
+    "title": "Technomunk Website",
+    "description": "This very website you're viewing right now",
+    "aspiration": "Create something that is easily shareable that I can continuously build up over many years. Additionally learn finishing projects when they are good enough instead of getting stuck trying to perfect one.",
+    "skills": [
+        "typescript",
+        "sass",
+        "astrojs",
+        "vitejs"
+    ],
+    "lastActivity": "2024-03-18",
+    "status": "Active"
+}

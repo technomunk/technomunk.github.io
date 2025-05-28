@@ -12,8 +12,10 @@ import { isMobile } from '@lib/util';
 
 function setup() {
 	const canvas = document.querySelector('canvas#main') as HTMLCanvasElement;
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+	canvas.style.width = '100%';
+	canvas.style.height = '100%';
+	canvas.width = window.innerWidth * window.devicePixelRatio;
+	canvas.height = window.innerHeight * window.devicePixelRatio;
 
 	const renderer = new Renderer(canvas);
 	const renderSystem = new RenderSystem(renderer);

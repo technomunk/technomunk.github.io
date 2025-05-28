@@ -1,0 +1,14 @@
+{
+    "$schema": "../project.schema.json",
+    "title": "GNET",
+    "description": "Message-based networking library for real-time applications, supporting reliable out-of-order delivery mixed with unreliable best-effort delivery, congestion avoidance, rate-limitting and bit-packing over UDP.",
+    "aspiration": "Dive deep into networking and create something I could use for future projects.",
+    "skills": [
+        "c++",
+        "udp",
+        "posix",
+        "rust"
+    ],
+    "lastActivity": "2021-08-15",
+    "status": "Completed C++ version, Rust-rewrite abandoned"
+}

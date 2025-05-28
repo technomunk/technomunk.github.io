@@ -3,6 +3,8 @@
 @use 'sass:map';
 @use 'sass:string';
 
+$darkmode-enabled: false !default;
+
 $light-palette: (
     text: #161309,
     background: #fffdf5,
@@ -37,6 +39,9 @@ $dark-palette: (
 }
 
 @function dark($color) {
+    @if $darkmode-enabled == false {
+        @return light($color);
+    }
     $color-parts: string.split($color, '-', 1);
 
     @if list.length($color-parts)==2 {
