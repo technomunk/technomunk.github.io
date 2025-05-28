@@ -5,9 +5,10 @@ import '@styles/global.scss';
 export interface Props {
     title: string;
     description: string;
+    class?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, class: bodyClass } = Astro.props;
 ---
 
 <html lang="en">
@@ -30,7 +31,7 @@ const { title, description } = Astro.props;
         <title>{title}</title>
         <slot name="head" />
     </head>
-    <body>
+    <body class={bodyClass}>
         <slot />
     </body>
 </html>

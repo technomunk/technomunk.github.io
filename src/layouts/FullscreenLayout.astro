@@ -4,9 +4,11 @@ import type { Props as MainLayoutProps } from './MainLayout.astro';
 import MainLayout from './MainLayout.astro';
 
 interface Props extends MainLayoutProps {}
+
+const { class: bodyClass = '', ...props }: Props = Astro.props;
 ---
 
-<MainLayout {...Astro.props}>
+<MainLayout class={`fs ${bodyClass}`} {...props}>
     <meta
         name="viewport"
         content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
@@ -16,7 +18,16 @@ interface Props extends MainLayoutProps {}
 </MainLayout>
 
 <style lang="scss">
+    html,
     body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    body.fs {
+        width: 100%;
+        height: 100%;
         margin: 0;
         padding: 0;
         overflow: hidden;
