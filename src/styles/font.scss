@@ -33,11 +33,23 @@
     }
 }
 
-@mixin text-body {
-    font-size: 18px;
+@mixin text-small {
+    font-size: 14px;
 
-    @media (min-width: 800px) {
-        font-size: 20px;
+    @media (min-width: 700px) {
+        font-size: 16px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 19px;
+    }
+}
+
+@mixin text-body {
+    font-size: 16px;
+
+    @media (min-width: 700px) {
+        font-size: 19px;
     }
 
     @media (min-width: 1200px) {
@@ -45,11 +57,47 @@
     }
 }
 
+@mixin text-title {
+    font-size: 23px;
+
+    @media (min-width: 700px) {
+        font-size: 27px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 32px;
+    }
+}
+
+@mixin text-large {
+    font-size: 27px;
+
+    @media (min-width: 700px) {
+        font-size: 32px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 37px;
+    }
+}
+
+@mixin text-giant {
+    font-size: 32px;
+
+    @media (min-width: 700px) {
+        font-size: 37px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 42px;
+    }
+}
+
 @mixin text-display {
     font-size: 37px;
     font-weight: 600;
 
-    @media (min-width: 800px) {
+    @media (min-width: 700px) {
         font-size: 42px;
     }
 
@@ -58,40 +106,8 @@
     }
 }
 
-@mixin text-giant {
-    font-size: 32px;
-
-    @media (min-width: 800px) {
-        font-size: 37px;
-    }
-
-    @media (min-width: 1200px) {
-        font-size: 42px;
-    }
-}
-
-@mixin text-large {
-    font-size: 26px;
-
-    @media (min-width: 800px) {
-        font-size: 32px;
-    }
-
-    @media (min-width: 1200px) {
-        font-size: 37px;
-    }
-}
-
-@mixin text-title {
-    font-size: 24px;
-
-    @media (min-width: 800px) {
-        font-size: 26px;
-    }
-
-    @media (min-width: 1200px) {
-        font-size: 32px;
-    }
+date {
+    @include text-small;
 }
 
 body {

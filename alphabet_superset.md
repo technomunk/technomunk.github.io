@@ -5,13 +5,13 @@
 - [x] C: Compilers
 - [x] D: Debugging
 - [x] E: Email
-- [-] F: Floats
-- [ ] G: GPUs
+- [x] F: Floats
+- [x] G: GPUs
 - [ ] H: Hashing
-- [ ] I: Iteration? | Introspection? | Interfaces?
+- [ ] I: Iteration? | Introspection? | Interfaces? | Images
 - [ ] J: Java? | JIT
 - [ ] K: Kernel? | Knapsack?
-- [ ] L: Lists?
+- [ ] L: Lists? | Lisp?
 - [ ] M: Memory? | Macro? | Meta-programming
 - [ ] N: Networking
 - [ ] O: Optimization | Object-oriented | OS
@@ -25,4 +25,4 @@
 - [ ] W: Web?
 - [ ] X: XML
 - [ ] Y: YAGNI (You Ain't Gonna Need It)?
-- [ ] Z: Z-buffers?
+- [ ] Z: Z-buffers? | Zig?

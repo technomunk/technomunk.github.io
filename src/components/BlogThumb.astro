@@ -12,10 +12,16 @@ const { title, description, publishDate, href, tags } = Astro.props;
 
 <a class="thumb chamfer" {href}>
     <slot />
-    {publishDate && <div class="date">{new Date(publishDate).toDateString()}</div>}
     <h2>{title}</h2>
     {description}
-    {tags && <div class="tags">{tags.join(', ')}</div>}
+    {
+        (tags || publishDate) && (
+            <div class="meta">
+                {publishDate && <date class="date">{new Date(publishDate).toDateString()}</date>}
+                {tags && <div class="tags">{tags.join(', ')}</div>}
+            </div>
+        )
+    }
 </a>
 
 <style lang="scss">
@@ -24,18 +30,37 @@ const { title, description, publishDate, href, tags } = Astro.props;
     @use '@styles/material';
     @use '@styles/motion';
     @use '@styles/palette';
+    @use '@styles/font';
+
+    .meta {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 35em;
+        display: flex;
+        justify-content: space-between;
+        font-style: italic;
+        gap: 1rem;
+
+        @include font.text-small;
+    }
 
     a.thumb {
-        text-decoration: none;
-
         display: flex;
+
+        text-decoration: none;
+        box-sizing: border-box;
+
         flex-direction: column;
         text-align: center;
-        padding: 0.2rem 0.5rem;
+        justify-content: space-between;
+
+        padding: 0.5rem 1.5rem;
+        gap: 0.5rem;
 
         @include material.paper($background: gradient);
 
         & {
+            @include material.chamfer;
             @include motion.grow;
         }
 
@@ -43,15 +68,7 @@ const { title, description, publishDate, href, tags } = Astro.props;
         h2,
         h3 {
             padding: 0;
-            margin: 0.5rem;
-
-            font-style: italic;
-        }
-
-        & > .tags {
-            font-size: 0.8em;
-            font-style: italic;
-            margin-top: auto;
+            margin: 0;
         }
     }
 </style>

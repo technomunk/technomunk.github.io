@@ -16,7 +16,7 @@ import pathtraceImg from '@assets/img/pathtrace.png';
 >
     <header class="strong text-center">
         <Avatar src={avatarImg} />
-        <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
+        <p translate="no">Grigory <mark>Technomunk</mark> Glukhov</p>
     </header>
     <main>
         <p>
@@ -62,8 +62,21 @@ import pathtraceImg from '@assets/img/pathtrace.png';
 </MainLayout>
 
 <style lang="scss">
+    @use '@styles/palette';
+
     mark {
         font-style: italic;
-        background-color: transparent;
+        background: palette.light-gradient(text-primary, text-accent);
+        background-clip: text;
+        color: transparent;
+        font-weight: 200;
+    }
+    
+    header > p {
+        margin: auto;
+
+        @media (max-width: 650px) {
+            word-spacing: 100vw;
+        }
     }
 </style>
