@@ -6,14 +6,17 @@
     "startDate": "2025-04",
     "endDate": "today",
     "skills": [
-        "WebGL",
-        "Three.js",
+        "css",
         "git",
-        "React",
-        "TypeScript",
+        "glsl",
+        "GraphQL",
+        "html",
+        "linux",
         "Material_UI",
         "PostgreSQL",
-        "GraphQL",
-        "linux"
+        "React",
+        "Three.js",
+        "TypeScript",
+        "WebGL"
     ]
 }

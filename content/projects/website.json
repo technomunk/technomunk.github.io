@@ -4,11 +4,18 @@
     "description": "This very website you're viewing right now",
     "aspiration": "Create something that is easily shareable that I can continuously build up over many years. Additionally learn finishing projects when they are good enough instead of getting stuck trying to perfect one.",
     "skills": [
-        "typescript",
-        "sass",
         "astrojs",
-        "vitejs"
+        "css",
+        "git",
+        "github_actions",
+        "glsl",
+        "html",
+        "sass",
+        "svg",
+        "typescript",
+        "vitejs",
+        "webgl"
     ],
-    "lastActivity": "2024-03-18",
+    "lastActivity": "2025-05-29",
     "status": "Active"
 }

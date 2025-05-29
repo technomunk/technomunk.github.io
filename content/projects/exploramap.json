@@ -1,15 +1,17 @@
 {
     "$schema": "../project.schema.json",
     "title": "Exploramap App",
-    "description": "Exploration gamification cross-platform application based on GPS data and OpenStreetMap data.",
+    "description": "Exploration gamification cross-platform application based on GPS and OpenStreetMap data.",
     "aspiration": "Dive into mobile and cross-platform development. Focus on design and user experience and build something that could evolve into a side-business.",
     "skills": [
+        "android",
         "dart",
         "flutter",
-        "kotlin",
+        "github_actions",
+        "glsl",
         "gradle",
-        "android",
-        "glsl"
+        "kotlin",
+        "notion"
     ],
     "lastActivity": "2024-01-25",
     "status": "Semi-active"

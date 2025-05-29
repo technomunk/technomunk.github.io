@@ -30,6 +30,11 @@
         "type": "software",
         "hint": "A novel open-source game-engine written in Rust"
     },
+    "css": {
+        "display": "CSS",
+        "type": "language",
+        "hint": "The Cascading Style Sheets language"
+    },
     "c++": {
         "display": "C++",
         "type": "language",
@@ -150,6 +155,11 @@
         "type": "standard",
         "hint": "The Hyper Text Transport Protocol standard"
     },
+    "html": {
+        "display": "HTML",
+        "type": "language",
+        "hint": "The Hyper Text Markup Language"
+    },
     "iterative_development": {
         "display": "Iterative Development",
         "type": "methodology",
@@ -225,6 +235,11 @@
         "type": "software",
         "hint": "The Microsoft Visual C compiler suite"
     },
+    "notion": {
+        "display": "Notion",
+        "type": "software",
+        "hint": "The Notion organization and collaboration tool"
+    },
     "opengl": {
         "display": "OpenGL",
         "type": "software",
@@ -289,6 +304,11 @@
         "display": "SNS",
         "type": "software",
         "hint": "The AWS Simple Notification Service"
+    },
+    "svg": {
+        "display": "SVG",
+        "type": "language",
+        "hint": "The Scalable Vector Graphics language"
     },
     "sqs": {
         "display": "SQS",
