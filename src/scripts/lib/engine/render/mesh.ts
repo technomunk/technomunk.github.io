@@ -70,7 +70,6 @@ export class Mesh<A extends string = string> extends Map<A, VertexData> {
 			result.indices = new GpuBuffer(gl, this.indices, gl.ELEMENT_ARRAY_BUFFER);
 			result.vertexCount = this.indices.length;
 		}
-		console.log('MeshBufferSet', result);
 		return result;
 	}
 }

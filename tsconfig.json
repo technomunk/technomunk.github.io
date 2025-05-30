@@ -16,6 +16,7 @@
 			"@scripts/*": ["src/scripts/*"],
 			"@shader/*": ["src/shader/*"],
 			"@styles/*": ["src/styles/*"]
-		}
+		},
+		"types": ["vite-plugin-glsl/ext"]
 	}
 }

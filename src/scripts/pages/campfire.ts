@@ -2,15 +2,16 @@ import type { MeshBufferSet } from '@lib/engine/render/mesh';
 
 import { mat4, vec3 } from 'gl-matrix';
 
-import { Mesh } from '@lib/engine/render/mesh';
 import { Shader } from '@lib/engine/render/shader';
 import { error } from '@lib/util';
 
-import MESH_DATA from '@assets/mesh/campfire.json';
+import campfireUrl from '@assets/mesh/campfire.glb?url';
+import sceneUrl from '@assets/mesh/campfire-scene.glb?url';
 
 import vertex from '@shader/mvp.vs';
 import fragment from '@shader/bling-phong.fs';
 import { hexToRgb } from '@lib/engine/color';
+import { importGltfMesh, importGltfScene } from '@lib/engine/gltf';
 
 // import vertex from '@shader/identity.vs';
 // import fragment from '@shader/color.fs';
@@ -39,7 +40,7 @@ type Attributes = 'aPos' | 'aNorm';
 class CampfirePage {
 	readonly gl: WebGL2RenderingContext;
 	readonly shader: Shader<Uniforms, Attributes>;
-	readonly buffers: MeshBufferSet<Attributes>;
+	buffers?: MeshBufferSet<Attributes>;
 
 	readonly view: CameraUniforms = {
 		uVP: mat4.create(),
@@ -49,7 +50,7 @@ class CampfirePage {
 		uLightPos: new Float32Array([...vec3.fromValues(-1, -10, -1), 0]),
 		uLightCol: new Float32Array([1, 1, 1]),
 		uLightCount: 1,
-		uAmbient: new Float32Array([.1, .1, .1]),
+		uAmbient: new Float32Array([0.1, 0.1, 0.1]),
 	};
 	readonly entity: EntityUniforms = {
 		uModel: mat4.create(),
@@ -72,13 +73,13 @@ class CampfirePage {
 		this.gl.enable(this.gl.CULL_FACE);
 		this.gl.cullFace(this.gl.BACK);
 
-		// cube mesh with normals
 		// TODO: fix interleaving
-		this.buffers = detail.loadCampfireMesh().createVertexBuffers(this.gl);
 		this.updateCamera();
 		this.shader.setUniforms(this.lights);
 
 		this.resize();
+
+		this.fetchMeshes();
 		this.loop(performance.now());
 	}
 
@@ -101,8 +102,10 @@ class CampfirePage {
 		mat4.fromRotation(this.entity.uModel, this.rotation, [0, 1, 0]);
 
 		this.shader.setUniforms(this.view); // per-frame uniforms
-		this.shader.setUniforms(this.entity); // per-entity uniforms
-		this.shader.draw(this.buffers);
+		if (this.buffers) {
+			this.shader.setUniforms(this.entity); // per-entity uniforms
+			this.shader.draw(this.buffers);
+		}
 	}
 
 	updateCamera(): mat4 {
@@ -119,125 +122,26 @@ class CampfirePage {
 		this.draw();
 		requestAnimationFrame(this.loop.bind(this));
 	}
-}
 
-namespace detail {
-	export const createCubeMesh = () => {
-		return new Mesh<Attributes>(
-			[
-				[
-					'aPos',
-					{
-						stride: 3,
-						values: new Float32Array(
-							[
-								// x- face
-								[-0.5, -0.5, -0.5],
-								[-0.5, -0.5, 0.5],
-								[-0.5, 0.5, -0.5],
-								[-0.5, 0.5, 0.5],
-								// x+ face
-								[0.5, -0.5, -0.5],
-								[0.5, -0.5, 0.5],
-								[0.5, 0.5, -0.5],
-								[0.5, 0.5, 0.5],
-								// y- face
-								[-0.5, -0.5, -0.5],
-								[-0.5, -0.5, 0.5],
-								[0.5, -0.5, -0.5],
-								[0.5, -0.5, 0.5],
-								// y+ face
-								[-0.5, 0.5, -0.5],
-								[-0.5, 0.5, 0.5],
-								[0.5, 0.5, -0.5],
-								[0.5, 0.5, 0.5],
-								// z- face
-								[-0.5, -0.5, -0.5],
-								[-0.5, 0.5, -0.5],
-								[0.5, -0.5, -0.5],
-								[0.5, 0.5, -0.5],
-								// z+ face
-								[-0.5, -0.5, 0.5],
-								[-0.5, 0.5, 0.5],
-								[0.5, -0.5, 0.5],
-								[0.5, 0.5, 0.5],
-							].flat(),
-						),
-					},
-				],
-				[
-					'aNorm',
-					{
-						stride: 3,
-						values: new Float32Array(
-							[
-								// normals for the cube vertices
-								[-1, 0, 0],
-								[-1, 0, 0],
-								[-1, 0, 0],
-								[-1, 0, 0],
-								[1, 0, 0],
-								[1, 0, 0],
-								[1, 0, 0],
-								[1, 0, 0],
-								[0, -1, 0],
-								[0, -1, 0],
-								[0, -1, 0],
-								[0, -1, 0],
-								[0, 1, 0],
-								[0, 1, 0],
-								[0, 1, 0],
-								[0, 1, 0],
-								[0, 0, -1],
-								[0, 0, -1],
-								[0, 0, -1],
-								[0, 0, -1],
-								[0, 0, 1],
-								[0, 0, 1],
-								[0, 0, 1],
-								[0, 0, 1],
-							].flat(),
-						),
-					},
-				],
-			],
-			new Uint16Array([
-				//x- face
-				0, 1, 2, 1, 3, 2,
-				//x+ face
-				4, 6, 5, 5, 6, 7,
-				//y- face
-				8, 10, 9, 9, 10, 11,
-				//y+ face
-				12, 13, 14, 14, 13, 15,
-				//z- face
-				16, 17, 18, 18, 17, 19,
-				//z+ face
-				20, 22, 21, 21, 22, 23,
-			]),
+	async fetchMeshes() {
+		const mesh = await importGltfMesh<Attributes>(campfireUrl, 'Campfire', {
+			aPos: 'POSITION',
+			aNorm: 'NORMAL',
+		});
+		this.buffers = mesh.createVertexBuffers(this.gl);
+		const scene = await importGltfScene<Attributes>(
+			sceneUrl,
+			{
+				aPos: 'POSITION',
+				aNorm: 'NORMAL',
+			},
+			{
+				uDiffuse: 'base',
+				uRoughness: 'roughness',
+			},
 		);
-	};
-
-	export const loadCampfireMesh = () =>
-		new Mesh<Attributes>(
-			[
-				[
-					'aPos',
-					{
-						stride: 3,
-						values: new Float32Array(MESH_DATA.pos),
-					},
-				],
-				[
-					'aNorm',
-					{
-						stride: 3,
-						values: new Float32Array(MESH_DATA.norm),
-					},
-				],
-			],
-			// new Uint16Array(MESH_DATA.idx),
-		);
+		console.log('Scene loaded:', scene);
+	}
 }
 
 const setup = () => {

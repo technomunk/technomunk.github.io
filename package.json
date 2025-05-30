@@ -16,6 +16,8 @@
     "@astrojs/mdx": "^4.2.6",
     "@astrojs/ts-plugin": "^1.10.4",
     "@biomejs/biome": "^1.9.4",
+    "@gltf-transform/core": "^4.1.4",
+    "@gltf-transform/functions": "^4.1.4",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/vfile": "^4.0.0",
