@@ -5,11 +5,13 @@ interface Props {
 }
 const { di, code } = Astro.props;
 import { markSemanticsWithSpans } from '@lib/code/semanitcize';
+
+import '@styles/components/interpreter.scss';
 ---
 
-<asm-interpreter {di} class="interpreter">
-    <code set:html={markSemanticsWithSpans(code, 'asm')} />
-    <div class="interpreter-menu drawer">
+<asm-interpreter {di} class="interpreter frame chamfer shadow center">
+    <code class="paper rect" set:html={markSemanticsWithSpans(code, 'asm')} />
+    <div class="interpreter-menu drawer paper rect">
         <div>
             <button id="step">step</button>
             <button id="reset">reset</button>
@@ -18,9 +20,5 @@ import { markSemanticsWithSpans } from '@lib/code/semanitcize';
 </asm-interpreter>
 
 <script>
-    import '../scripts/components/asm_interpreter';
+    import '@scripts/components/asm_interpreter';
 </script>
-
-<style lang="scss">
-    @use '@styles/components/interpreter';
-</style>

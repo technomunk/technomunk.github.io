@@ -29,8 +29,9 @@ struct RayHit {
 };
 
 const vec4 SPHERE = vec4(0, 0, 0, .5);
+
 const float REFRACTIVE_INDEX_AIR = 1.00027717;
-const float REFRACTIVE_INDEX_GLASS = 1.025;
+const float REFRACTIVE_INDEX_GLASS = 1.03;
 
 
 vec3 rayDir(in vec2 uv) {

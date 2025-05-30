@@ -17,16 +17,17 @@ pre,
         padding: 1em;
         display: block;
         overflow-x: auto;
+        text-align: start;
     }
 }
 
 .interpreter {
     display: flex;
+    overflow: hidden;
 
-    @include material.paper($background: transparent);
+    gap: 8px;
 
     & code {
-        flex: 0 0 auto;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
     }
@@ -50,23 +51,21 @@ pre,
     padding: 1em 1.5em;
     flex-basis: 160px;
     flex-grow: 1;
-    min-width: 160px;
+    min-width: 18em;
+    max-width: 24em;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
 
-    @include material.surface;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 
-    & {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-
-        @media (max-width: 1000px) {
-            border-top-right-radius: 0;
-            border-bottom-left-radius: 8px;
-        }
+    @media (max-width: 1000px) {
+        border-top-right-radius: 0;
+        border-bottom-left-radius: 8px;
+        width: 100%;
+        max-width: 100%;
     }
-
 
     &>* {
         margin: .2em;

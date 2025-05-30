@@ -61,3 +61,7 @@ $dark-palette: (
 
 $light-gradient: linear-gradient(25deg, light(primary), light(accent));
 $dark-gradient: linear-gradient(25deg, dark(primary), dark(accent));
+
+.contrast {
+    filter: contrast(1.2);
+}

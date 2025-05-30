@@ -1,0 +1,16 @@
+.circle {
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+.rect {
+    border-radius: 8px;
+}
+
+.chamfer {
+    border-radius: 20px;
+
+    &>.chamfer {
+        border-radius: 12px;
+    }
+}

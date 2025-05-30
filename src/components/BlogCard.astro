@@ -1,0 +1,34 @@
+---
+export interface Props {
+    title: string;
+    description?: string;
+    publishDate?: string;
+    href: string;
+    tags?: string[];
+}
+
+export interface BlogFrontmatter {
+    title: string;
+    description?: string;
+    publishedOn?: string;
+    tags?: string[];
+}
+
+const { title, description, publishDate, href, tags } = Astro.props;
+
+import '@styles/components/card.scss';
+---
+
+<a class="card-4 frame shadow contrast chamfer raise" {href}>
+    <slot />
+    <h2>{title}</h2>
+    {description}
+    {
+        (tags || publishDate) && (
+            <div class="meta">
+                {publishDate && <date class="date">{new Date(publishDate).toDateString()}</date>}
+                {tags && <div class="tags">{tags.join(', ')}</div>}
+            </div>
+        )
+    }
+</a>

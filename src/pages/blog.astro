@@ -1,11 +1,11 @@
 ---
-import type { Frontmatter } from '@scripts/types/blog';
+import type { BlogFrontmatter } from '@components/BlogCard.astro';
 
 import BlogOverview from '@components/BlogOverview.astro';
 import MainLayout from '@layouts/MainLayout.astro';
 import { dateCompare } from '@lib/dateutil';
 
-const posts = await Astro.glob<Frontmatter>('./blog/*.mdx');
+const posts = await Astro.glob<BlogFrontmatter>('./blog/*.mdx');
 
 posts.sort((a, b) => dateCompare(b.frontmatter.publishedOn, a.frontmatter.publishedOn));
 ---

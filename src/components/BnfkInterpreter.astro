@@ -12,11 +12,13 @@ const cellIds = [];
 for (let i = 0; i < cells; ++i) {
 	cellIds.push(i);
 }
+
+import '@styles/components/interpreter.scss';
 ---
 
-<bnfk-interpreter class="interpreter" {cells} {names}>
-    <code set:html={markSemanticsWithSpans(code, "bnfk")} />
-    <div class="interpreter-menu">
+<bnfk-interpreter class="interpreter frame chamfer shadow center" {cells} {names}>
+    <code class="paper rect" set:html={markSemanticsWithSpans(code, "bnfk")} />
+    <div class="interpreter-menu paper rect">
         <div class="shelf" id="vars">
             {cellIds.map(() => <input pattern="\d*"></input>)}
         </div>
@@ -39,7 +41,3 @@ for (let i = 0; i < cells; ++i) {
 <script>
     import '@scripts/components/bnfk_interpreter';
 </script>
-
-<style lang="scss">
-    @use '@styles/components/interpreter';
-</style>

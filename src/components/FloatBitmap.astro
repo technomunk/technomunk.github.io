@@ -2,7 +2,7 @@
 import { repeat } from '@lib/util';
 ---
 
-<div class="float-container center">
+<div class="float-container center frame chamfer shadow">
     <float-bitmap>
         <span class="sign group" title="sign"><span class="bit" title="sign">0</span></span>
         <span class="exponent group" title="exponent"
@@ -27,15 +27,13 @@ import { repeat } from '@lib/util';
 
 <style lang="scss">
     @use '@styles/font';
-    @use '@styles/material';
 
     .float-container {
+        padding: 8px;
         overflow: hidden;
-        @include material.paper($background: soft);
     }
 
     float-bitmap {
-        padding: 5px;
         display: block;
         @include font.monospace;
 
@@ -44,6 +42,7 @@ import { repeat } from '@lib/util';
         }
 
         & > .group {
+            border-radius: 4px;
             padding: 0px 4px;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -89,6 +88,21 @@ import { repeat } from '@lib/util';
 
     .mantissa {
         background-color: #b6fdff;
+    }
+
+    .subnote {
+        @include font.text-small;
+        & > * {
+            border-radius: 4px;
+        }
+        @media (min-width: 1200px) {
+            & > :first-child {
+                border-bottom-left-radius: 12px;
+            }
+            & > :last-child {
+                border-bottom-right-radius: 12px;
+            }
+        }
     }
 
     .subnote > span {

@@ -1,11 +1,11 @@
 ---
 import type { MDXInstance } from 'astro';
-import type { Frontmatter } from '@scripts/types/blog';
+import type { BlogFrontmatter } from './BlogCard.astro';
 
-import BlogThumb from './BlogThumb.astro';
+import BlogCard from './BlogCard.astro';
 
 interface Props {
-    posts: MDXInstance<Frontmatter>[];
+    posts: MDXInstance<BlogFrontmatter>[];
 }
 
 const { posts } = Astro.props;
@@ -14,7 +14,7 @@ const { posts } = Astro.props;
 <nav class="grid">
     {
         posts.map((p) => (
-            <BlogThumb
+            <BlogCard
                 title={p.frontmatter.title}
                 description={p.frontmatter.description}
                 publishDate={p.frontmatter.publishedOn}

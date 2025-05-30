@@ -1,12 +1,9 @@
 @use '../font';
-@use '../material';
 @use '../palette';
 
 code {
+    background: palette.light(soft);
     @include font.monospace;
-    & {
-        @include material.surface;
-    }
 }
 
 code,
@@ -16,7 +13,17 @@ code * {
 
 pre {
     padding: .2em;
-    @include material.paper;
+    min-width: 30em;
+    max-width: 38em;
+    overflow-x: auto;
+    width: fit-content;
+    margin: auto;
+
+    background: padding-box palette.light-gradient(soft, soft),
+        palette.light-gradient(primary, accent) border-box;
+    border: 8px solid transparent;
+    border-radius: 8px;
+    box-shadow: 4px 4px 8px 4px palette.light(shadow);
 }
 
 @keyframes highlightVarView {
