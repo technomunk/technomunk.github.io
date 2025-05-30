@@ -3,8 +3,6 @@
 @use '../material';
 
 table {
-    @include material.paper($background: transparent);
-
     &>caption {
         margin-top: 1em;
         @include font.text-display;
@@ -13,6 +11,5 @@ table {
     & th,
     & td {
         padding: 0.5em;
-        @include material.surface;
     }
 }
