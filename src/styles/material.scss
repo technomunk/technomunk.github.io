@@ -2,11 +2,15 @@
 @use 'palette';
 
 .shadow {
-    box-shadow: 4px 4px 8px 4px palette.light(shadow);
+    box-shadow: 4px 4px 8px 4px var(--color-grey-900);
+}
 
-    @media (prefers-color-scheme: dark) {
-        box-shadow: 4px 4px 8px 4px palette.dark(shadow);
-    }
+.inset {
+    box-shadow: inset 0px 0px 4px 0px var(--color-grey-900);
+}
+
+.inset.shadow {
+    box-shadow: 4px 4px 8px 4px var(--color-grey-900), inset 0px 0px 8px 1px var(--color-grey-900);
 }
 
 .frame {
