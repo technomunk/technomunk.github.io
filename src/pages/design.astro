@@ -1,0 +1,41 @@
+---
+import ColorPalette from '@components/ColorPalette.astro';
+import MainLayout from '@layouts/MainLayout.astro';
+---
+
+<MainLayout
+    title="Design Overview"
+    description="Summary and examples of the design system used for the website."
+>
+    <main>
+        <section>
+            <header>Principles</header>
+            <p>
+                The purpose of the website is to learn, practice and display my design and web-dev
+                skills. The design system is built on top of the following principles:
+            </p>
+            <ul>
+                <li>
+                    <strong>Clarity</strong> - the content should be easily understood by anyone visiting
+                    the webpage.
+                </li>
+                <li>
+                    <strong>Friendly</strong> - looking around or interacting with the website should
+                    feel simple, easy and welcoming.
+                </li>
+                <li>
+                    <strong>Sleek</strong> - the design should feel modern and polished, as it is a display
+                    of my abilities.
+                </li>
+            </ul>
+        </section>
+        <section>
+            <header>Palette</header>
+            <p>
+                To ensure a consistent experience across the website, the following color palette is
+                used:
+            </p>
+            <ColorPalette />
+        </section>
+    </main>
+</MainLayout>

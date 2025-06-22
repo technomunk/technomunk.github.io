@@ -1,0 +1,30 @@
+---
+import { capitalize } from '@lib/util';
+import '@styles/components/color-swatch.scss';
+
+export type ColorShade = '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+const SHADES: ColorShade[] = ['900', '800', '700', '600', '500', '400', '300', '200', '100'];
+
+export interface Props {
+    name: string;
+}
+
+const { name }: Props = Astro.props;
+---
+
+<section>
+    <header>{capitalize(name)}</header>
+    <div class="color-swatch-set">
+        {
+            SHADES.map((shade) => (
+                <div class="color-swatch" title={`${name}-${shade}`}>
+                    <div
+                        class="color-swatch-color inset"
+                        style=`background-color: var(--color-${name}-${shade});`
+                    />
+                    <div class="color-swatch-label">{shade}</div>
+                </div>
+            ))
+        }
+    </div>
+</section>

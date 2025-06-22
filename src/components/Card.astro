@@ -1,11 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 
-type ImageSrc =
-    | ImageMetadata
-    | Promise<{
-          default: ImageMetadata;
-      }>;
+type ImageSrc = ImageMetadata;
 
 interface Props {
     title: string;
@@ -19,6 +15,14 @@ import '@styles/components/card.scss';
 ---
 
 <a class="card-2 frame chamfer raise shadow" href={href}>
-    <Image src={src} alt={alt} />
-    <h2 class="semi-paper">{title}</h2>
+    {
+        src.format === 'svg' ? (
+            <Image src={src} alt={alt} class="inset" />
+        ) : (
+            <div class="inset">
+                <Image src={src} alt={alt} />
+            </div>
+        )
+    }
+    <h2 class="semi-paper inset">{title}</h2>
 </a>
