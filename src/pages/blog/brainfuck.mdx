@@ -2,8 +2,8 @@
 title: 'Brainfuck'
 description: 'Surface level exploration of the most famous esoteric language'
 layout: '@layouts/BlogLayout.astro'
-fallbackLang: bnfk
-publishedOn: 2023-09-17
+fallbackLang: 'bnfk'
+publishedOn: '2023-09-17'
 tags: ['alphabet superset', 'programming languages']
 ---
 
@@ -23,8 +23,10 @@ So putting it all together the following will read a character from input and pr
 
 However with these operators it would be impossible to write the same program as we did in the [post on assembly](../assembly). We are missing conditional operators, which brings us to the final 2 operators: **[** which will skip to the associated closing brace if the value at current cell is 0 and **]**. Which will jump back to the associated opening brace if the value is non-zero. And that's it! Any other character is treated as a comment and should be ignored.
 
-<BnfkInterpreter cells="8" names="from Technomunk;blog;world;dear reader" code={
-`+++++ +++             Set Cell #0 to 8 to setup multiplying the following cells by 8
+<BnfkInterpreter
+    cells="8"
+    names="from Technomunk;blog;world;dear reader"
+    code={`+++++ +++             Set Cell #0 to 8 to setup multiplying the following cells by 8
 [
       >+++++ ++++       Add 9 to Cell #1
       >+++++ +++++ +++  Add 13 to Cell #2
@@ -38,17 +40,18 @@ However with these operators it would be impossible to write the same program as
 >.                    Cell #3 is 32 for the space
 <,                    Start reading the name into Cell #2 which we don't need any more
 [.,]                  Read input until we find a 0
->+.                   Exclamation point is 33 so add one to space and print it`}/>
+>+.                   Exclamation point is 33 so add one to space and print it`}
+/>
 
 That's a lot of code for a simple `print("Hello World!")`! Programming in Brainfuck is an exercise in patience and self-torture, as the name implies. However it is an excellent example to learn about compilers, because the rules are so simple - anyone should be able to write a compiler or an interpreter for brainfuck and that is an excellent exercise that I strongly encourage you to do! Especially if you start thinking about optimizing the program instead of executing an instruction for each character in the input 😉.
 
 But are 8 instructions really enough to write any program out there? Well actually 8 might be too many! It's possible to use fewer instructions by putting boundaries on the memory cells. If we say that each cell can only hold 8 bit numbers (1 byte) - adding 254 is the same as subtracting one, so minus becomes redundant.
 
-But those print and read instructions seem kinda magical. Do you ever wonder how they operate under the hood? How does the computer tell the screen to display text? Or how does it figure out that you pressed a key on the keyboard? The complete process is too involved to get into in this blog, but a core concept is <dfn>memory mapping</dfn>. The computer can address *a lot* of memory. So much in fact - that it's very unlikely it has access to so much physical memory. So instead of leaving empty addresses to waste - engineers allow special addresses to interact not with memory but computer hardware.
+But those print and read instructions seem kinda magical. Do you ever wonder how they operate under the hood? How does the computer tell the screen to display text? Or how does it figure out that you pressed a key on the keyboard? The complete process is too involved to get into in this blog, but a core concept is <dfn>memory mapping</dfn>. The computer can address _a lot_ of memory. So much in fact - that it's very unlikely it has access to so much physical memory. So instead of leaving empty addresses to waste - engineers allow special addresses to interact not with memory but computer hardware.
 
 So let's use our Brainfuck example. Instead of having special print and read instructions we will add some magic to a handful of memory cells (remember theoretically we have infinite number of them). If you ponder a bit you might realize that we can say one cell should contain an input and another cell should contain an output. But how would we take the data in or out of them? How do we signal the system that we intend to increment the output a bit more before printing it to the screen?
 
-We could add extra instructions, but remember that we want to see how few instructions we can get away with. So instead - let's mark another cell as "command", so if it contains **1** - we tell the system to print the character from the output cell. If it contains **2** - we tell the system that we want it to update the input cell with a new character and so on. But we are still stuck with the same problem - how do we tell the system that our command is done? I would suggest adding another one (final) special cell - signal. Whenever the signal cell is updated - the system is *signalled* that we want it to perform the command according to the command cell.
+We could add extra instructions, but remember that we want to see how few instructions we can get away with. So instead - let's mark another cell as "command", so if it contains **1** - we tell the system to print the character from the output cell. If it contains **2** - we tell the system that we want it to update the input cell with a new character and so on. But we are still stuck with the same problem - how do we tell the system that our command is done? I would suggest adding another one (final) special cell - signal. Whenever the signal cell is updated - the system is _signalled_ that we want it to perform the command according to the command cell.
 
 And the commands can be a lot more advanced than just printing or reading. They could be playing a sound, connecting to the internet, asking the system to run another program and so on and so on. And that is memory mapping! Instead of saying that all memory is just memory the computer marks (maps) some addresses to have special meaning. Such as a command for other hardware, data with color values for the screen to display whenever it's ready and so forth.
 

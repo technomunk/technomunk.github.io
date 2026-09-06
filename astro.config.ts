@@ -7,14 +7,21 @@ import remarkRemoveRunts from './src/plugins/remark/remove-runts';
 
 // https://astro.build/config
 export default defineConfig({
-	markdown: {
-		syntaxHighlight: false,
-		remarkPlugins: [remarkHighlight, remarkRemoveRunts],
-	},
-	integrations: [mdx()],
-	site: 'https://www.technomunk.com',
-	output: 'static',
-	vite: {
-		plugins: [glsl()],
-	},
+    markdown: {
+        syntaxHighlight: false,
+        remarkPlugins: [remarkHighlight, remarkRemoveRunts],
+    },
+    integrations: [mdx()],
+    site: 'https://www.technomunk.com',
+    output: 'static',
+    vite: {
+        plugins: [glsl()],
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    loadPaths: ['./src/styles'],
+                },
+            },
+        },
+    },
 });

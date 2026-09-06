@@ -1,18 +1,18 @@
 ---
-export interface Props {
+export type BlogMetadata = {
+    title: string;
+    description?: string;
+    publishedOn?: string;
+    tags?: string[];
+};
+
+export type Props = {
     title: string;
     description?: string;
     publishDate?: string;
     href: string;
     tags?: string[];
-}
-
-export interface BlogFrontmatter {
-    title: string;
-    description?: string;
-    publishedOn?: string;
-    tags?: string[];
-}
+};
 
 const { title, description, publishDate, href, tags } = Astro.props;
 

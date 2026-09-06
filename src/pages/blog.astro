@@ -1,13 +1,12 @@
 ---
-import type { BlogFrontmatter } from '@components/BlogCard.astro';
-
 import BlogOverview from '@components/BlogOverview.astro';
 import MainLayout from '@layouts/MainLayout.astro';
 import { dateCompare } from '@lib/dateutil';
+import { getCollection } from 'astro:content';
 
-const posts = await Astro.glob<BlogFrontmatter>('./blog/*.mdx');
+const posts = await getCollection('blog');
 
-posts.sort((a, b) => dateCompare(b.frontmatter.publishedOn, a.frontmatter.publishedOn));
+posts.sort((a, b) => dateCompare(b.data.publishedOn, a.data.publishedOn));
 ---
 
 <MainLayout title="Technomunk's Blog" description="Technomunk's personal blog">

@@ -2,12 +2,12 @@
 title: 'Floating point numbers'
 description: 'The unintuitive complexity for an intuitive idea'
 layout: '@layouts/BlogLayout.astro'
-publishedOn: 2023-10-15
+publishedOn: '2023-10-15'
 highlight: false
 tags: ['alphabet superset']
 ---
 
-import FloatBitmap from '@components/FloatBitmap.astro'
+import FloatBitmap from '@components/FloatBitmap.astro';
 
 If you ever worked with numbers on computers - you likely noticed the stark difference between integers and real numbers. Integers make sense and behave as expected. However whenever real numbers are required - suddenly there are multiple choices for representation. There are fractions, decimals and floats. What are these weird names?
 
@@ -25,11 +25,11 @@ A decimal notation is a shorthand for fractional notation - `0.11` is really `11
 
 Let's dive into the hardware implementation details, taking the widely used 32-bit representation as an example. As you may guess - there are 2 groups of bits, one for the exponent (the power we raise 2 to) and the significant or mantissa - the most significant digits of the value. The most common implementation is [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754) standard, which is implemented by virtually all modern processors. It allocates 8 bits to the exponent and 24 bits to the mantissa. There are a couple of gotchas though. One - the exponent range is not 255 values, but only 254. This is done to accomodate positive and negative infinities and <def>NaN</def> (not a number) representations. The values are useful to make arithmetic operations more robust - dividing some value by zero results in an infinity instead of resulting in a hardware signalled exception. And because the floating point numbers are not intended to be used in highly prcise calculations - working with them becomes simpler.
 
-<FloatBitmap/>
+<FloatBitmap />
 
 I just mentioned positive and negative infinities and if you're familiar with different negative number representations in hardware - you might be wondering now how are negative floating point numbers are represented. Well it's done with a sign bit. But wait, wouldn't that make it a 33-bit representation? Yes it would! But engineers were clever and made the convention that values should be represented in such a way that the first bit of the mantissa is always one, so we don't need to represent it in hardware! Hang on, how do we then represent zero? Simple - the convention only applies if the exponent is not 0.
 
-This hardware representation leads to several interesting side-effects. For one - there are 2 zero values: a positive and a negative one. Additionally there are *subnormal* numbers - numbers near zero that have several leading zeroes. These are equivalent to "inefficient" scientific notation: `10^10 * 0.03`. Older hardware did not handle such values well and would provide erroneous results, however nowadays they can be used without much worry.
+This hardware representation leads to several interesting side-effects. For one - there are 2 zero values: a positive and a negative one. Additionally there are _subnormal_ numbers - numbers near zero that have several leading zeroes. These are equivalent to "inefficient" scientific notation: `10^10 * 0.03`. Older hardware did not handle such values well and would provide erroneous results, however nowadays they can be used without much worry.
 
 Now that you know how floats work - you might be wondering why are they not the default everywhere. There are several reasons. For one - they are imprecise, trying to add 1 to 17 million will not result in 17 million and one, because there are not enough bits in the mantissa, so the 1 gets lost. This may be an acceptable tradeoff in some uses, but not in others. You wouldn't want your user id to be confused with someone else's, right? Another reason is that floating point operations are slow. Before 2 values can be added - their exponents need to be equalized, so for most hardware floating point operations take about 10x longer to execute.
 

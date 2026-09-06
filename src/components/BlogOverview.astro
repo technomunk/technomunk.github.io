@@ -1,11 +1,15 @@
 ---
-import type { MDXInstance } from 'astro';
-import type { BlogFrontmatter } from './BlogCard.astro';
+import type { BlogMetadata } from './BlogCard.astro';
 
 import BlogCard from './BlogCard.astro';
 
+export type Post = {
+    data: BlogMetadata;
+    id: string;
+};
+
 interface Props {
-    posts: MDXInstance<BlogFrontmatter>[];
+    posts: Post[];
 }
 
 const { posts } = Astro.props;
@@ -15,11 +19,11 @@ const { posts } = Astro.props;
     {
         posts.map((p) => (
             <BlogCard
-                title={p.frontmatter.title}
-                description={p.frontmatter.description}
-                publishDate={p.frontmatter.publishedOn}
-                href={p.url!}
-                tags={p.frontmatter.tags}
+                title={p.data.title}
+                description={p.data.description}
+                publishDate={p.data.publishedOn}
+                href={`/blog/${p.id}`}
+                tags={p.data.tags}
             />
         ))
     }

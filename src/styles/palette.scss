@@ -55,10 +55,12 @@ $dark-palette: (
 @function light($color) {
     $color-parts: string.split($color, '-', 1);
 
-    @if list.length($color-parts)==2 {
-        @return color.mix(map.get($light-palette, list.nth($color-parts, 1)),
+    @if list.length($color-parts) ==2 {
+        @return color.mix(
+            map.get($light-palette, list.nth($color-parts, 1)),
             map.get($light-palette, list.nth($color-parts, 2)),
-            $weight: 50%);
+            $weight: 50%
+        );
     }
 
     @return map.get($light-palette, $color);
@@ -70,10 +72,12 @@ $dark-palette: (
     }
     $color-parts: string.split($color, '-', 1);
 
-    @if list.length($color-parts)==2 {
-        @return color.mix(map.get($dark-palette, text),
+    @if list.length($color-parts) ==2 {
+        @return color.mix(
+            map.get($dark-palette, text),
             map.get($dark-palette, list.nth($color-parts, 2)),
-            $weight: 50%);
+            $weight: 50%
+        );
     }
 
     @return map.get($dark-palette, $color);

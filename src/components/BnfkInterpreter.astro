@@ -2,33 +2,31 @@
 import { markSemanticsWithSpans } from '@lib/code/semanitcize';
 
 interface Props {
-	cells: number;
-	names: string;
-	code: string;
+    cells: number;
+    names: string;
+    code: string;
 }
 
 const { cells, names, code } = Astro.props;
 const cellIds = [];
 for (let i = 0; i < cells; ++i) {
-	cellIds.push(i);
+    cellIds.push(i);
 }
-
-import '@styles/components/interpreter.scss';
 ---
 
 <bnfk-interpreter class="interpreter frame chamfer shadow center" {cells} {names}>
-    <code class="paper rect" set:html={markSemanticsWithSpans(code, "bnfk")} />
+    <code class="paper rect" set:html={markSemanticsWithSpans(code, 'bnfk')} />
     <div class="interpreter-menu paper rect">
         <div class="shelf" id="vars">
-            {cellIds.map(() => <input pattern="\d*"></input>)}
+            {cellIds.map(() => <input pattern="\d*" />)}
         </div>
         <div class="shelf">
             <label for="input">input:</label>
-            <input id="input" class="io"></input>
+            <input id="input" class="io" />
         </div>
         <div class="shelf">
             <label for="output">output:</label>
-            <input id="output" class="io" disabled></input>
+            <input id="output" class="io" disabled />
         </div>
         <div>
             <button id="step">step</button>
@@ -41,3 +39,136 @@ import '@styles/components/interpreter.scss';
 <script>
     import '@scripts/components/bnfk_interpreter';
 </script>
+
+<style lang="scss">
+    @use 'sass:color';
+
+    @use 'font';
+    @use 'palette';
+    @use 'material';
+
+    @use 'components/code';
+
+    .interpreter,
+    .interpreter * {
+        @include font.monospace;
+    }
+
+    pre,
+    .interpreter {
+        & code {
+            padding: 1em;
+            display: block;
+            overflow-x: auto;
+            text-align: start;
+        }
+    }
+
+    .interpreter {
+        display: flex;
+        overflow: hidden;
+
+        gap: 8px;
+
+        & code {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        @media (max-width: 1000px) {
+            flex-direction: column;
+
+            & code {
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+        }
+    }
+
+    .interpreter-menu {
+        border-left: 4px solid transparent;
+
+        padding: 1em 1.5em;
+        flex-basis: 160px;
+        flex-grow: 1;
+        min-width: 18em;
+        max-width: 24em;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+
+        @media (max-width: 1000px) {
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 8px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        & > * {
+            margin: 0.2em;
+        }
+
+        & #vars > input {
+            text-align: center;
+        }
+
+        & input {
+            border: none;
+            width: 24px;
+            margin: 0;
+            flex: 24px;
+        }
+
+        & * {
+            background-color: transparent;
+        }
+
+        & > div {
+            display: flex;
+            gap: 1em;
+            justify-content: space-between;
+
+            & > input {
+                padding: 4px;
+
+                &:disabled {
+                    color: black;
+                }
+            }
+
+            & > button {
+                flex-basis: 100px;
+                flex-grow: 0.4;
+            }
+        }
+
+        & > .shelf {
+            display: flex;
+            border: 2px inset;
+            flex-wrap: wrap;
+            gap: 0;
+
+            & > input {
+                text-align: end;
+
+                &.io {
+                    margin-right: 1em;
+                }
+            }
+
+            & > * {
+                margin: 0.2em;
+                padding: 1px 4px;
+            }
+
+            &.hl,
+            & > .hl {
+                animation: highlightVarView 0.4s ease-out forwards;
+            }
+        }
+    }
+</style>
