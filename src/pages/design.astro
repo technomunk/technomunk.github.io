@@ -1,5 +1,7 @@
 ---
 import ColorPalette from '@components/ColorPalette.astro';
+import NavBar from '@components/NavBar.astro';
+
 import MainLayout from '@layouts/MainLayout.astro';
 ---
 
@@ -7,8 +9,9 @@ import MainLayout from '@layouts/MainLayout.astro';
     title="Design Overview"
     description="Summary and examples of the design system used for the website."
 >
+    <NavBar sections={['principles', 'palette', 'font-faces']} />
     <main>
-        <section>
+        <section id="principles">
             <header>Principles</header>
             <p>
                 The purpose of the website is to learn, practice and display my design and web-dev
@@ -29,7 +32,7 @@ import MainLayout from '@layouts/MainLayout.astro';
                 </li>
             </ul>
         </section>
-        <section>
+        <section id="palette">
             <header>Palette</header>
             <p>
                 To ensure a consistent experience across the website, the following color palette is
@@ -37,5 +40,47 @@ import MainLayout from '@layouts/MainLayout.astro';
             </p>
             <ColorPalette />
         </section>
+        <section id="font-faces">
+            <header>Font faces</header>
+            <p class="display">Display - for the page titles</p>
+            <p class="giant">Diant - for chapter titles</p>
+            <p class="large">Large - for section titles</p>
+            <p class="title">Title - for sub-section titles</p>
+            <p class="body">body - main content, blocks of paragraphs etc</p>
+            <p class="mono">monospace - technical text, typically code of some kind</p>
+            <p class="small">small - for adding the tiny footnotes</p>
+        </section>
     </main>
 </MainLayout>
+
+<style lang="scss">
+    @use 'font';
+
+    p {
+        &.display {
+            @include font.text-display;
+            font-weight: bold;
+        }
+        &.giant {
+            @include font.text-giant;
+            font-weight: bold;
+        }
+        &.large {
+            @include font.text-large;
+            font-weight: bold;
+        }
+        &.title {
+            @include font.text-title;
+            font-weight: bold;
+        }
+        &.body {
+            @include font.text-body;
+        }
+        &.mono {
+            @include font.monospace;
+        }
+        &.small {
+            @include font.text-small;
+        }
+    }
+</style>

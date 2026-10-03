@@ -3,7 +3,10 @@ import FullscreenLayout from '@layouts/FullscreenLayout.astro';
 import DrawerMenu from '@components/DrawerMenu.astro';
 ---
 
-<FullscreenLayout title="Julia sets explorer" description="Interactive Julia sets explorer and visualizer in real time.">
+<FullscreenLayout
+    title="Julia sets explorer"
+    description="Interactive Julia sets explorer and visualizer in real time."
+>
     <main>
         <canvas id="view-julia" is="julia-view" class="fill-parent"></canvas>
     </main>

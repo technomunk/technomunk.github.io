@@ -1,28 +1,20 @@
 ---
+import type { LocalImageProps } from 'astro:assets';
 import { Image } from 'astro:assets';
 
-export interface Props {
-    src:
-        | ImageMetadata
-        | Promise<{
-              default: ImageMetadata;
-          }>;
-}
+export type Props = Omit<LocalImageProps, 'alt'> & { alt?: string };
 
-const { src } = Astro.props;
+const { class: extraClasses, alt = 'Avatar', ...props } = Astro.props;
 ---
 
-<Image class="avatar circle shadow inset" src={src} alt="Avatar" />
+<Image class={'avatar circle inset ' + (extraClasses ?? '')} alt={alt} {...props} />
 
 <style lang="scss">
     @use 'palette';
 
     .avatar {
-        margin: 0 auto 20px;
-        max-width: min(90%, 512px);
-        width: 100%;
-        height: auto;
+        aspect-ratio: 1 / 1;
         background: border-box palette.light-gradient(primary, secondary);
-        border: 4px solid transparent;
+        border: solid transparent;
     }
 </style>

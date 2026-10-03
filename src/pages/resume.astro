@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 
 import MainLayout from '@layouts/MainLayout.astro';
+import Hero from '@components/Hero.astro';
 
 import { dateCompare } from '@lib/dateutil';
 import Table from '@components/Table.astro';
@@ -38,15 +39,9 @@ const findOrDefaultSkill = (skill: string): Skill => {
 ---
 
 <MainLayout title="Technomunk's Resume" description="Overview of Technomunk's work">
-    <header class="strong text-center">
-        <!-- TODO: add an actual image of me face -->
-        <!-- <Avatar src={avatarImg} /> -->
-        <caption translate="no">Grigory <mark>Technomunk</mark> Glukhov</caption>
-    </header>
+    <Hero />
     <main>
-        <p class="text-center">
-            Welcome to the overview of my development work assignments and projects.
-        </p>
+        <p class="text-center">Who am I and what do I do?</p>
         <Table>
             <caption>Assignments</caption>
             <thead>
@@ -121,11 +116,6 @@ const findOrDefaultSkill = (skill: string): Skill => {
 </MainLayout>
 
 <style lang="scss">
-    mark {
-        font-style: italic;
-        background-color: transparent;
-    }
-
     table {
         min-width: 100%;
     }

@@ -1,8 +1,13 @@
 @use 'palette';
 @use 'material';
 @use 'font';
+@use 'breakpoint';
 
 body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
     color: palette.light(text);
     background: palette.light(background);
 
@@ -53,18 +58,7 @@ button,
     }
 }
 
-body {
-    margin: 2vh 8vw;
-}
-
-p,
-address,
-ol {
-    max-width: 38em;
-    margin-left: auto;
-    margin-right: auto;
-}
-
+ul,
 ol {
     width: fit-content;
 }
@@ -77,5 +71,14 @@ h4,
 h5,
 h6,
 strong {
-    color: var(--color-primary-900)
+    color: var(--color-primary-900);
+}
+
+section {
+    margin-bottom: var(--spacing-l);
+}
+
+.content {
+    width: min(80%, 1200px);
+    margin-inline: auto;
 }

@@ -1,0 +1,73 @@
+---
+import siteIcon from '@assets/img/avatar.jpg';
+import Avatar from './Avatar.astro';
+import type { HTMLAttributes } from 'astro/types';
+
+export interface Props extends HTMLAttributes<'div'> {
+    sections?: string[];
+}
+
+const { sections, ...props } = Astro.props;
+---
+
+<nav {...props}>
+    <div class="justify">
+        <a href="/" style="display: flex; height: 100%;">
+            <Avatar
+                src={siteIcon}
+                alt="Circular site icon"
+                width={60}
+                height={60}
+                style={{ borderWidth: '2px' }}
+            />
+        </a>
+        <a href="blog">blog</a>
+    </div>
+    <div class="justify">
+        {
+            sections?.map((s) => (
+                <a class="inactive" href={`#${s}`}>
+                    {s}
+                </a>
+            ))
+        }
+    </div>
+</nav>
+
+<style lang="scss">
+    @use 'font';
+    @use 'palette';
+    @use 'breakpoint';
+
+    nav {
+        @include font.text-title;
+        & * {
+            @include font.text-title;
+            text-decoration: none;
+            color: palette.light(text);
+
+            &.inactive {
+                color: var(--color-grey-600);
+            }
+            &.inactive:hover {
+                color: var(--color-grey-800);
+            }
+        }
+
+        height: 1.4em;
+
+        display: flex;
+        flex-direction: row;
+        align-content: start;
+        justify-content: space-between;
+        text-align: center;
+    }
+
+    .justify {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        gap: 1em;
+    }
+</style>

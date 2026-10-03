@@ -1,3 +1,5 @@
+@use 'breakpoint';
+
 @font-face {
     font-family: Rubik;
     src: url('/font/rubik.ttf') format('truetype');
@@ -24,102 +26,123 @@
     font-family: ibmplexmono, ui-monospace, SFMono-REgular, 'SF Mono', monospace !important;
     font-size: 14px;
 
-    @media (min-width: 800px) {
+    @include breakpoint.on('tablet') {
         font-size: 15px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 16px;
     }
 }
 
 @mixin text-small {
-    font-size: 14px;
+    font-size: 12px;
 
-    @media (min-width: 700px) {
+    @include breakpoint.on('mobile-large') {
+        font-size: 14px;
+    }
+
+    @include breakpoint.on('tablet') {
         font-size: 16px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 19px;
     }
 }
 
 @mixin text-body {
-    font-size: 16px;
+    font-size: 14px;
 
-    @media (min-width: 700px) {
+    @include breakpoint.on('mobile-large') {
+        font-size: 16px;
+    }
+
+    @include breakpoint.on('tablet') {
         font-size: 19px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 23px;
     }
 }
 
 @mixin text-title {
-    font-size: 23px;
+    font-size: 19px;
 
-    @media (min-width: 700px) {
+    @include breakpoint.on('mobile-large') {
+        font-size: 23px;
+    }
+
+    @include breakpoint.on('tablet') {
         font-size: 27px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 32px;
     }
 }
 
 @mixin text-large {
-    font-size: 27px;
+    font-size: 23px;
 
-    @media (min-width: 700px) {
+    @include breakpoint.on('mobile-large') {
+        font-size: 27px;
+    }
+
+    @include breakpoint.on('tablet') {
         font-size: 32px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 37px;
     }
 }
 
 @mixin text-giant {
-    font-size: 32px;
+    font-size: 27px;
 
-    @media (min-width: 700px) {
+    @include breakpoint.on('mobile-large') {
+        font-size: 32px;
+    }
+
+    @include breakpoint.on('tablet') {
         font-size: 37px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 42px;
     }
 }
 
 @mixin text-display {
-    font-size: 37px;
+    font-size: 32px;
     font-weight: 600;
 
-    @media (min-width: 700px) {
+    @include breakpoint.on('mobile-large') {
+        font-size: 37px;
+    }
+
+    @include breakpoint.on('tablet') {
         font-size: 42px;
     }
 
-    @media (min-width: 1200px) {
+    @include breakpoint.on('desktop-large') {
         font-size: 48px;
     }
 }
 
-date {
+date,
+.text-small {
     @include text-small;
 }
 
-body {
-    font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-variant-ligatures: no-common-ligatures;
-    @include text-body;
-}
-
+body,
 input,
 button,
 textarea,
-select {
+select,
+.text-body {
     font-family: Rubik, Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-variant-ligatures: no-common-ligatures;
     @include text-body;

@@ -1,8 +1,12 @@
 @use 'sass:color';
 @use 'palette';
+@use 'breakpoint';
 
 .shadow {
-    box-shadow: 4px 4px 8px 4px var(--color-grey-900);
+    box-shadow: 1px 1px 4px 1px var(--color-grey-800);
+    @include breakpoint.on('tablet') {
+        box-shadow: 4px 4px 8px 4px var(--color-grey-900);
+    }
 }
 
 .inset {
@@ -10,7 +14,15 @@
 }
 
 .inset.shadow {
-    box-shadow: 4px 4px 8px 4px var(--color-grey-900), inset 0px 0px 8px 1px var(--color-grey-900);
+    box-shadow:
+        1px 1px 4px 1px var(--color-grey-800),
+        inset 0px 0px 4px 1px var(--color-grey-800);
+
+    @include breakpoint.on('tablet') {
+        box-shadow:
+            4px 4px 8px 4px var(--color-grey-900),
+            inset 0px 0px 8px 1px var(--color-grey-900);
+    }
 }
 
 .frame {
@@ -19,7 +31,7 @@
     box-sizing: border-box;
     padding: 8px;
 
-    &>* {
+    & > * {
         box-sizing: border-box;
     }
 

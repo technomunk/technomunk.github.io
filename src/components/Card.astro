@@ -5,24 +5,57 @@ type ImageSrc = ImageMetadata;
 
 interface Props {
     title: string;
+    about: string;
     src: ImageSrc;
     alt: string;
     href: string;
 }
-const { title, src, alt, href } = Astro.props;
-
-import '@styles/components/card.scss';
+const props = Astro.props;
 ---
 
-<a class="card-2 frame chamfer raise shadow" href={href}>
-    {
-        src.format === 'svg' ? (
-            <Image src={src} alt={alt} class="inset" />
-        ) : (
-            <div class="inset">
-                <Image src={src} alt={alt} />
-            </div>
-        )
-    }
-    <h2 class="semi-paper inset">{title}</h2>
+<a class="raise" href={props.href}>
+    <Image src={props.src} alt={props.alt} />
+    <h2>{props.title}</h2>
+    <p class="text-small">{props.about}</p>
 </a>
+
+<style lang="scss">
+    @use 'palette';
+
+    a {
+        max-width: max(50vw, 330px);
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-block-end: 0.5em;
+
+        border-radius: 12px;
+        box-shadow: 1px 1px 4px 1px var(--color-grey-600);
+        text-decoration: none;
+
+        &:hover {
+            box-shadow: 2px 2px 4px 2px var(--color-grey-700);
+
+            & h2 {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+    }
+
+    h2 {
+        margin-block: 0.5em 0;
+        margin-inline: 1rem;
+    }
+
+    p {
+        margin-block: auto 0;
+        margin-inline: 1rem;
+        color: palette.light(text);
+    }
+</style>

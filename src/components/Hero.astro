@@ -1,0 +1,65 @@
+---
+import type { Props as AvatarProps } from '@components/Avatar.astro';
+import Avatar from '@components/Avatar.astro';
+import type { HTMLAttributes } from 'astro/types';
+
+export interface Props extends HTMLAttributes<'section'> {
+    src?: AvatarProps['src'];
+}
+
+const { src, ...props } = Astro.props;
+---
+
+<section {...props}>
+    {src && <Avatar src={src} class="shadow" />}
+    <h1 class="text-display" translate="no">Grigory <mark>Technomunk</mark> Glukhov</h1>
+    <p class="text-body"><slot /></p>
+</section>
+
+<style lang="scss">
+    @use 'palette';
+    @use 'breakpoint';
+
+    section {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 1em 1em;
+        align-items: center;
+        grid-template-areas:
+            'avatar title'
+            'text   text';
+
+        margin-top: 2em;
+
+        @include breakpoint.on('tablet') {
+            column-gap: 2em;
+            grid-template-areas:
+                'avatar .'
+                'avatar title'
+                'avatar text'
+                'avatar .';
+        }
+    }
+    img {
+        box-sizing: border-box;
+        grid-area: avatar;
+        width: clamp(80px, 25vw, 330px);
+        height: auto;
+        border-width: 1px;
+    }
+    h1 {
+        margin-block: auto;
+        grid-area: title;
+        text-wrap: balance;
+    }
+    p {
+        margin-block: auto;
+        grid-area: text;
+    }
+
+    mark {
+        background: palette.light-gradient(text-primary, text-accent);
+        background-clip: text;
+        color: transparent;
+    }
+</style>

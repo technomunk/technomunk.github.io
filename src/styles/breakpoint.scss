@@ -1,0 +1,30 @@
+@use 'sass:map';
+@use 'sass:meta';
+
+$breakpoints: (
+    'mobile-large': (
+        min-width: 480px,
+    ),
+    'tablet': (
+        min-width: 768px,
+    ),
+    'desktop': (
+        min-width: 1024px,
+    ),
+    'desktop-large': (
+        min-width: 1200px,
+    ),
+    'extra-large': (
+        min-width: 1440px,
+    ),
+) !default;
+
+@mixin on($bp) {
+    @if map.has-key($breakpoints, $bp) {
+        @media #{meta.inspect(map.get($breakpoints, $bp))} {
+            @content;
+        }
+    } @else {
+        @error "Unknown breakpoint `#{$bp}`, see #{map.keys($breakpoints)}!";
+    }
+}

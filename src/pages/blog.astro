@@ -1,5 +1,6 @@
 ---
 import BlogOverview from '@components/BlogOverview.astro';
+import NavBar from '@components/NavBar.astro';
 import MainLayout from '@layouts/MainLayout.astro';
 import { dateCompare } from '@lib/dateutil';
 import { getCollection } from 'astro:content';
@@ -10,7 +11,8 @@ posts.sort((a, b) => dateCompare(b.data.publishedOn, a.data.publishedOn));
 ---
 
 <MainLayout title="Technomunk's Blog" description="Technomunk's personal blog">
-    <main class="text-center">
+    <NavBar />
+    <main class="center text-center">
         <header>Welcome to Technomunk's blog!</header>
     </main>
     <BlogOverview posts={posts} />
@@ -18,6 +20,7 @@ posts.sort((a, b) => dateCompare(b.data.publishedOn, a.data.publishedOn));
 
 <style lang="scss">
     header {
-        margin-bottom: 0.5em;
+        margin-top: 0.5em;
+        margin-bottom: 1em;
     }
 </style>
